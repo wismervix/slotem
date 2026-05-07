@@ -1,11 +1,12 @@
-version: '3.8'
-
 services:
   # ----------------------------------------
   # Application
   # ----------------------------------------
   app:
-    image: php:8.2-fpm
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # image: php:8.3.3-fpm
     container_name: slotem_app
     working_dir: /var/www
     volumes:
@@ -39,3 +40,12 @@ services:
       MYSQL_DATABASE: slotem
     ports:
       - "3306:3306"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: slotem_phpmyadmin
+    restart: always
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
