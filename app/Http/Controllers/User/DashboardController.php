@@ -11,4 +11,8 @@ class DashboardController extends Controller
     {
         return inertia('User/Dashboard');
     }
+    public function login()
+    {
+        return inertia('User/Login');
+    }
 }

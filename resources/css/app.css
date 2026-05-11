@@ -8,4 +8,38 @@
         'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
+        --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+        
+        --color-primary: #630ed4;
+        --color-primary-foreground: #ffffff;
+        
+        --color-surface: #fef7ff;
+        --color-on-surface: #1d1a24;
+        --color-on-surface-variant: #4a4455;
+        
+        --color-surface-container: #f3ebfa;
+        --color-surface-container-low: #f9f1ff;
+        --color-surface-container-high: #ede5f4;
+        --color-surface-container-highest: #e8dfee;
+        
+        --color-secondary-container: #dae2fd;
+        --color-on-secondary-container: #5c647a;
+        
+        --color-outline-variant: #ccc3d8;
+        
+        --color-tertiary-fixed: #ffdcc6;
+        --color-on-tertiary-fixed: #301400;
+        
+        --color-error-container: #ffdad6;
+        --color-on-error-container: #93000a;
+      
+        --radius-xl: 0.5rem;
+        --radius-2xl: 1rem;
+}
+
+
+@layer base {
+  body {
+    @apply bg-surface text-on-surface font-sans;
+  }
 }

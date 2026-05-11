@@ -12,6 +12,10 @@ class BookingController extends Controller
     {
         return Inertia::render('Guest/Booking/Index');
     }
+    public function create()
+    {
+        return Inertia::render('Guest/Booking/Create');
+    }
     public function store(Request $request)
     {
         // Handle booking store logic
