@@ -24,7 +24,7 @@ const Home = () => {
                 {/* Hero */}
                 <section className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 px-6 py-20 lg:grid-cols-2 lg:py-32">
                     <div className="flex flex-col gap-8">
-                        <div className="inline-flex w-fit items-center gap-2 rounded-full bg-indigo-100 px-4 py-2 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300">
+                        <div className="inline-flex w-fit items-center gap-2 rounded-full bg-purple-100 px-4 py-2 text-purple-700 dark:bg-purple-500/10 dark:text-purple-300">
                             <ShieldCheck className="h-4 w-4" />
 
                             <span className="text-sm font-medium">
@@ -46,7 +46,7 @@ const Home = () => {
                         </div>
 
                         <div className="flex flex-wrap gap-4">
-                            <button className="rounded-2xl bg-indigo-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-indigo-500/20 transition hover:bg-indigo-500">
+                            <button className="rounded-2xl bg-purple-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-purple-500/20 transition hover:bg-purple-500">
                                 Book Now
                             </button>
 
@@ -57,7 +57,7 @@ const Home = () => {
 
                         <div className="flex items-center gap-4">
                             <div className="flex -space-x-2">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-indigo-200 text-xs font-bold text-indigo-800 dark:border-slate-900">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-purple-200 text-xs font-bold text-purple-800 dark:border-slate-900">
                                     JD
                                 </div>
 
@@ -78,7 +78,7 @@ const Home = () => {
 
                     {/* Hero Image */}
                     <div className="relative">
-                        <div className="absolute inset-0 rounded-full bg-indigo-500/10 blur-3xl"></div>
+                        <div className="absolute inset-0 rounded-full bg-purple-500/10 blur-3xl"></div>
 
                         <div className="relative aspect-square overflow-hidden rounded-full border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900">
                             <img
@@ -87,13 +87,13 @@ const Home = () => {
                                 className="h-full w-full object-cover"
                             />
 
-                            <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/20 to-transparent"></div>
+                            <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/20 to-transparent"></div>
                         </div>
 
                         {/* Floating Card */}
                         <div className="absolute top-1/2 right-0 hidden max-w-xs -translate-y-1/2 rounded-2xl border border-slate-200 bg-white p-6 shadow-xl md:block dark:border-slate-700 dark:bg-slate-900">
                             <div className="flex flex-col gap-3">
-                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-500/10">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-purple-100 text-purple-600 dark:bg-purple-500/10">
                                     <Calendar className="h-6 w-6" />
                                 </div>
 
@@ -121,12 +121,12 @@ const Home = () => {
 
                         <div className="grid gap-8 md:grid-cols-3">
                             {/* Step 1 */}
-                            <div className="relative rounded-3xl border border-slate-200 bg-white p-8 transition hover:border-indigo-500 dark:border-slate-700 dark:bg-slate-800">
-                                <div className="absolute -top-4 left-8 flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-sm font-bold text-white">
+                            <div className="relative rounded-3xl border border-slate-200 bg-white p-8 transition hover:border-purple-500 dark:border-slate-700 dark:bg-slate-800">
+                                <div className="absolute -top-4 left-8 flex h-8 w-8 items-center justify-center rounded-full bg-purple-600 text-sm font-bold text-white">
                                     1
                                 </div>
 
-                                <ListTodo className="mt-4 mb-6 h-10 w-10 text-indigo-600" />
+                                <ListTodo className="mt-4 mb-6 h-10 w-10 text-purple-600" />
 
                                 <h3 className="mb-3 text-xl font-bold">
                                     Choose Service
@@ -139,12 +139,12 @@ const Home = () => {
                             </div>
 
                             {/* Step 2 */}
-                            <div className="relative rounded-3xl border border-slate-200 bg-white p-8 transition hover:border-indigo-500 dark:border-slate-700 dark:bg-slate-800">
-                                <div className="absolute -top-4 left-8 flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-sm font-bold text-white">
+                            <div className="relative rounded-3xl border border-slate-200 bg-white p-8 transition hover:border-purple-500 dark:border-slate-700 dark:bg-slate-800">
+                                <div className="absolute -top-4 left-8 flex h-8 w-8 items-center justify-center rounded-full bg-purple-600 text-sm font-bold text-white">
                                     2
                                 </div>
 
-                                <Calendar className="mt-4 mb-6 h-10 w-10 text-indigo-600" />
+                                <Calendar className="mt-4 mb-6 h-10 w-10 text-purple-600" />
 
                                 <h3 className="mb-3 text-xl font-bold">
                                     Pick a Time
@@ -157,12 +157,12 @@ const Home = () => {
                             </div>
 
                             {/* Step 3 */}
-                            <div className="relative rounded-3xl border border-slate-200 bg-white p-8 transition hover:border-indigo-500 dark:border-slate-700 dark:bg-slate-800">
-                                <div className="absolute -top-4 left-8 flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-sm font-bold text-white">
+                            <div className="relative rounded-3xl border border-slate-200 bg-white p-8 transition hover:border-purple-500 dark:border-slate-700 dark:bg-slate-800">
+                                <div className="absolute -top-4 left-8 flex h-8 w-8 items-center justify-center rounded-full bg-purple-600 text-sm font-bold text-white">
                                     3
                                 </div>
 
-                                <CheckCircle2 className="mt-4 mb-6 h-10 w-10 text-indigo-600" />
+                                <CheckCircle2 className="mt-4 mb-6 h-10 w-10 text-purple-600" />
 
                                 <h3 className="mb-3 text-xl font-bold">
                                     Confirm
@@ -181,7 +181,7 @@ const Home = () => {
                 <section className="mx-auto max-w-7xl px-6 py-24">
                     <div className="grid auto-rows-[220px] grid-cols-1 gap-6 md:grid-cols-12">
                         {/* Big Card */}
-                        <div className="relative overflow-hidden rounded-[2rem] bg-indigo-600 p-10 text-white md:col-span-8">
+                        <div className="relative overflow-hidden rounded-[2rem] bg-purple-600 p-10 text-white md:col-span-8">
                             <div className="absolute top-8 right-8 opacity-10">
                                 <Zap className="h-32 w-32" />
                             </div>
@@ -191,7 +191,7 @@ const Home = () => {
                                     Lightning Fast Booking
                                 </h3>
 
-                                <p className="max-w-xl text-lg text-indigo-100">
+                                <p className="max-w-xl text-lg text-purple-100">
                                     Our optimized flow reduces booking time by
                                     60% compared to traditional calls.
                                 </p>
@@ -200,7 +200,7 @@ const Home = () => {
 
                         {/* Stats */}
                         <div className="flex flex-col items-center justify-center rounded-3xl bg-slate-100 p-8 text-center md:col-span-4 dark:bg-slate-800">
-                            <span className="text-5xl font-black text-indigo-600">
+                            <span className="text-5xl font-black text-purple-600">
                                 99.9%
                             </span>
 
@@ -211,7 +211,7 @@ const Home = () => {
 
                         {/* Secure */}
                         <div className="rounded-3xl border border-slate-200 bg-white p-8 md:col-span-4 dark:border-slate-700 dark:bg-slate-800">
-                            <ShieldCheck className="mb-4 h-10 w-10 text-indigo-600" />
+                            <ShieldCheck className="mb-4 h-10 w-10 text-purple-600" />
 
                             <h3 className="mb-3 text-2xl font-bold">
                                 Secure Payments
@@ -224,7 +224,7 @@ const Home = () => {
                         </div>
 
                         {/* Testimonial */}
-                        <div className="flex items-center gap-8 rounded-3xl bg-indigo-100 p-8 md:col-span-8 dark:bg-indigo-500/10">
+                        <div className="flex items-center gap-8 rounded-3xl bg-purple-100 p-8 md:col-span-8 dark:bg-purple-500/10">
                             <img
                                 src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=600&auto=format&fit=crop"
                                 alt="Business Owner"
@@ -248,7 +248,7 @@ const Home = () => {
 
                 {/* CTA */}
                 <section className="mx-auto max-w-7xl px-6 pb-24">
-                    <div className="relative overflow-hidden rounded-[3rem] bg-indigo-600 px-8 py-20 text-center text-white md:px-20">
+                    <div className="relative overflow-hidden rounded-[3rem] bg-purple-600 px-8 py-20 text-center text-white md:px-20">
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12)_0%,transparent_70%)]"></div>
 
                         <div className="relative z-10 mx-auto max-w-3xl">
@@ -256,13 +256,13 @@ const Home = () => {
                                 Ready to automate your appointment scheduling?
                             </h2>
 
-                            <p className="mx-auto mt-6 max-w-2xl text-lg text-indigo-100">
+                            <p className="mx-auto mt-6 max-w-2xl text-lg text-purple-100">
                                 Join thousands of small businesses that trust
                                 Slotem for their daily operations.
                             </p>
 
                             <div className="mt-10 flex flex-wrap justify-center gap-4">
-                                <button className="rounded-2xl bg-white px-10 py-4 text-lg font-semibold text-indigo-600 transition hover:bg-slate-100">
+                                <button className="rounded-2xl bg-white px-10 py-4 text-lg font-semibold text-purple-600 transition hover:bg-slate-100">
                                     Get Started for Free
                                 </button>
 

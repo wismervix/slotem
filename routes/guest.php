@@ -14,6 +14,6 @@ Route::controller(PagesController::class)->group(function(){
 
 Route::controller(BookingController::class)->group(function(){
     Route::get('/booking', 'index')->name('booking.index');
-    Route::post('/booking/create', 'create')->name('booking.create');
+    Route::get('/booking/create', 'create')->name('booking.create');
     Route::post('/booking', 'store')->name('booking.store');
 });

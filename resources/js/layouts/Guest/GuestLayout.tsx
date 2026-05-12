@@ -10,7 +10,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                 <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
                     <Link
                         href={route('home')}
-                        className="text-2xl font-bold tracking-tight text-indigo-600"
+                        className="text-2xl font-bold tracking-tight text-purple-600"
                     >
                         Slotem
                     </Link>
@@ -18,28 +18,28 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                     <div className="hidden items-center gap-8 md:flex">
                         <Link
                             href={route('how-it-works')}
-                            className="font-medium text-indigo-600"
+                            className="font-medium text-purple-600"
                         >
                             How it works
                         </Link>
 
                         <Link
                             href={route('services')}
-                            className="text-slate-600 transition hover:text-indigo-600 dark:text-slate-300"
+                            className="text-slate-600 transition hover:text-purple-600 dark:text-slate-300"
                         >
                             Services
                         </Link>
 
                         <Link
                             href={route('pricing')}
-                            className="text-slate-600 transition hover:text-indigo-600 dark:text-slate-300"
+                            className="text-slate-600 transition hover:text-purple-600 dark:text-slate-300"
                         >
                             Pricing
                         </Link>
 
                         <Link
                             href={route('admin.dashboard')}
-                            className="text-slate-600 transition hover:text-indigo-600 dark:text-slate-300"
+                            className="text-slate-600 transition hover:text-purple-600 dark:text-slate-300"
                         >
                             Admin
                         </Link>
@@ -48,14 +48,14 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                     <div className="flex items-center gap-4">
                         <Link
                             href={route('login')}
-                            className="hidden text-sm font-medium text-indigo-600 transition hover:text-indigo-500 sm:block"
+                            className="hidden text-sm font-medium text-purple-600 transition hover:text-purple-500 sm:block"
                         >
                             Login
                         </Link>
 
                         <Link
                             href={route('booking.create')}
-                            className="rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition hover:scale-[1.02] hover:bg-indigo-500"
+                            className="rounded-xl bg-purple-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-purple-500/20 transition hover:scale-[1.02] hover:bg-purple-500"
                         >
                             Book Now
                         </Link>
@@ -70,7 +70,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
             <footer className="border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
                 <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-8 px-6 py-10 md:flex-row">
                     <div>
-                        <h3 className="text-2xl font-bold text-indigo-600">
+                        <h3 className="text-2xl font-bold text-purple-600">
                             Slotem
                         </h3>
 
@@ -80,19 +80,19 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                     </div>
 
                     <div className="flex flex-wrap justify-center gap-6 text-sm text-slate-500">
-                        <a href="#" className="hover:text-indigo-600">
+                        <a href="#" className="hover:text-purple-600">
                             Privacy Policy
                         </a>
 
-                        <a href="#" className="hover:text-indigo-600">
+                        <a href="#" className="hover:text-purple-600">
                             Terms of Service
                         </a>
 
-                        <a href="#" className="hover:text-indigo-600">
+                        <a href="#" className="hover:text-purple-600">
                             Help Center
                         </a>
 
-                        <a href="#" className="hover:text-indigo-600">
+                        <a href="#" className="hover:text-purple-600">
                             Contact Sales
                         </a>
                     </div>

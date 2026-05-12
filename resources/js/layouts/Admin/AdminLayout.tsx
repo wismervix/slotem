@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import Sidebar from '@/components/Admin/Sidebar';
 import Footer from '@/components/Admin/Footer';
+import Sidebar from '@/components/Admin/Sidebar';
 
 interface Props {
     children: ReactNode;

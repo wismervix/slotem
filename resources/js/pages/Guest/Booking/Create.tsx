@@ -219,8 +219,10 @@ const Create = () => {
                 </div>
             </main>
 
-            <Footer />
-
+            <div className="px-10">
+                <Footer />
+            </div>
+            
             {/* Success Overlay */}
             <AnimatePresence>
                 {isBooked && (
