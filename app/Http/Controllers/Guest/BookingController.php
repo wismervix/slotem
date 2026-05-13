@@ -8,9 +8,9 @@ use Inertia\Inertia;
 
 class BookingController extends Controller
 {
-    public function index()
+    public function dateAndTime()
     {
-        return Inertia::render('Guest/Booking/Index');
+        return Inertia::render('Guest/Booking/DateAndTime');
     }
     public function create()
     {

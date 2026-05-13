@@ -108,7 +108,7 @@ const Home = () => {
                 </section>
 
                 {/* How It Works */}
-                <section className="bg-slate-100 py-24 dark:bg-slate-900">
+                <section id='how-it-works' className="bg-slate-100 py-24 dark:bg-slate-900">
                     <div className="mx-auto max-w-7xl px-6">
                         <div className="mb-16 text-center">
                             <h2 className="text-4xl font-bold">How it Works</h2>

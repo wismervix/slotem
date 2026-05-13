@@ -42,6 +42,8 @@ services:
       MYSQL_DATABASE: slotem
     ports:
       - "3306:3306"
+    volumes:
+      - slotem_db_data:/var/lib/mysql
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -51,3 +53,6 @@ services:
       - "8081:80"
     environment:
       PMA_HOST: db
+      
+volumes:
+  slotem_db_data:

@@ -16,12 +16,18 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                     </Link>
 
                     <div className="hidden items-center gap-8 md:flex">
-                        <Link
+                        {/* <Link
                             href={route('how-it-works')}
                             className="font-medium text-purple-600"
                         >
                             How it works
-                        </Link>
+                        </Link> */}
+                        <a
+                            href="#how-it-works"
+                            className="font-medium text-purple-600"
+                        >
+                            How It Works
+                        </a>
 
                         <Link
                             href={route('services')}
@@ -54,7 +60,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                         </Link>
 
                         <Link
-                            href={route('booking.create')}
+                            href={route('services')}
                             className="rounded-xl bg-purple-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-purple-500/20 transition hover:scale-[1.02] hover:bg-purple-500"
                         >
                             Book Now

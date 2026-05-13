@@ -1,5 +1,4 @@
 import {
-    ArrowLeft,
     Scissors,
     Calendar,
     Clock,
@@ -9,29 +8,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useState } from 'react';
-import Footer from '@/components/Admin/Footer';
-
-// Sub-components for better organization
-const Header = () => (
-    <header className="mx-auto mb-8 flex w-full max-w-7xl items-center justify-between border-b border-outline-variant bg-white px-6 py-4 md:px-12">
-        <div className="flex items-center gap-4">
-            <button
-                className="rounded-full p-2 transition-colors hover:bg-surface-container"
-                aria-label="Go back"
-            >
-                <ArrowLeft className="h-5 w-5 text-primary" />
-            </button>
-            <span className="text-2xl font-bold tracking-tight text-primary">
-                Slotem
-            </span>
-        </div>
-        <div className="hidden gap-4 md:flex">
-            <span className="text-xs font-semibold tracking-widest text-on-surface-variant uppercase opacity-60">
-                Step 3 of 3
-            </span>
-        </div>
-    </header>
-);
+import GuestLayout from '@/layouts/Guest/GuestLayout';
 
 const Create = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,10 +25,8 @@ const Create = () => {
     };
 
     return (
-        <div className="flex min-h-screen flex-col">
-            <Header />
-
-            <main className="flex flex-grow items-center justify-center overflow-hidden px-6 py-8">
+        <GuestLayout>
+            <main className="flex flex-grow items-center justify-center overflow-hidden px-6 py-32">
                 <div className="grid w-full max-w-5xl grid-cols-1 items-start gap-8 md:grid-cols-12">
                     {/* Left Column: Form */}
                     <section className="rounded-2xl border border-outline-variant bg-white p-8 shadow-sm md:col-span-7">
@@ -219,10 +194,6 @@ const Create = () => {
                 </div>
             </main>
 
-            <div className="px-10">
-                <Footer />
-            </div>
-            
             {/* Success Overlay */}
             <AnimatePresence>
                 {isBooked && (
@@ -290,7 +261,7 @@ const Create = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
-        </div>
+        </GuestLayout>
     );
 };
 

@@ -1,3 +1,4 @@
+import { Link } from '@inertiajs/react';
 import { Info } from 'lucide-react';
 
 export function TimeSlotPicker() {
@@ -39,10 +40,10 @@ export function TimeSlotPicker() {
                         disabled={!slot.available}
                         className={`rounded-full border px-4 py-3 text-sm font-semibold transition-all duration-200 ${
                             slot.selected
-                                ? 'bg-purple-600 border-purple-600 ring-purple-600/10 text-white shadow-md ring-2'
+                                ? 'border-purple-600 bg-purple-600 text-white shadow-md ring-2 ring-purple-600/10'
                                 : !slot.available
                                   ? 'cursor-not-allowed border-gray-100 bg-gray-100 text-gray-400 opacity-50'
-                                  : 'hover:border-purple-600 dark:border-purple-300 hover:text-purple-600 border-gray-200 bg-white text-gray-700 shadow-sm'
+                                  : 'border-gray-200 bg-white text-gray-700 shadow-sm hover:border-purple-600 hover:text-purple-600 dark:border-purple-300'
                         }`}
                         id={`time-slot-${slot.time.replace(/[:\s]/g, '-')}`}
                     >
@@ -53,13 +54,16 @@ export function TimeSlotPicker() {
 
             <div className="mt-8 border-t border-purple-100 pt-8">
                 <div
-                    className="bg-purple-600/10 border-purple-600/5 dark:bg-purple-600/15 dark:border-purple-600/20 mb-8 flex items-start space-x-3 rounded-xl border p-4"
+                    className="mb-8 flex items-start space-x-3 rounded-xl border border-purple-600/5 bg-purple-600/10 p-4 dark:border-purple-600/20 dark:bg-purple-600/15"
                     id="booking-info-box"
                 >
-                    <Info size={18} className="text-purple-600 mt-0.5 shrink-0" />
-                    <p className="text-purple-600 dark:text-purple-600/90 text-xs leading-relaxed font-medium">
+                    <Info
+                        size={18}
+                        className="mt-0.5 shrink-0 text-purple-600"
+                    />
+                    <p className="text-xs leading-relaxed font-medium text-purple-600 dark:text-purple-600/90">
                         You are booking for{' '}
-                        <span className="decoration-purple-600/30 dark:decoration-purple-600/50 font-bold underline">
+                        <span className="font-bold underline decoration-purple-600/30 dark:decoration-purple-600/50">
                             Thursday, November 14th at 12:00 PM
                         </span>
                         . You can change this later if needed.
@@ -67,18 +71,20 @@ export function TimeSlotPicker() {
                 </div>
 
                 <div className="flex gap-4">
-                    <button
-                        className="flex-1 rounded-full border border-gray-200 dark:border-gray-700 px-6 py-4 text-sm font-bold text-gray-500 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+                    <Link
+                        href={route('services')}
+                        className="flex-1 rounded-full border border-gray-200 px-6 py-4 text-sm text-center font-bold text-gray-500 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
                         id="back-btn"
                     >
                         Back
-                    </button>
-                    <button
-                        className="bg-purple-600 hover:bg-purple-700 flex-[2] transform rounded-full px-6 py-4 text-sm font-bold text-white shadow-lg shadow-purple-200 transition-all active:scale-[0.98]"
+                    </Link>
+                    <Link
+                        href={route('booking.create')}
+                        className="flex-[2] transform rounded-full bg-purple-600 px-6 py-4 text-sm text-center font-bold text-white shadow-lg shadow-purple-200 transition-all hover:bg-purple-700 active:scale-[0.98]"
                         id="next-step-btn"
                     >
                         Next Step
-                    </button>
+                    </Link>
                 </div>
             </div>
         </div>
