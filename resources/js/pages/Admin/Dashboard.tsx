@@ -58,7 +58,7 @@ export default function AdminDashboard() {
 
     const filteredBookings = bookings
         .map((booking) => {
-            const service = services.find((s) => s.id === booking.serviceId);
+            const service = services.find((s) => s.id === booking.service_id);
 
             return {
                 ...booking,
@@ -193,8 +193,8 @@ export default function AdminDashboard() {
                                                 {booking.date}
                                             </div>
                                             <div className="text-[11px] text-on-surface-variant">
-                                                {booking.startTime} -{' '}
-                                                {booking.endTime}
+                                                {booking.start_time} -{' '}
+                                                {booking.end_time}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">

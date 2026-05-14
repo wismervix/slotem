@@ -1,22 +1,62 @@
-import type { Availability } from "@/types";
+import type { Availability } from '@/types';
 
 export const INITIAL_AVAILABILITY: Availability[] = [
     {
         date: '2026-05-20',
-        timeSlots: ['09:00', '10:00', '11:00', '14:00', '15:00'],
+
+        time_slots: [
+            {
+                start_time: '09:00',
+                end_time: '10:00',
+            },
+            {
+                start_time: '10:00',
+                end_time: '11:00',
+            },
+        ],
     },
 
     {
         date: '2026-05-21',
-        timeSlots: ['10:00', '11:00', '14:00', '15:00'],
+
+        time_slots: [
+            {
+                start_time: '10:00',
+                end_time: '11:00',
+            },
+            {
+                start_time: '14:00',
+                end_time: '15:00',
+            },
+        ],
     },
     {
         date: '2026-05-22',
-        timeSlots: ['09:00', '10:00', '11:00', '14:00', '15:00'],
+
+        time_slots: [
+            {
+                start_time: '09:00',
+                end_time: '10:00',
+            },
+            {
+                start_time: '10:00',
+                end_time: '11:00',
+            },
+        ],
     },
 
     {
         date: '2026-05-23',
-        timeSlots: ['10:00', '11:00', '14:00', '15:00'],
+
+        time_slots: [
+            {
+                start_time: '10:00',
+                end_time: '11:00',
+            },
+            {
+                start_time: '14:00',
+                end_time: '15:00',
+            },
+        ],
     },
 ];

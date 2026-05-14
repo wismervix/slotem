@@ -9,15 +9,24 @@ export interface Booking {
     id: string;
     client_name: string;
     client_email: string;
-    serviceId: string;
+    service_id: string;
     date: string;
     // example: "2026-05-14"
-    startTime: string;
+    start_time: string;
     // example: "10:00 AM"
-    endTime: string;
+    end_time: string;
     // example: "11:00 AM"
     status: BookingStatus;
     created_at: string;
+}
+
+export interface BookingDraft {
+    serviceId?: string;
+
+    date?: string;
+
+    startTime?: string;
+    endTime?: string;
 }
 
 export interface Stat {
