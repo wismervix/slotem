@@ -6,17 +6,18 @@ interface Props {
 
 export default function StatusBadge({ status }: Props) {
     const styles = {
-        Pending: 'bg-tertiary-fixed text-on-tertiary-fixed',
-        Confirmed: 'bg-secondary-container text-on-secondary-container',
-        Completed: 'bg-surface-container-highest text-on-surface-variant',
-        Cancelled: 'bg-error-container text-on-error-container',
+        pending: 'bg-tertiary-fixed text-on-tertiary-fixed',
+        approved: 'bg-secondary-container text-on-secondary-container',
+        completed: 'bg-surface-container-highest text-on-surface-variant',
+        cancelled: 'bg-error-container text-on-error-container',
+        rejected: 'bg-error-container text-on-error-container',
     };
 
     return (
         <span
             className={`rounded-full px-3 py-1 text-xs font-semibold ${styles[status]}`}
         >
-            {status}
+            {status.charAt(0).toUpperCase() + status.slice(1)}
         </span>
     );
 }

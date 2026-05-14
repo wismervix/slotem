@@ -16,15 +16,9 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                     </Link>
 
                     <div className="hidden items-center gap-8 md:flex">
-                        {/* <Link
-                            href={route('how-it-works')}
-                            className="font-medium text-purple-600"
-                        >
-                            How it works
-                        </Link> */}
                         <a
-                            href="#how-it-works"
-                            className="font-medium text-purple-600"
+                            href="/#how-it-works"
+                            className="font-medium text-slate-600 transition hover:text-purple-600 dark:text-slate-300"
                         >
                             How It Works
                         </a>
@@ -37,10 +31,10 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                         </Link>
 
                         <Link
-                            href={route('pricing')}
+                            href={route('contact-us')}
                             className="text-slate-600 transition hover:text-purple-600 dark:text-slate-300"
                         >
-                            Pricing
+                            Contact Us
                         </Link>
 
                         <Link

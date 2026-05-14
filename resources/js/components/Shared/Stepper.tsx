@@ -3,9 +3,9 @@ import { Check } from 'lucide-react';
 export function Stepper({ currentStep = 2 }: { currentStep?: number }) {
     const steps = [
         { id: 1, label: 'Service', icon: Check },
-        { id: 2, label: 'Date & Time', icon: null },
+        { id: 2, label: 'Date & Time', icon: Check },
         { id: 3, label: 'Details', icon: null },
-        { id: 4, label: 'Payment', icon: null },
+        // { id: 4, label: 'Payment', icon: null },
     ];
 
     return (

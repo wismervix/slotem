@@ -1,3 +1,4 @@
+import { Link } from '@inertiajs/react';
 import { LayoutDashboard, Calendar, Clock, Settings, Plus } from 'lucide-react';
 import { useState } from 'react';
 
@@ -46,10 +47,10 @@ export default function Sidebar() {
                 ))}
             </nav>
 
-            <button className="bg-primary text-primary-foreground mt-auto flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 font-semibold">
+            <Link href={route('services')} className="bg-primary text-primary-foreground mt-auto flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 font-semibold">
                 <Plus size={20} />
                 New Booking
-            </button>
+            </Link>
         </aside>
     );
 }

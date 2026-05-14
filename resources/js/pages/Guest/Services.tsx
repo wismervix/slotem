@@ -1,9 +1,7 @@
 import { Head } from '@inertiajs/react';
-import { Link } from '@inertiajs/react';
 import {
     Calendar,
     Bell,
-    Clock3,
     CheckCircle2,
     Scissors,
     Sparkles,
@@ -12,10 +10,22 @@ import {
     UserCheck,
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { ServiceCard } from '@/components/Shared/ServiceCard';
 import { Stepper } from '@/components/Shared/Stepper';
+import { services } from '@/data/services';
 import GuestLayout from '@/layouts/Guest/GuestLayout';
 
-const Home = () => {
+export type IconName = keyof typeof icons;
+
+const icons = {
+    Scissors,
+    UserCheck,
+    Sparkles,
+    Paintbrush,
+    ShieldCheck,
+} as const;
+
+const Services = () => {
     return (
         <GuestLayout>
             <Head title="Services" />
@@ -47,208 +57,18 @@ const Home = () => {
 
                     {/* Services Grid */}
                     <section className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-                        {/* Card 1 */}
-                        <div className="relative flex flex-col rounded-3xl border border-slate-200 bg-white p-8 transition hover:border-purple-500 dark:border-slate-700 dark:bg-slate-900">
-                            <div className="absolute top-6 right-6 rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-700 dark:bg-purple-500/10 dark:text-purple-300">
-                                Popular
-                            </div>
+                        {services.map((service) => {
+                            const Icon =
+                                icons[service.icon as keyof typeof icons];
 
-                            <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-100 text-purple-600 dark:bg-purple-500/10">
-                                <Scissors className="h-7 w-7" />
-                            </div>
-
-                            <h3 className="mb-2 text-2xl font-bold">
-                                Signature Haircut
-                            </h3>
-
-                            <p className="mb-8 flex-grow text-slate-600 dark:text-slate-400">
-                                Our most requested service. Includes
-                                consultation, precision cut, scalp massage, and
-                                styling.
-                            </p>
-
-                            <div className="mt-auto flex items-center justify-between">
-                                <div>
-                                    <span className="text-3xl font-black text-purple-600">
-                                        $45
-                                    </span>
-
-                                    <span className="ml-2 text-sm text-slate-500">
-                                        / 45 min
-                                    </span>
-                                </div>
-
-                                <Link
-                                    href={route('booking.date-time')}
-                                    className="rounded-xl bg-purple-600 px-6 py-2 font-semibold text-white transition hover:bg-purple-500"
-                                >
-                                    Select
-                                </Link>
-                            </div>
-                        </div>
-
-                        {/* Card 2 */}
-                        <div className="flex flex-col rounded-3xl border border-slate-200 bg-white p-8 transition hover:border-purple-500 dark:border-slate-700 dark:bg-slate-900">
-                            <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-100 text-purple-600 dark:bg-purple-500/10">
-                                <UserCheck className="h-7 w-7" />
-                            </div>
-
-                            <h3 className="mb-2 text-2xl font-bold">
-                                Beard Trim & Sculpt
-                            </h3>
-
-                            <p className="mb-8 flex-grow text-slate-600 dark:text-slate-400">
-                                A meticulous trim and shape-up using clippers
-                                and shears. Finished with organic beard oil.
-                            </p>
-
-                            <div className="mt-auto flex items-center justify-between">
-                                <div>
-                                    <span className="text-3xl font-black text-purple-600">
-                                        $25
-                                    </span>
-
-                                    <span className="ml-2 text-sm text-slate-500">
-                                        / 20 min
-                                    </span>
-                                </div>
-
-                                <Link
-                                    href={route('booking.date-time')}
-                                    className="rounded-xl bg-purple-600 px-6 py-2 font-semibold text-white transition hover:bg-purple-500"
-                                >
-                                    Select
-                                </Link>
-                            </div>
-                        </div>
-
-                        {/* Card 3 */}
-                        <div className="flex flex-col rounded-3xl border border-slate-200 bg-white p-8 transition hover:border-purple-500 dark:border-slate-700 dark:bg-slate-900">
-                            <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-100 text-purple-600 dark:bg-purple-500/10">
-                                <Sparkles className="h-7 w-7" />
-                            </div>
-
-                            <h3 className="mb-2 text-2xl font-bold">
-                                Classic Hot Towel Shave
-                            </h3>
-
-                            <p className="mb-8 flex-grow text-slate-600 dark:text-slate-400">
-                                Traditional straight razor shave with hot towels
-                                and premium pre-shave treatment.
-                            </p>
-
-                            <div className="mt-auto flex items-center justify-between">
-                                <div>
-                                    <span className="text-3xl font-black text-purple-600">
-                                        $35
-                                    </span>
-
-                                    <span className="ml-2 text-sm text-slate-500">
-                                        / 30 min
-                                    </span>
-                                </div>
-
-                                <Link
-                                    href={route('booking.date-time')}
-                                    className="rounded-xl bg-purple-600 px-6 py-2 font-semibold text-white transition hover:bg-purple-500"
-                                >
-                                    Select
-                                </Link>
-                            </div>
-                        </div>
-
-                        {/* Deluxe Package */}
-                        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 transition hover:border-purple-500 md:col-span-2 dark:border-slate-700 dark:bg-slate-800">
-                            <div className="flex h-full flex-col md:flex-row">
-                                <div className="md:w-1/3">
-                                    <img
-                                        src="https://images.unsplash.com/photo-1621605815971-fbc98d665033?q=80&w=1200&auto=format&fit=crop"
-                                        alt="Deluxe Package"
-                                        className="h-64 w-full object-cover md:h-full"
-                                    />
-                                </div>
-
-                                <div className="flex flex-1 flex-col p-8">
-                                    <h3 className="mb-3 text-3xl font-black">
-                                        The Deluxe Package
-                                    </h3>
-
-                                    <p className="mb-6 text-slate-600 dark:text-slate-400">
-                                        Our ultimate experience combining the
-                                        Signature Haircut, Beard Trim, and
-                                        Charcoal Facial Mask.
-                                    </p>
-
-                                    <div className="mb-8 flex flex-wrap gap-6 text-sm text-slate-500">
-                                        <div className="flex items-center gap-2">
-                                            <Clock3 className="h-4 w-4" />
-
-                                            <span>90 min</span>
-                                        </div>
-
-                                        <div className="flex items-center gap-2">
-                                            <ShieldCheck className="h-4 w-4" />
-
-                                            <span>Master Barber</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="mt-auto flex items-center justify-between">
-                                        <div>
-                                            <span className="text-4xl font-black text-purple-600">
-                                                $85
-                                            </span>
-
-                                            <span className="ml-2 text-sm text-slate-500">
-                                                All inclusive
-                                            </span>
-                                        </div>
-
-                                        <Link
-                                            href={route('booking.date-time')}
-                                            className="rounded-2xl bg-purple-600 px-8 py-3 font-semibold text-white transition hover:bg-purple-500"
-                                        >
-                                            Book Package
-                                        </Link>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Card 5 */}
-                        <div className="flex flex-col rounded-3xl border border-slate-200 bg-white p-8 transition hover:border-purple-500 dark:border-slate-700 dark:bg-slate-900">
-                            <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-100 text-purple-600 dark:bg-purple-500/10">
-                                <Paintbrush className="h-7 w-7" />
-                            </div>
-
-                            <h3 className="mb-2 text-2xl font-bold">
-                                Hair Coloring
-                            </h3>
-
-                            <p className="mb-8 flex-grow text-slate-600 dark:text-slate-400">
-                                Full color or grey coverage using premium dyes
-                                that protect your hair's health.
-                            </p>
-
-                            <div className="mt-auto flex items-center justify-between">
-                                <div>
-                                    <span className="text-3xl font-black text-purple-600">
-                                        $60
-                                    </span>
-
-                                    <span className="ml-2 text-sm text-slate-500">
-                                        / 60 min
-                                    </span>
-                                </div>
-
-                                <Link
-                                    href={route('booking.date-time')}
-                                    className="rounded-xl bg-purple-600 px-6 py-2 font-semibold text-white transition hover:bg-purple-500"
-                                >
-                                    Select
-                                </Link>
-                            </div>
-                        </div>
+                            return (
+                                <ServiceCard
+                                    key={service.id}
+                                    service={service}
+                                    Icon={Icon}
+                                />
+                            );
+                        })}
                     </section>
 
                     {/* Info Section */}
@@ -315,4 +135,4 @@ const Home = () => {
     );
 };
 
-export default Home;
+export default Services;

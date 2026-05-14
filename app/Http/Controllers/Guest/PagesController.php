@@ -19,10 +19,10 @@ class PagesController extends Controller
     {
         return Inertia::render('Guest/HowItWorks');
     }
-    public function pricing()
-    {
-        return Inertia::render('Guest/Pricing');
-    }
+    // public function pricing()
+    // {
+    //     return Inertia::render('Guest/Pricing');
+    // }
     public function contactUs()
     {
         return Inertia::render('Guest/ContactUs');

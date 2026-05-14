@@ -20,6 +20,7 @@ import React, { useState } from 'react';
 import StatCard from '@/components/Admin/StatCard';
 import StatusBadge from '@/components/Admin/StatusBadge';
 import { INITIAL_BOOKINGS } from '@/data/bookings';
+import { services } from '@/data/services';
 import AdminLayout from '@/layouts/Admin/AdminLayout';
 
 export default function AdminDashboard() {
@@ -55,30 +56,48 @@ export default function AdminDashboard() {
         },
     ];
 
-    const filteredBookings = bookings.filter(
-        (b) =>
-            b.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            b.service.toLowerCase().includes(searchTerm.toLowerCase()),
-    );
+    const filteredBookings = bookings
+        .map((booking) => {
+            const service = services.find((s) => s.id === booking.serviceId);
+
+            return {
+                ...booking,
+                service,
+                client_initials: booking.client_name
+                    .split(' ')
+                    .map((name) => name[0])
+                    .join('')
+                    .toUpperCase(),
+            };
+        })
+        .filter(
+            (b) =>
+                b.client_name
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase()) ||
+                b.service?.name
+                    ?.toLowerCase()
+                    .includes(searchTerm.toLowerCase()),
+        );
 
     return (
         <AdminLayout>
             {/* Header */}
             <header className="mb-8 flex items-end justify-between">
                 <div>
-                    <h1 className="text-on-surface text-3xl font-bold">
+                    <h1 className="text-3xl font-bold text-on-surface">
                         Bookings Management
                     </h1>
-                    <p className="text-on-surface-variant mt-1 text-sm">
+                    <p className="mt-1 text-sm text-on-surface-variant">
                         Review and manage upcoming client appointments
                     </p>
                 </div>
-                <div className="bg-surface-container border-outline-variant flex items-center gap-2 rounded-full border px-4 py-2">
+                <div className="flex items-center gap-2 rounded-full border border-outline-variant bg-surface-container px-4 py-2">
                     <CalendarDays
                         size={18}
                         className="text-on-surface-variant"
                     />
-                    <span className="text-on-surface text-[11px] font-bold tracking-widest uppercase">
+                    <span className="text-[11px] font-bold tracking-widest text-on-surface uppercase">
                         October 24, 2024
                     </span>
                 </div>
@@ -92,26 +111,26 @@ export default function AdminDashboard() {
             </section>
 
             {/* Table Container */}
-            <section className="border-outline-variant overflow-hidden rounded-2xl border bg-white shadow-sm shadow-black/5">
-                <div className="border-outline-variant bg-surface-container-low/50 flex items-center justify-between border-b px-6 py-4 backdrop-blur-sm">
-                    <h3 className="text-on-surface text-lg font-semibold">
+            <section className="overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-sm shadow-black/5">
+                <div className="flex items-center justify-between border-b border-outline-variant bg-surface-container-low/50 px-6 py-4 backdrop-blur-sm">
+                    <h3 className="text-lg font-semibold text-on-surface">
                         All Bookings
                     </h3>
                     <div className="flex items-center gap-2">
                         <div className="relative">
                             <Search
                                 size={18}
-                                className="text-on-surface-variant absolute top-1/2 left-3 -translate-y-1/2"
+                                className="absolute top-1/2 left-3 -translate-y-1/2 text-on-surface-variant"
                             />
                             <input
                                 type="text"
                                 placeholder="Search client or service..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="border-outline-variant focus:ring-primary w-64 rounded-xl border bg-white py-2 pr-4 pl-10 text-sm transition-all outline-none focus:border-transparent focus:ring-2"
+                                className="w-64 rounded-xl border border-outline-variant bg-white py-2 pr-4 pl-10 text-sm transition-all outline-none focus:border-transparent focus:ring-2 focus:ring-primary"
                             />
                         </div>
-                        <button className="border-outline-variant hover:bg-surface-container-high flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold transition-colors">
+                        <button className="flex items-center gap-2 rounded-xl border border-outline-variant px-3 py-2 text-xs font-semibold transition-colors hover:bg-surface-container-high">
                             <Filter size={16} />
                             Filter
                         </button>
@@ -121,25 +140,25 @@ export default function AdminDashboard() {
                 <div className="overflow-x-auto">
                     <table className="w-full border-collapse text-left">
                         <thead>
-                            <tr className="bg-surface-container-low/30 border-outline-variant border-b">
-                                <th className="text-on-surface-variant px-6 py-4 text-[10px] font-bold tracking-wider uppercase">
+                            <tr className="border-b border-outline-variant bg-surface-container-low/30">
+                                <th className="px-6 py-4 text-[10px] font-bold tracking-wider text-on-surface-variant uppercase">
                                     Client Name
                                 </th>
-                                <th className="text-on-surface-variant px-6 py-4 text-[10px] font-bold tracking-wider uppercase">
+                                <th className="px-6 py-4 text-[10px] font-bold tracking-wider text-on-surface-variant uppercase">
                                     Service
                                 </th>
-                                <th className="text-on-surface-variant px-6 py-4 text-[10px] font-bold tracking-wider uppercase">
+                                <th className="px-6 py-4 text-[10px] font-bold tracking-wider text-on-surface-variant uppercase">
                                     Date & Time
                                 </th>
-                                <th className="text-on-surface-variant px-6 py-4 text-[10px] font-bold tracking-wider uppercase">
+                                <th className="px-6 py-4 text-[10px] font-bold tracking-wider text-on-surface-variant uppercase">
                                     Status
                                 </th>
-                                <th className="text-on-surface-variant px-6 py-4 text-right text-[10px] font-bold tracking-wider uppercase">
+                                <th className="px-6 py-4 text-right text-[10px] font-bold tracking-wider text-on-surface-variant uppercase">
                                     Actions
                                 </th>
                             </tr>
                         </thead>
-                        <tbody className="divide-outline-variant divide-y">
+                        <tbody className="divide-y divide-outline-variant">
                             <AnimatePresence mode="popLayout">
                                 {filteredBookings.map((booking) => (
                                     <motion.tr
@@ -148,32 +167,34 @@ export default function AdminDashboard() {
                                         animate={{ opacity: 1 }}
                                         exit={{ opacity: 0 }}
                                         key={booking.id}
-                                        className="hover:bg-surface-container-low/20 group transition-colors"
+                                        className="group transition-colors hover:bg-surface-container-low/20"
                                     >
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="bg-secondary-container text-primary flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold tracking-tighter">
-                                                    {booking.clientInitials}
+                                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary-container text-xs font-bold tracking-tighter text-primary">
+                                                    {booking.client_initials}
                                                 </div>
                                                 <div>
-                                                    <div className="text-on-surface text-sm leading-tight font-semibold">
-                                                        {booking.clientName}
+                                                    <div className="text-sm leading-tight font-semibold text-on-surface">
+                                                        {booking.client_name}
                                                     </div>
-                                                    <div className="text-on-surface-variant text-[11px]">
-                                                        {booking.clientEmail}
+                                                    <div className="text-[11px] text-on-surface-variant">
+                                                        {booking.client_email}
                                                     </div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="text-on-surface px-6 py-4 text-sm">
-                                            {booking.service}
+                                        <td className="px-6 py-4 text-sm text-on-surface">
+                                            {booking.service?.name ||
+                                                'Unknown Service'}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="text-on-surface text-sm font-medium">
+                                            <div className="text-sm font-medium text-on-surface">
                                                 {booking.date}
                                             </div>
-                                            <div className="text-on-surface-variant text-[11px]">
-                                                {booking.time}
+                                            <div className="text-[11px] text-on-surface-variant">
+                                                {booking.startTime} -{' '}
+                                                {booking.endTime}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
@@ -184,10 +205,10 @@ export default function AdminDashboard() {
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                                                 {booking.status ===
-                                                    'Pending' && (
+                                                    'pending' && (
                                                     <>
                                                         <button
-                                                            className="text-primary hover:bg-primary/10 rounded-xl p-2 transition-colors"
+                                                            className="rounded-xl p-2 text-primary transition-colors hover:bg-primary/10"
                                                             title="Approve"
                                                         >
                                                             <CheckCircle2
@@ -205,11 +226,11 @@ export default function AdminDashboard() {
                                                     </>
                                                 )}
                                                 {booking.status !==
-                                                    'Cancelled' &&
+                                                    'cancelled' &&
                                                     booking.status !==
-                                                        'Completed' && (
+                                                        'completed' && (
                                                         <button
-                                                            className="text-on-secondary-container hover:bg-secondary-container/50 rounded-xl p-2 transition-colors"
+                                                            className="rounded-xl p-2 text-on-secondary-container transition-colors hover:bg-secondary-container/50"
                                                             title="Mark Completed"
                                                         >
                                                             <CheckSquare
@@ -218,19 +239,19 @@ export default function AdminDashboard() {
                                                         </button>
                                                     )}
                                                 {booking.status ===
-                                                    'Completed' && (
-                                                    <button className="text-primary hover:bg-primary/5 rounded-lg px-3 py-1.5 text-xs font-bold transition-colors">
+                                                    'completed' && (
+                                                    <button className="rounded-lg px-3 py-1.5 text-xs font-bold text-primary transition-colors hover:bg-primary/5">
                                                         View Notes
                                                     </button>
                                                 )}
                                                 {booking.status ===
-                                                    'Cancelled' && (
-                                                    <button className="border-outline-variant text-on-surface-variant hover:bg-surface-container-high flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[11px] font-bold transition-colors">
+                                                    'cancelled' && (
+                                                    <button className="flex items-center gap-1.5 rounded-lg border border-outline-variant px-3 py-1.5 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high">
                                                         <RotateCcw size={12} />
                                                         Restore
                                                     </button>
                                                 )}
-                                                <button className="text-on-surface-variant hover:bg-surface-container-high ml-1 rounded-xl p-2 transition-colors">
+                                                <button className="ml-1 rounded-xl p-2 text-on-surface-variant transition-colors hover:bg-surface-container-high">
                                                     <MoreVertical size={18} />
                                                 </button>
                                             </div>
@@ -242,18 +263,18 @@ export default function AdminDashboard() {
                     </table>
                 </div>
 
-                <div className="bg-surface-container-low/30 border-outline-variant flex items-center justify-between border-t px-6 py-4">
-                    <span className="text-on-surface-variant text-[11px] font-medium">
+                <div className="flex items-center justify-between border-t border-outline-variant bg-surface-container-low/30 px-6 py-4">
+                    <span className="text-[11px] font-medium text-on-surface-variant">
                         Showing {filteredBookings.length} of 1,284 bookings
                     </span>
                     <div className="flex gap-2">
                         <button
                             disabled
-                            className="border-outline-variant hover:bg-surface-container-highest rounded-xl border p-2 transition-all disabled:opacity-30 disabled:hover:bg-transparent"
+                            className="rounded-xl border border-outline-variant p-2 transition-all hover:bg-surface-container-highest disabled:opacity-30 disabled:hover:bg-transparent"
                         >
                             <ChevronLeft size={18} />
                         </button>
-                        <button className="border-outline-variant hover:bg-surface-container-highest rounded-xl border p-2 transition-all active:scale-95">
+                        <button className="rounded-xl border border-outline-variant p-2 transition-all hover:bg-surface-container-highest active:scale-95">
                             <ChevronRight size={18} />
                         </button>
                     </div>
@@ -262,36 +283,36 @@ export default function AdminDashboard() {
 
             {/* Action Grid */}
             <section className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
-                <div className="bg-surface-container/40 border-outline-variant flex items-center gap-4 rounded-2xl border p-6">
-                    <div className="bg-secondary-container text-primary shadow-primary/5 flex h-12 w-12 items-center justify-center rounded-2xl shadow-sm">
+                <div className="flex items-center gap-4 rounded-2xl border border-outline-variant bg-surface-container/40 p-6">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-secondary-container text-primary shadow-sm shadow-primary/5">
                         <Bell size={24} />
                     </div>
                     <div>
-                        <h4 className="text-on-surface text-base font-bold">
+                        <h4 className="text-base font-bold text-on-surface">
                             Send Reminders
                         </h4>
-                        <p className="text-on-surface-variant text-xs">
+                        <p className="text-xs text-on-surface-variant">
                             Notify clients about tomorrow's bookings.
                         </p>
                     </div>
-                    <button className="border-primary text-primary hover:bg-primary ml-auto rounded-xl border px-5 py-2.5 text-xs font-bold transition-all hover:text-white active:scale-95">
+                    <button className="ml-auto rounded-xl border border-primary px-5 py-2.5 text-xs font-bold text-primary transition-all hover:bg-primary hover:text-white active:scale-95">
                         Send All
                     </button>
                 </div>
 
-                <div className="bg-surface-container/40 border-outline-variant flex items-center gap-4 rounded-2xl border p-6">
-                    <div className="bg-surface-container-high text-on-secondary-container flex h-12 w-12 items-center justify-center rounded-2xl shadow-sm shadow-black/5">
+                <div className="flex items-center gap-4 rounded-2xl border border-outline-variant bg-surface-container/40 p-6">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-container-high text-on-secondary-container shadow-sm shadow-black/5">
                         <CloudDownload size={24} />
                     </div>
                     <div>
-                        <h4 className="text-on-surface text-base font-bold">
+                        <h4 className="text-base font-bold text-on-surface">
                             Export Data
                         </h4>
-                        <p className="text-on-surface-variant text-xs">
+                        <p className="text-xs text-on-surface-variant">
                             Download booking history in CSV format.
                         </p>
                     </div>
-                    <button className="border-on-secondary-container text-on-secondary-container hover:bg-on-secondary-container ml-auto rounded-xl border px-5 py-2.5 text-xs font-bold transition-all hover:text-white active:scale-95">
+                    <button className="ml-auto rounded-xl border border-on-secondary-container px-5 py-2.5 text-xs font-bold text-on-secondary-container transition-all hover:bg-on-secondary-container hover:text-white active:scale-95">
                         Export
                     </button>
                 </div>
