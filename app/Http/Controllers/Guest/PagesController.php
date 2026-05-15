@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Guest;
 
 use Inertia\Inertia;
 use App\Http\Controllers\Controller;
+use App\Models\Service;
 
 class PagesController extends Controller
 {
@@ -13,7 +14,11 @@ class PagesController extends Controller
     }
     public function services()
     {
-        return Inertia::render('Guest/Services');
+        $services = Service::all();
+
+        return Inertia::render('Guest/Services', [
+            'services' => $services,
+        ]);
     }
     public function howItWorks()
     {

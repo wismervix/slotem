@@ -1,31 +1,21 @@
 import { Head } from '@inertiajs/react';
-import {
-    Calendar,
-    Bell,
-    CheckCircle2,
-    Scissors,
-    Sparkles,
-    ShieldCheck,
-    Paintbrush,
-    UserCheck,
-} from 'lucide-react';
+import { CheckCircle2, Calendar, Bell } from 'lucide-react';
 import { motion } from 'motion/react';
 import { ServiceCard } from '@/components/Shared/ServiceCard';
 import { Stepper } from '@/components/Shared/Stepper';
-import { services } from '@/data/services';
+// import { services } from '@/data/services';
 import GuestLayout from '@/layouts/Guest/GuestLayout';
+import { serviceIcons } from '@/lib/service-icons';
+import type { Service } from '@/types/service';
 
-export type IconName = keyof typeof icons;
 
-const icons = {
-    Scissors,
-    UserCheck,
-    Sparkles,
-    Paintbrush,
-    ShieldCheck,
-} as const;
+interface ServicesProps {
+    services: Service[];
+}
 
-const Services = () => {
+const Services = ({ services }: ServicesProps) => {
+    console.log('Services from backend:', services);
+
     return (
         <GuestLayout>
             <Head title="Services" />
@@ -58,8 +48,7 @@ const Services = () => {
                     {/* Services Grid */}
                     <section className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
                         {services.map((service) => {
-                            const Icon =
-                                icons[service.icon as keyof typeof icons];
+                            const Icon = serviceIcons[service.icon];
 
                             return (
                                 <ServiceCard

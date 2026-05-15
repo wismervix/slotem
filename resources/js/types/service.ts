@@ -1,20 +1,25 @@
-import type { IconName } from "@/pages/Guest/Services";
+export type ServiceIcon =
+    | 'scissors'
+    | 'user-check'
+    | 'sparkles'
+    | 'paintbrush'
+    | 'shield-check';
 
 export type ServiceBadge = 'popular' | 'recommended' | 'best-value';
 
 export interface Service {
     id: number;
     name: string;
-    icon: IconName;
-    description?: string;
-    image?: string;
-    price: number;
+    icon: ServiceIcon;
+    description?: string | null;
+    image?: string | null;
+    price: string;
     variant: 'standard' | 'featured';
 
     // duration in minutes
     duration: number;
 
     active?: boolean;
-    badges?: ServiceBadge[];
+    badges?: ServiceBadge[] | null;
     created_at: string;
 }
