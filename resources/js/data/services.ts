@@ -2,7 +2,7 @@ import type { Service } from '@/types';
 
 export const services: Service[] = [
     {
-        id: 'service-1',
+        id: 1,
         icon: 'Scissors',
         name: 'Signature Haircut',
         description:
@@ -12,10 +12,11 @@ export const services: Service[] = [
         active: true,
         badges: ['popular', 'recommended'],
         variant: 'standard',
+        created_at: new Date().toISOString(),
     },
 
     {
-        id: 'service-2',
+        id: 2,
         icon: 'UserCheck',
         name: 'Beard Trim & Sculpt',
         description:
@@ -24,10 +25,11 @@ export const services: Service[] = [
         price: 25,
         active: true,
         variant: 'standard',
+        created_at: new Date().toISOString(),
     },
 
     {
-        id: 'service-3',
+        id: 3,
         icon: 'Sparkles',
         name: 'Classic Hot Towel Shave',
         description:
@@ -36,10 +38,11 @@ export const services: Service[] = [
         price: 35,
         active: true,
         variant: 'standard',
+        created_at: new Date().toISOString(),
     },
 
     {
-        id: 'service-4',
+        id: 4,
         icon: 'Paintbrush',
         name: 'Hair Coloring',
         description:
@@ -49,10 +52,11 @@ export const services: Service[] = [
         active: true,
         badges: ['popular'],
         variant: 'standard',
+        created_at: new Date().toISOString(),
     },
 
     {
-        id: 'deluxe-service-1',
+        id: 5,
         icon: 'ShieldCheck',
         name: 'The Deluxe Package',
         description:
@@ -63,5 +67,6 @@ export const services: Service[] = [
         badges: ['popular', 'recommended', 'best-value'],
         variant: 'featured',
         image: 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?q=80&w=1200&auto=format&fit=crop',
+        created_at: new Date().toISOString(),
     },
 ];

@@ -2,8 +2,10 @@ import type { Booking } from '@/types';
 
 export const INITIAL_BOOKINGS: Booking[] = [
     {
-        id: '1',
-        service_id: 'service-1',
+        id: 1,
+        service_id: 1,
+        time_slot_id: 1,
+        availability_id: 1,
 
         date: '2026-05-20',
         start_time: '10:00',
@@ -17,8 +19,10 @@ export const INITIAL_BOOKINGS: Booking[] = [
         created_at: new Date().toISOString(),
     },
     {
-        id: '2',
-        service_id: 'service-2',
+        id: 2,
+        service_id: 2,
+        time_slot_id: 2,
+        availability_id: 2,
 
         date: '2026-05-21',
         start_time: '14:00',
@@ -32,8 +36,10 @@ export const INITIAL_BOOKINGS: Booking[] = [
         created_at: new Date().toISOString(),
     },
     {
-        id: '3',
-        service_id: 'service-3',
+        id: 3,
+        service_id: 3,
+        time_slot_id: 3,
+        availability_id: 3,
 
         date: '2026-05-22',
         start_time: '10:00',
@@ -47,8 +53,10 @@ export const INITIAL_BOOKINGS: Booking[] = [
         created_at: new Date().toISOString(),
     },
     {
-        id: '4',
-        service_id: 'service-4',
+        id: 4,
+        service_id: 4,
+        time_slot_id: 4,
+        availability_id: 4,
 
         date: '2026-05-23',
         start_time: '14:30',

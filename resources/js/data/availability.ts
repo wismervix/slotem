@@ -1,62 +1,32 @@
+import { formatDate } from '@/lib/calendar-utils';
+
 import type { Availability } from '@/types';
 
-export const INITIAL_AVAILABILITY: Availability[] = [
-    {
-        date: '2026-05-20',
+const generateAvailability = (): Availability[] => {
+    const availability: Availability[] = [];
 
-        time_slots: [
-            {
-                start_time: '09:00',
-                end_time: '10:00',
-            },
-            {
-                start_time: '10:00',
-                end_time: '11:00',
-            },
-        ],
-    },
+    const startDate = new Date('2026-04-15');
+    const endDate = new Date('2026-12-31');
 
-    {
-        date: '2026-05-21',
+    let id = 1;
 
-        time_slots: [
-            {
-                start_time: '10:00',
-                end_time: '11:00',
-            },
-            {
-                start_time: '14:00',
-                end_time: '15:00',
-            },
-        ],
-    },
-    {
-        date: '2026-05-22',
+    for (
+        let date = new Date(startDate);
+        date <= endDate;
+        date.setDate(date.getDate() + 1)
+    ) {
+        if (date.getDay() === 0) {
+            continue;
+        }
 
-        time_slots: [
-            {
-                start_time: '09:00',
-                end_time: '10:00',
-            },
-            {
-                start_time: '10:00',
-                end_time: '11:00',
-            },
-        ],
-    },
+        availability.push({
+            id: id++,
+            date: formatDate(date),
+            created_at: new Date().toISOString(),
+        });
+    }
 
-    {
-        date: '2026-05-23',
+    return availability;
+};
 
-        time_slots: [
-            {
-                start_time: '10:00',
-                end_time: '11:00',
-            },
-            {
-                start_time: '14:00',
-                end_time: '15:00',
-            },
-        ],
-    },
-];
+export const INITIAL_AVAILABILITY: Availability[] = generateAvailability();

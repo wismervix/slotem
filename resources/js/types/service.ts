@@ -3,7 +3,7 @@ import type { IconName } from "@/pages/Guest/Services";
 export type ServiceBadge = 'popular' | 'recommended' | 'best-value';
 
 export interface Service {
-    id: string;
+    id: number;
     name: string;
     icon: IconName;
     description?: string;
@@ -16,4 +16,5 @@ export interface Service {
 
     active?: boolean;
     badges?: ServiceBadge[];
+    created_at: string;
 }

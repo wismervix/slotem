@@ -6,10 +6,12 @@ export type BookingStatus =
     | 'cancelled';
 
 export interface Booking {
-    id: string;
+    id: number;
     client_name: string;
     client_email: string;
-    service_id: string;
+    service_id: number;
+    availability_id: number;
+    time_slot_id: number;
     date: string;
     // example: "2026-05-14"
     start_time: string;
