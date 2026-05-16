@@ -59,25 +59,42 @@ export function TimeSlotPicker({
             </div>
 
             <div className="grid flex-grow grid-cols-2 gap-4">
-                {slots.map((slot) => {
-                    const selected =
-                        selectedSlot?.start_time === slot.start_time;
+                {slots.length === 0 ? (
+                    <p className="col-span-2 text-center text-sm text-gray-400">
+                        No available slots for this date. Please select another
+                        date.
+                    </p>
+                ) : (
+                    slots.map((slot) => {
+                        const selected =
+                            selectedSlot?.start_time === slot.start_time;
 
-                    return (
-                        <button
-                            key={slot.start_time}
-                            onClick={() => onSelectSlot(slot)}
-                            className={`rounded-full border px-4 py-3 text-sm font-semibold transition-all duration-200 ${
-                                selected
-                                    ? 'border-purple-600 bg-purple-600 text-white shadow-md ring-2 ring-purple-600/10'
-                                    : 'border-gray-200 bg-white text-gray-700 shadow-sm hover:border-purple-600 hover:text-purple-600 dark:border-purple-300'
-                            }`}
-                        >
-                            {formatTime(slot.start_time)} -{' '}
-                            {formatTime(slot.end_time)}
-                        </button>
-                    );
-                })}
+                        const isBooked = slot.is_booked;
+
+                        return (
+                            <button
+                                key={slot.start_time}
+                                disabled={isBooked}
+                                onClick={() => onSelectSlot(slot)}
+                                className={`rounded-full border px-4 py-3 text-sm font-semibold transition-all duration-200 ${
+                                    isBooked
+                                        ? 'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400 line-through opacity-60 dark:bg-gray-800'
+                                        : selected
+                                          ? 'border-purple-600 bg-purple-600 text-white shadow-md ring-2 ring-purple-600/10'
+                                          : 'border-gray-200 bg-white text-gray-700 shadow-sm hover:border-purple-600 hover:text-purple-600 dark:border-purple-300'
+                                }`}
+                            >
+                                {formatTime(slot.start_time)} -{' '}
+                                {formatTime(slot.end_time)}
+                                {isBooked && (
+                                    <span className="ml-2 text-xs">
+                                        (Booked)
+                                    </span>
+                                )}
+                            </button>
+                        );
+                    })
+                )}
             </div>
 
             <div className="mt-8 border-t border-purple-100 pt-8">
@@ -108,13 +125,22 @@ export function TimeSlotPicker({
                     >
                         Back
                     </Link>
-                    <Link
-                        href={route('booking.create')}
-                        className="flex-[2] transform rounded-full bg-purple-600 px-6 py-4 text-center text-sm font-bold text-white shadow-lg shadow-purple-200 transition-all hover:bg-purple-700 active:scale-[0.98]"
-                        id="next-step-btn"
-                    >
-                        Next Step
-                    </Link>
+                    {selectedSlot ? (
+                        <Link
+                            href={route('booking.create')}
+                            id="next-step-btn"
+                            className="flex-[2] transform rounded-full bg-purple-600 px-6 py-4 text-center text-sm font-bold text-white shadow-lg shadow-purple-200 transition-all hover:bg-purple-700 active:scale-[0.98]"
+                        >
+                            Next Step
+                        </Link>
+                    ) : (
+                        <button
+                            disabled
+                            className="flex-[2] cursor-default rounded-full bg-gray-300 px-6 py-4 text-sm font-bold text-white opacity-70"
+                        >
+                            Select a slot first
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

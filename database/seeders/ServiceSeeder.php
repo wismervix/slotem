@@ -76,7 +76,7 @@ class ServiceSeeder extends Seeder
                 'description' => 'Our ultimate experience combining the Signature Haircut, Beard Trim, and Charcoal Facial Mask.',
                 'price' => 85,
                 'duration' => 90,
-                'variant' => 'standard',
+                'variant' => 'featured',
                 'image' => 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?q=80&w=1200&auto=format&fit=crop',
                 'active' => true,
                 'badges' => ['popular', 'recommended', 'best-value'],

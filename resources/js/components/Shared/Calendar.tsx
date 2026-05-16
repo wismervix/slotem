@@ -1,23 +1,24 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-import { INITIAL_AVAILABILITY } from '@/data/availability';
-
-import { isDateAvailable } from '@/lib/availability-utils';
-
 import {
     formatDate,
     generateCalendarDays,
     isPastDate,
 } from '@/lib/calendar-utils';
+import type { Availability } from '@/types/availability';
 
 interface CalendarProps {
     selectedDate: string | null;
-
     onSelectDate: (date: string) => void;
+    availabilities: Availability[];
 }
 
-export function Calendar({ selectedDate, onSelectDate }: CalendarProps) {
+export function Calendar({
+    selectedDate,
+    onSelectDate,
+    availabilities,
+}: CalendarProps) {
     const today = new Date();
 
     const [currentMonth, setCurrentMonth] = useState(today.getMonth());
@@ -55,6 +56,10 @@ export function Calendar({ selectedDate, onSelectDate }: CalendarProps) {
         });
     }
 
+    const isCurrentMonth =
+        currentMonth === today.getMonth() &&
+        currentYear === today.getFullYear();
+
     return (
         <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-800 dark:bg-slate-900 dark:shadow-lg dark:shadow-white/10">
             <div className="mb-8 flex items-center justify-between">
@@ -64,8 +69,13 @@ export function Calendar({ selectedDate, onSelectDate }: CalendarProps) {
 
                 <div className="flex space-x-2">
                     <button
+                        disabled={isCurrentMonth}
                         onClick={goToPreviousMonth}
-                        className="rounded-full p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+                        className={`rounded-full p-2 transition-colors ${
+                            isCurrentMonth
+                                ? 'cursor-default opacity-30'
+                                : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                        }`}
                     >
                         <ChevronLeft
                             size={20}
@@ -98,9 +108,10 @@ export function Calendar({ selectedDate, onSelectDate }: CalendarProps) {
                 {calendarDays.map(({ date, currentMonth }, idx) => {
                     const formatted = formatDate(date);
 
-                    const available = isDateAvailable(
-                        INITIAL_AVAILABILITY,
-                        formatted,
+                    const available = availabilities.some(
+                        (a) =>
+                            a.date === formatted &&
+                            a.time_slots.some((slot) => !slot.is_booked),
                     );
 
                     const disabled = isPastDate(date) || !available;
@@ -128,27 +139,6 @@ export function Calendar({ selectedDate, onSelectDate }: CalendarProps) {
                                 <span className="absolute bottom-2 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-purple-600" />
                             )}
                         </button>
-                        // <button
-                        //     key={idx}
-                        //     disabled={disabled}
-                        //     onClick={() => onSelectDate(formatted)}
-                        //     className={`relative rounded-xl py-4 font-medium transition-all duration-200 ${
-                        //         !currentMonth
-                        //             ? 'text-gray-300 dark:text-gray-700'
-                        //             : selected
-                        //               ? 'bg-purple-600 font-bold text-white shadow-lg shadow-purple-200'
-                        //               : disabled
-                        //                 ? 'cursor-default text-gray-300 opacity-40 dark:text-gray-700'
-                        //                 : // ? 'cursor-not-allowed text-gray-300 opacity-40 dark:text-gray-700'
-                        //                   'text-gray-700 hover:bg-purple-50 dark:text-gray-300 dark:hover:bg-gray-800'
-                        //     } `}
-                        // >
-                        //     {date.getDate()}
-
-                        //     {available && !selected && currentMonth && (
-                        //         <span className="absolute bottom-2 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-purple-600" />
-                        //     )}
-                        // </button>
                     );
                 })}
             </div>
@@ -173,7 +163,8 @@ export function Calendar({ selectedDate, onSelectDate }: CalendarProps) {
                 </div>
 
                 <span className="text-xs font-medium text-gray-400">
-                    Timezone: Europe/London (GMT)
+                    {/* Timezone: Europe/London (GMT) */}
+                    Timezone: {Intl.DateTimeFormat().resolvedOptions().timeZone}
                 </span>
             </div>
         </div>

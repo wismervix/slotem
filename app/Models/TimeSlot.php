@@ -13,6 +13,10 @@ class TimeSlot extends Model
         'end_time',
     ];
 
+    protected $casts = [
+        'is_booked' => 'boolean',
+    ];
+
     public function availability()
     {
         return $this->belongsTo(Availability::class);

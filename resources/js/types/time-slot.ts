@@ -3,5 +3,5 @@ export interface TimeSlot {
     availability_id: number;
     start_time: string;
     end_time: string;
-    created_at: string;
+    is_booked: boolean;
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Guest;
 
 use App\Http\Controllers\Controller;
+use App\Models\Availability;
 use App\Services\BookingService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -11,7 +12,10 @@ class BookingController extends Controller
 {
     public function dateAndTime()
     {
-        return Inertia::render('Guest/Booking/DateAndTime');
+        $availabilities = Availability::with('timeSlots')->get();
+        return Inertia::render('Guest/Booking/DateAndTime', [
+            'availabilities' => $availabilities
+        ]);
     }
     public function create()
     {

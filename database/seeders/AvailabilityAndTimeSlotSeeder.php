@@ -31,7 +31,7 @@ class AvailabilityAndTimeSlotSeeder extends Seeder
 
             // Saturday rule
             if ($date->isSaturday()) {
-                $this->generateSlots($availability->id, 10, 15);
+                $this->generateSlots($availability->id, 10, 16);
             } else {
                 // Weekdays
                 $this->generateSlots($availability->id, 9, 17);

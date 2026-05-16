@@ -5,17 +5,14 @@ import { Calendar } from '@/components/Shared/Calendar';
 import { HostCard } from '@/components/Shared/HostCard';
 import { Stepper } from '@/components/Shared/Stepper';
 import { TimeSlotPicker } from '@/components/Shared/TimeSlotPicker';
-
-import { INITIAL_AVAILABILITY } from '@/data/availability';
-import { INITIAL_TIME_SLOTS } from '@/data/time-slots';
-
 import GuestLayout from '@/layouts/Guest/GuestLayout';
+import type { Availability, TimeSlot } from '@/types';
 
-import { getSlotsForDate } from '@/lib/availability-utils';
+interface DateAndTimeProps {
+    availabilities: Availability[];
+}
 
-import type { TimeSlot } from '@/types';
-
-export default function App() {
+export default function DateAndTime({ availabilities }: DateAndTimeProps) {
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
     const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
@@ -25,17 +22,27 @@ export default function App() {
             return [];
         }
 
-        return getSlotsForDate(
-            INITIAL_AVAILABILITY,
-            INITIAL_TIME_SLOTS,
-            selectedDate,
+        const availability = availabilities.find(
+            (a) => a.date === selectedDate,
         );
-    }, [selectedDate]);
+
+        if (!availability) {
+            return [];
+        }
+
+        // return availability.time_slots.filter((slot) => !slot.is_booked);
+        return availability.time_slots;
+    }, [selectedDate, availabilities]);
 
     function handleSelectDate(date: string) {
         setSelectedDate(date);
         setSelectedSlot(null);
     }
+
+    // console.log(
+    //     'Availabilities (with time slots) from backend: ',
+    //     availabilities,
+    // );
 
     return (
         <GuestLayout>
@@ -68,6 +75,7 @@ export default function App() {
                             <Calendar
                                 selectedDate={selectedDate}
                                 onSelectDate={handleSelectDate}
+                                availabilities={availabilities}
                             />
                         </div>
 
