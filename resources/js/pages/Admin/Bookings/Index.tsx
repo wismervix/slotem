@@ -21,14 +21,14 @@ import StatCard from '@/components/Admin/StatCard';
 import StatusBadge from '@/components/Admin/StatusBadge';
 import { services } from '@/data/services';
 import AdminLayout from '@/layouts/Admin/AdminLayout';
+import { formatTime } from '@/pages/Guest/Booking/Create';
 import type { Booking } from '@/types/booking';
-
 
 interface BookingsProps {
     bookings: Booking[];
 }
 
-export default function AdminBookingIndex({bookings}: BookingsProps) {
+export default function AdminBookingIndex({ bookings }: BookingsProps) {
     const [searchTerm, setSearchTerm] = useState('');
 
     const stats = [
@@ -83,8 +83,7 @@ export default function AdminBookingIndex({bookings}: BookingsProps) {
                     .includes(searchTerm.toLowerCase()),
         );
 
-        // console.log('Bookings from backend: ', bookings);
-        
+    // console.log('Bookings from backend: ', bookings);
 
     return (
         <AdminLayout>
@@ -196,11 +195,21 @@ export default function AdminBookingIndex({bookings}: BookingsProps) {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="text-sm font-medium text-on-surface">
-                                                {booking.date}
+                                                {new Intl.DateTimeFormat(
+                                                    'en-US',
+                                                    {
+                                                        weekday: 'long',
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        year: 'numeric',
+                                                    },
+                                                ).format(
+                                                    new Date(booking.date),
+                                                )}
                                             </div>
                                             <div className="text-[11px] text-on-surface-variant">
-                                                {booking.start_time} -{' '}
-                                                {booking.end_time}
+                                                {formatTime(booking.start_time)}{' '}
+                                                — {formatTime(booking.end_time)}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">

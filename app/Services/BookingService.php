@@ -16,7 +16,9 @@ class BookingService
                 ->findOrFail($data['time_slot_id']);
 
             if ($slot->is_booked) {
-                throw new \Exception('Slot already booked.');
+                throw ValidationException::withMessages([
+                    'slot' => 'This slot has already been booked.'
+                ]);
             }
 
             $booking = Booking::create([

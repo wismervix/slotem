@@ -19,8 +19,23 @@ interface CreateProps {
     slot: TimeSlot;
 }
 
+export const formatTime = (time: string) => {
+    const [hours, minutes] = time.split(':');
+
+    const date = new Date();
+    date.setHours(Number(hours));
+    date.setMinutes(Number(minutes));
+
+    return new Intl.DateTimeFormat('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+    }).format(date);
+};
+
 const Create = ({ service, selectedDate, slot }: CreateProps) => {
     const [isBooked, setIsBooked] = useState(false);
+    const [booking, setBooking] = useState<any>(null);
 
     useEffect(() => {
         if (!service || !slot || !selectedDate) {
@@ -28,21 +43,8 @@ const Create = ({ service, selectedDate, slot }: CreateProps) => {
         }
     }, [service, slot, selectedDate]);
 
-    const formatTime = (time: string) => {
-        const [hours, minutes] = time.split(':');
-
-        const date = new Date();
-        date.setHours(Number(hours));
-        date.setMinutes(Number(minutes));
-
-        return new Intl.DateTimeFormat('en-US', {
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true,
-        }).format(date);
-    };
-
-    const { data, setData, post, processing, errors } = useForm({
+    // const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, processing, errors } = useForm({
         client_name: '',
         client_email: '',
         service_id: service.id,
@@ -50,23 +52,52 @@ const Create = ({ service, selectedDate, slot }: CreateProps) => {
         date: selectedDate,
     });
 
-    const handleConfirm = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleConfirm = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        post(route('booking.store'), {
-            onSuccess: () => {
-                setIsBooked(true);
-            },
+    const response = await fetch(route('booking.store'), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            'X-CSRF-TOKEN':
+                document
+                    .querySelector('meta[name="csrf-token"]')
+                    ?.getAttribute('content') || '',
+        },
+        body: JSON.stringify(data),
+    });
 
-            onError: (errors) => {
-                console.log(errors);
-            },
+    const result = await response.json();
 
-            onFinish: () => {
-                console.log('Form Submitted!');
-            },
-        });
+    if (result.success) {
+        setBooking(result.booking);
+        setIsBooked(true);
+    }
     };
+    // const handleConfirm = (e: React.FormEvent<HTMLFormElement>) => {
+    //     e.preventDefault();
+
+    //     // console.log('Submitting booking:', data);
+
+    //     post(route('booking.store'), {
+    //         preserveScroll: true,
+    //         onSuccess: (page) => {
+    //             if (page.props.success) {
+    //                 setIsBooked(true);
+    //                 setBooking(page.props.booking);
+    //             }
+    //         },
+
+    //         onError: (errors) => {
+    //             console.log(errors);
+    //         },
+
+    //         onFinish: () => {
+    //             console.log('Form Submitted!');
+    //         },
+    //     });
+    // };
 
     // console.log('CreateProps: ', service, selectedDate, slot);
 
@@ -104,7 +135,7 @@ const Create = ({ service, selectedDate, slot }: CreateProps) => {
                                         Full Name
                                     </label>
                                     <input
-                                        className={`w-full rounded-lg border bg-white px-4 py-3 text-on-surface transition-all placeholder:text-neutral-400 focus:outline-none dark:border-outline-variant-dark dark:text-gray-400 dark:text-on-surface-dark ${
+                                        className={`w-full rounded-lg border bg-white px-4 py-3 text-on-surface transition-all placeholder:text-neutral-400 focus:outline-none dark:border-outline-variant-dark dark:text-gray-400 ${
                                             errors.client_name
                                                 ? 'border-red-500 focus:ring-red-500'
                                                 : 'border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary'
@@ -137,7 +168,7 @@ const Create = ({ service, selectedDate, slot }: CreateProps) => {
                                         Email
                                     </label>
                                     <input
-                                        className={`w-full rounded-lg border bg-white px-4 py-3 text-on-surface transition-all placeholder:text-neutral-400 focus:outline-none dark:border-outline-variant-dark dark:text-gray-400 dark:text-on-surface-dark ${
+                                        className={`w-full rounded-lg border bg-white px-4 py-3 text-on-surface transition-all placeholder:text-neutral-400 focus:outline-none dark:border-outline-variant-dark dark:text-gray-400 ${
                                             errors.client_email
                                                 ? 'border-red-500 focus:ring-red-500'
                                                 : 'border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary'
@@ -172,9 +203,9 @@ const Create = ({ service, selectedDate, slot }: CreateProps) => {
                                 </div>
 
                                 <button
-                                    className="hover:bg-primary-hover flex w-full items-center justify-center gap-3 rounded-xl bg-primary py-4 text-lg font-semibold text-white transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
+                                    className="hover:bg-primary-hover flex w-full items-center justify-center gap-3 rounded-xl bg-primary py-4 text-lg font-semibold text-white cursor-pointer transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
                                     type="submit"
-                                    disabled={processing}
+                                    disabled={processing || isBooked}
                                 >
                                     {processing
                                         ? 'Confirming...'
@@ -350,7 +381,7 @@ const Create = ({ service, selectedDate, slot }: CreateProps) => {
                                         Booking ID
                                     </span>
                                     <span className="rounded-full bg-surface-accent px-3 py-1 text-sm font-bold text-primary dark:bg-surface-accent-dark">
-                                        #SLT-88219
+                                        #{booking?.id}
                                     </span>
                                 </div>
 
@@ -358,13 +389,19 @@ const Create = ({ service, selectedDate, slot }: CreateProps) => {
                                     <div className="flex items-center gap-4 text-on-surface dark:text-on-surface-dark">
                                         <Scissors className="h-5 w-5 text-primary opacity-70" />
                                         <span className="font-semibold">
-                                            Premium Haircut
+                                            {service.name}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-4 text-on-surface dark:text-on-surface-dark">
                                         <Calendar className="h-5 w-5 text-primary opacity-70" />
                                         <span className="font-semibold">
-                                            Tuesday, Oct 24 • 10:30 AM
+                                            {new Intl.DateTimeFormat('en-US', {
+                                                weekday: 'long',
+                                                month: 'short',
+                                                day: 'numeric',
+                                            }).format(new Date(selectedDate))}
+                                            • {formatTime(slot.start_time)}
+                                            {/* Tuesday, Oct 24 • 10:30 AM */}
                                         </span>
                                     </div>
                                 </div>
@@ -375,10 +412,12 @@ const Create = ({ service, selectedDate, slot }: CreateProps) => {
                                     Add to Calendar
                                 </button>
                                 <button
-                                    onClick={() => setIsBooked(false)}
+                                    onClick={() =>
+                                        router.visit(route('services'))
+                                    }
                                     className="w-full rounded-xl border-2 border-primary py-4 text-lg font-bold text-primary transition-all hover:bg-primary/5"
                                 >
-                                    Back to Home
+                                    OK
                                 </button>
                             </div>
                         </motion.div>

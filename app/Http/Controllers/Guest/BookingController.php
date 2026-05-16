@@ -20,7 +20,9 @@ class BookingController extends Controller
 
         $service = Service::findOrFail($validated['service']);
 
-        $availabilities = Availability::with('timeSlots')->get();
+        $availabilities = Availability::with('timeSlots')
+            ->whereDate('date', '>=', now()->toDateString())
+            ->get();
 
         return Inertia::render('Guest/Booking/DateAndTime', [
             'service' => $service,
@@ -84,7 +86,15 @@ class BookingController extends Controller
 
         $booking = $bookingService->createBooking($validated);
 
-        return redirect()
-            ->route('booking.success', $booking->id);
+        // return redirect()
+        //     ->route('services', $booking->id)
+        //     ->with('success', true)
+        //     ->with('booking', $booking);
+        return response()->json([
+            'success' => true,
+            'booking' => $booking
+        ]);
+        // return redirect()
+        //     ->route('services', $booking->id);
     }
 }
