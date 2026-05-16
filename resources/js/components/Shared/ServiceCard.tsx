@@ -103,7 +103,9 @@ export function ServiceCard({ service, Icon }: any) {
                             </div>
 
                             <Link
-                                href={route('booking.date-time')}
+                                href={route('booking.date-time', {
+                                    service: service.id,
+                                })}
                                 className="rounded-2xl bg-purple-600 px-8 py-3 font-semibold text-white transition hover:bg-purple-500"
                             >
                                 Book Package
@@ -141,7 +143,9 @@ export function ServiceCard({ service, Icon }: any) {
                 </div>
 
                 <Link
-                    href={route('booking.date-time')}
+                    href={route('booking.date-time', {
+                        service: service.id,
+                    })}
                     className="rounded-xl bg-purple-600 px-6 py-2 font-semibold text-white transition hover:bg-purple-500"
                 >
                     Select

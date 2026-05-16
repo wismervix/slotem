@@ -4,35 +4,87 @@ namespace App\Http\Controllers\Guest;
 
 use App\Http\Controllers\Controller;
 use App\Models\Availability;
+use App\Models\Service;
+use App\Models\TimeSlot;
 use App\Services\BookingService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class BookingController extends Controller
 {
-    public function dateAndTime()
-    {
-        $availabilities = Availability::with('timeSlots')->get();
-        return Inertia::render('Guest/Booking/DateAndTime', [
-            'availabilities' => $availabilities
-        ]);
-    }
-    public function create()
-    {
-        return Inertia::render('Guest/Booking/Create');
-    }
-    public function store(Request $request, BookingService $service)
+    public function dateAndTime(Request $request)
     {
         $validated = $request->validate([
-            'service_id' => 'required',
-            'time_slot_id' => 'required',
-            'date' => 'required',
-            'client_name' => 'required',
-            'client_email' => 'required|email',
+            'service' => ['required', 'exists:services,id'],
         ]);
 
-        $booking = $service->createBooking($validated);
+        $service = Service::findOrFail($validated['service']);
 
-        return response()->json($booking);
+        $availabilities = Availability::with('timeSlots')->get();
+
+        return Inertia::render('Guest/Booking/DateAndTime', [
+            'service' => $service,
+            'availabilities' => $availabilities,
+        ]);
+    }
+    public function create(Request $request)
+    {
+        $validated = $request->validate([
+            'service' => ['required', 'exists:services,id'],
+            'slot' => ['required', 'exists:time_slots,id'],
+            'date' => ['required', 'date'],
+        ]);
+
+        $service = Service::findOrFail($validated['service']);
+        $slot = TimeSlot::with('availability')->findOrFail($validated['slot']);
+
+        // Guard: booked slot
+        if ($slot->is_booked) {
+            return redirect()
+                ->route('booking.date-time', [
+                    'service' => $service->id
+                ])
+                ->with('error', 'That slot has already been booked.');
+        }
+
+        // Guard: date mismatch
+        if ($slot->availability->date !== $validated['date']) {
+            abort(403, 'Invalid slot/date combination.');
+        }
+
+        return Inertia::render('Guest/Booking/Create', [
+            'service' => $service,
+            'selectedDate' => $validated['date'],
+            'slot' => $slot,
+        ]);
+    }
+    public function store(Request $request, BookingService $bookingService)
+    {
+        $validated = $request->validate([
+            'client_name' => ['required', 'string', 'max:255'],
+            'client_email' => ['required', 'email'],
+            'service_id' => ['required', 'exists:services,id'],
+            'time_slot_id' => ['required', 'exists:time_slots,id'],
+            'date' => ['required', 'date'],
+        ]);
+
+        $slot = TimeSlot::with('availability')->findOrFail($validated['time_slot_id']);
+
+        if ($slot->is_booked) {
+            return back()->withErrors([
+                'slot' => 'This slot has already been booked.'
+            ]);
+        }
+
+        if ($slot->availability->date !== $validated['date']) {
+            return back()->withErrors([
+                'date' => 'Invalid booking date.'
+            ]);
+        }
+
+        $booking = $bookingService->createBooking($validated);
+
+        return redirect()
+            ->route('booking.success', $booking->id);
     }
 }

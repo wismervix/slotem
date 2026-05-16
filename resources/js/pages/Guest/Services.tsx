@@ -14,7 +14,7 @@ interface ServicesProps {
 }
 
 const Services = ({ services }: ServicesProps) => {
-    console.log('Services from backend:', services);
+    // console.log('Services from backend:', services);
 
     return (
         <GuestLayout>

@@ -15,5 +15,5 @@ Route::controller(PagesController::class)->group(function(){
 Route::controller(BookingController::class)->group(function(){
     Route::get('/booking', 'dateAndTime')->name('booking.date-time');
     Route::get('/booking/create', 'create')->name('booking.create');
-    Route::post('/booking', 'store')->name('booking.store');
+    Route::post('/booking/confirm', 'store')->name('booking.store');
 });

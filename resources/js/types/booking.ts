@@ -23,12 +23,9 @@ export interface Booking {
 }
 
 export interface BookingDraft {
-    serviceId?: string;
-
+    serviceId?: number;
     date?: string;
-
-    startTime?: string;
-    endTime?: string;
+    slotId?: number;
 }
 
 export interface Stat {

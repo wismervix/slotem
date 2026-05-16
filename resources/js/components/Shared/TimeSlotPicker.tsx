@@ -1,9 +1,11 @@
 import { Link } from '@inertiajs/react';
 import { Info } from 'lucide-react';
 
-import type { TimeSlot } from '@/types';
+import type { Service, TimeSlot } from '@/types';
 
 interface TimeSlotPickerProps {
+    service: Service;
+
     selectedDate: string | null;
 
     slots: TimeSlot[];
@@ -14,6 +16,7 @@ interface TimeSlotPickerProps {
 }
 
 export function TimeSlotPicker({
+    service,
     selectedDate,
     slots,
     selectedSlot,
@@ -36,6 +39,13 @@ export function TimeSlotPicker({
         });
     }
 
+    const availableCount = slots.filter((s) => !s.is_booked).length;
+
+    // console.log(
+    //     "TimeSlot's Passed Service Prop: ",
+    //     service,
+    // );
+
     return (
         <div
             className="flex h-full flex-col rounded-2xl border border-purple-100 bg-purple-50/50 p-8 shadow-sm backdrop-blur-sm dark:border-purple-900/40 dark:bg-purple-950/20 dark:shadow-black/20"
@@ -54,7 +64,7 @@ export function TimeSlotPicker({
                     className="text-sm text-gray-500 dark:text-gray-300"
                     id="slots-count"
                 >
-                    {slots.length} slots available
+                    {availableCount} slots available
                 </p>
             </div>
 
@@ -127,7 +137,11 @@ export function TimeSlotPicker({
                     </Link>
                     {selectedSlot ? (
                         <Link
-                            href={route('booking.create')}
+                            href={route('booking.create', {
+                                service: service.id,
+                                date: selectedDate,
+                                slot: selectedSlot?.id,
+                            })}
                             id="next-step-btn"
                             className="flex-[2] transform rounded-full bg-purple-600 px-6 py-4 text-center text-sm font-bold text-white shadow-lg shadow-purple-200 transition-all hover:bg-purple-700 active:scale-[0.98]"
                         >

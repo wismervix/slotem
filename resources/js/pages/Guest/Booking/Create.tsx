@@ -1,31 +1,74 @@
-import { Link } from '@inertiajs/react';
+import { Link, router, useForm } from '@inertiajs/react';
 import {
     Scissors,
     Calendar,
     Clock,
     Info,
     CheckCircle,
-    ChevronDown,
     SquarePen,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Stepper } from '@/components/Shared/Stepper';
 import GuestLayout from '@/layouts/Guest/GuestLayout';
+import type { Service, TimeSlot } from '@/types';
 
-const Create = () => {
-    const [isSubmitting, setIsSubmitting] = useState(false);
+interface CreateProps {
+    service: Service;
+    selectedDate: string;
+    slot: TimeSlot;
+}
+
+const Create = ({ service, selectedDate, slot }: CreateProps) => {
     const [isBooked, setIsBooked] = useState(false);
 
-    const handleConfirm = (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsSubmitting(true);
-        // Simulate API call
-        setTimeout(() => {
-            setIsSubmitting(false);
-            setIsBooked(true);
-        }, 1500);
+    useEffect(() => {
+        if (!service || !slot || !selectedDate) {
+            router.visit(route('services'));
+        }
+    }, [service, slot, selectedDate]);
+
+    const formatTime = (time: string) => {
+        const [hours, minutes] = time.split(':');
+
+        const date = new Date();
+        date.setHours(Number(hours));
+        date.setMinutes(Number(minutes));
+
+        return new Intl.DateTimeFormat('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+        }).format(date);
     };
+
+    const { data, setData, post, processing, errors } = useForm({
+        client_name: '',
+        client_email: '',
+        service_id: service.id,
+        time_slot_id: slot.id,
+        date: selectedDate,
+    });
+
+    const handleConfirm = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        post(route('booking.store'), {
+            onSuccess: () => {
+                setIsBooked(true);
+            },
+
+            onError: (errors) => {
+                console.log(errors);
+            },
+
+            onFinish: () => {
+                console.log('Form Submitted!');
+            },
+        });
+    };
+
+    // console.log('CreateProps: ', service, selectedDate, slot);
 
     return (
         <GuestLayout>
@@ -61,45 +104,69 @@ const Create = () => {
                                         Full Name
                                     </label>
                                     <input
-                                        className="w-full rounded-lg border border-outline-variant bg-white px-4 py-3 text-on-surface transition-all placeholder:text-neutral-400 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none dark:border-outline-variant-dark dark:text-gray-400 dark:text-on-surface-dark"
+                                        className={`w-full rounded-lg border bg-white px-4 py-3 text-on-surface transition-all placeholder:text-neutral-400 focus:outline-none dark:border-outline-variant-dark dark:text-gray-400 dark:text-on-surface-dark ${
+                                            errors.client_name
+                                                ? 'border-red-500 focus:ring-red-500'
+                                                : 'border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary'
+                                        }`}
                                         id="full_name"
+                                        value={data.client_name}
+                                        onChange={(e) =>
+                                            setData(
+                                                'client_name',
+                                                e.target.value,
+                                            )
+                                        }
                                         placeholder="Enter your full name"
                                         type="text"
                                         required
                                     />
+
+                                    {errors.client_name && (
+                                        <p className="mt-2 text-sm text-red-500">
+                                            {errors.client_name}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div>
                                     <label
                                         className="mb-2 block text-xs font-medium tracking-wider text-on-surface uppercase dark:text-gray-100 dark:text-on-surface-dark"
-                                        htmlFor="phone_number"
+                                        htmlFor="email"
                                     >
-                                        Phone Number
+                                        Email
                                     </label>
-                                    <div className="flex gap-2">
-                                        <div className="relative w-24">
-                                            <select className="w-full cursor-pointer appearance-none rounded-lg border border-outline-variant bg-white px-4 py-3 text-on-surface transition-all focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none dark:border-outline-variant-dark dark:text-gray-400">
-                                                <option>+1</option>
-                                                <option>+44</option>
-                                                <option>+61</option>
-                                            </select>
-                                            <ChevronDown className="pointer-events-none absolute top-1/2 right-2 h-4 w-4 -translate-y-1/2 text-on-surface text-on-surface-variant dark:text-on-surface-dark dark:text-on-surface-variant-dark" />
-                                        </div>
-                                        <input
-                                            className="flex-grow rounded-lg border border-outline-variant bg-white px-4 py-3 text-on-surface transition-all placeholder:text-neutral-400 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none dark:border-outline-variant-dark dark:text-gray-400"
-                                            id="phone_number"
-                                            placeholder="(555) 000-0000"
-                                            type="tel"
-                                            required
-                                        />
-                                    </div>
+                                    <input
+                                        className={`w-full rounded-lg border bg-white px-4 py-3 text-on-surface transition-all placeholder:text-neutral-400 focus:outline-none dark:border-outline-variant-dark dark:text-gray-400 dark:text-on-surface-dark ${
+                                            errors.client_email
+                                                ? 'border-red-500 focus:ring-red-500'
+                                                : 'border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary'
+                                        }`}
+                                        id="email"
+                                        value={data.client_email}
+                                        onChange={(e) =>
+                                            setData(
+                                                'client_email',
+                                                e.target.value,
+                                            )
+                                        }
+                                        placeholder="Enter your email"
+                                        type="email"
+                                        required
+                                    />
+
+                                    {errors.client_email && (
+                                        <p className="mt-2 text-sm text-red-500">
+                                            {errors.client_email}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="flex items-start gap-4 rounded-xl bg-surface-container p-4 dark:bg-surface-container-dark">
                                     <Info className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                                     <p className="text-xs leading-relaxed text-on-surface dark:text-on-surface-dark">
-                                        A confirmation SMS will be sent to this
-                                        number 15 minutes before your
+                                        A confirmation Email will be sent to
+                                        this email 15 minutes before your
                                         appointment starts.
                                     </p>
                                 </div>
@@ -107,12 +174,12 @@ const Create = () => {
                                 <button
                                     className="hover:bg-primary-hover flex w-full items-center justify-center gap-3 rounded-xl bg-primary py-4 text-lg font-semibold text-white transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
                                     type="submit"
-                                    disabled={isSubmitting}
+                                    disabled={processing}
                                 >
-                                    {isSubmitting
+                                    {processing
                                         ? 'Confirming...'
                                         : 'Confirm Booking'}
-                                    {!isSubmitting && (
+                                    {!processing && (
                                         <CheckCircle className="h-5 w-5" />
                                     )}
                                 </button>
@@ -132,7 +199,9 @@ const Create = () => {
                                     </h3>
 
                                     <Link
-                                        href={route('booking.date-time')}
+                                        href={route('booking.date-time', {
+                                            service: service.id,
+                                        })}
                                         className="flex items-center gap-1.5 text-sm font-medium text-on-surface-variant transition-colors hover:text-primary dark:text-on-surface-variant-dark"
                                     >
                                         <SquarePen className="h-4 w-4" />
@@ -155,13 +224,15 @@ const Create = () => {
                                             </p>
 
                                             <p className="text-base leading-tight font-semibold transition-colors group-hover:text-primary dark:text-on-surface-dark">
-                                                Premium Haircut & Styling
+                                                {service.name}
                                             </p>
                                         </div>
                                     </Link>
 
                                     <Link
-                                        href={route('booking.date-time')}
+                                        href={route('booking.date-time', {
+                                            service: service.id,
+                                        })}
                                         className="group flex w-full items-start gap-4 rounded-xl p-3 text-left transition-all hover:bg-surface-accent/40 hover:shadow-sm dark:hover:bg-surface-accent-dark/40"
                                     >
                                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-accent transition-all group-hover:scale-105 group-hover:bg-primary/10 dark:bg-surface-accent-dark">
@@ -174,13 +245,26 @@ const Create = () => {
                                             </p>
 
                                             <p className="text-base leading-tight font-semibold transition-colors group-hover:text-primary dark:text-on-surface-dark">
-                                                Tuesday, Oct 24, 2024
+                                                {new Intl.DateTimeFormat(
+                                                    'en-US',
+                                                    {
+                                                        weekday: 'long',
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        year: 'numeric',
+                                                    },
+                                                ).format(
+                                                    new Date(selectedDate),
+                                                )}
+                                                {/* Tuesday, Oct 24, 2024 */}
                                             </p>
                                         </div>
                                     </Link>
 
                                     <Link
-                                        href={route('booking.date-time')}
+                                        href={route('booking.date-time', {
+                                            service: service.id,
+                                        })}
                                         className="group flex w-full items-start gap-4 rounded-xl p-3 text-left transition-all hover:bg-surface-accent/40 hover:shadow-sm dark:hover:bg-surface-accent-dark/40"
                                     >
                                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-accent transition-all group-hover:scale-105 group-hover:bg-primary/10 dark:bg-surface-accent-dark">
@@ -193,7 +277,9 @@ const Create = () => {
                                             </p>
 
                                             <p className="text-base leading-tight font-semibold transition-colors group-hover:text-primary dark:text-on-surface-dark">
-                                                10:30 AM — 11:15 AM
+                                                {formatTime(slot.start_time)} —{' '}
+                                                {formatTime(slot.end_time)}
+                                                {/* 10:30 AM — 11:15 AM */}
                                             </p>
                                         </div>
                                     </Link>
@@ -204,7 +290,7 @@ const Create = () => {
                                         Total Duration
                                     </span>
                                     <span className="text-sm font-bold text-on-surface dark:text-on-surface-dark">
-                                        45 Minutes
+                                        {service.duration} Minutes
                                     </span>
                                 </div>
                             </div>
