@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers\User;
 
+
+use App\Models\User;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+
 // use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -11,8 +15,19 @@ class DashboardController extends Controller
     {
         return inertia('User/Dashboard');
     }
-    public function login()
+    public function bookings()
     {
-        return inertia('User/Login');
+        /** @var User $user */
+        $user = Auth::user();
+
+        $bookings = $user
+            ->bookings()
+            ->with('service')
+            ->latest()
+            ->get();
+
+        return inertia('User/ViewBookings', [
+            'bookings' => $bookings
+        ]);
     }
 }

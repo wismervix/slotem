@@ -8,6 +8,7 @@ use App\Models\Service;
 use App\Models\TimeSlot;
 use App\Services\BookingService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class BookingController extends Controller
@@ -86,15 +87,16 @@ class BookingController extends Controller
 
         $booking = $bookingService->createBooking($validated);
 
-        // return redirect()
-        //     ->route('services', $booking->id)
-        //     ->with('success', true)
-        //     ->with('booking', $booking);
-        return response()->json([
-            'success' => true,
-            'booking' => $booking
-        ]);
-        // return redirect()
-        //     ->route('services', $booking->id);
+        Auth::login($booking->user);
+        $request->session()->regenerate();
+
+        // return response()->json([
+        //     'success' => true,
+        //     'booking' => $booking
+        // ]);
+
+        return redirect()
+            ->route('user.bookings')
+            ->with('success', true);
     }
 }

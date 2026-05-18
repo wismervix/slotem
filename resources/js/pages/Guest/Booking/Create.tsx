@@ -43,8 +43,7 @@ const Create = ({ service, selectedDate, slot }: CreateProps) => {
         }
     }, [service, slot, selectedDate]);
 
-    // const { data, setData, post, processing, errors } = useForm({
-    const { data, setData, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
         client_name: '',
         client_email: '',
         service_id: service.id,
@@ -52,52 +51,52 @@ const Create = ({ service, selectedDate, slot }: CreateProps) => {
         date: selectedDate,
     });
 
-    const handleConfirm = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-    const response = await fetch(route('booking.store'), {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-            'X-CSRF-TOKEN':
-                document
-                    .querySelector('meta[name="csrf-token"]')
-                    ?.getAttribute('content') || '',
-        },
-        body: JSON.stringify(data),
-    });
-
-    const result = await response.json();
-
-    if (result.success) {
-        setBooking(result.booking);
-        setIsBooked(true);
-    }
-    };
-    // const handleConfirm = (e: React.FormEvent<HTMLFormElement>) => {
+    // const handleConfirm = async (e: React.FormEvent<HTMLFormElement>) => {
     //     e.preventDefault();
 
-    //     // console.log('Submitting booking:', data);
+    // const response = await fetch(route('booking.store'), {
+    //     method: 'POST',
+    //     headers: {
+    //         'Content-Type': 'application/json',
+    //         Accept: 'application/json',
+    //         'X-CSRF-TOKEN':
+    //             document
+    //                 .querySelector('meta[name="csrf-token"]')
+    //                 ?.getAttribute('content') || '',
+    //     },
+    //     body: JSON.stringify(data),
+    // });
 
-    //     post(route('booking.store'), {
-    //         preserveScroll: true,
-    //         onSuccess: (page) => {
-    //             if (page.props.success) {
-    //                 setIsBooked(true);
-    //                 setBooking(page.props.booking);
-    //             }
-    //         },
+    // const result = await response.json();
 
-    //         onError: (errors) => {
-    //             console.log(errors);
-    //         },
-
-    //         onFinish: () => {
-    //             console.log('Form Submitted!');
-    //         },
-    //     });
+    // if (result.success) {
+    //     setBooking(result.booking);
+    //     setIsBooked(true);
+    // }
     // };
+    const handleConfirm = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        // console.log('Submitting booking:', data);
+
+        post(route('booking.store'), {
+            preserveScroll: true,
+            onSuccess: (page) => {
+                if (page.props.success) {
+                    setIsBooked(true);
+                    setBooking(page.props.booking);
+                }
+            },
+
+            onError: (errors) => {
+                console.log(errors);
+            },
+
+            onFinish: () => {
+                console.log('Form Submitted!', data);
+            },
+        });
+    };
 
     // console.log('CreateProps: ', service, selectedDate, slot);
 
@@ -203,7 +202,7 @@ const Create = ({ service, selectedDate, slot }: CreateProps) => {
                                 </div>
 
                                 <button
-                                    className="hover:bg-primary-hover flex w-full items-center justify-center gap-3 rounded-xl bg-primary py-4 text-lg font-semibold text-white cursor-pointer transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
+                                    className="hover:bg-primary-hover flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl bg-primary py-4 text-lg font-semibold text-white transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
                                     type="submit"
                                     disabled={processing || isBooked}
                                 >
@@ -413,11 +412,11 @@ const Create = ({ service, selectedDate, slot }: CreateProps) => {
                                 </button>
                                 <button
                                     onClick={() =>
-                                        router.visit(route('services'))
+                                        router.visit(route('user.bookings'))
                                     }
                                     className="w-full rounded-xl border-2 border-primary py-4 text-lg font-bold text-primary transition-all hover:bg-primary/5"
                                 >
-                                    OK
+                                    View My Bookings
                                 </button>
                             </div>
                         </motion.div>

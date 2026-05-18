@@ -9,6 +9,7 @@ export interface Booking {
     id: number;
     client_name: string;
     client_email: string;
+    user_id: number;
     service_id: number;
     availability_id: number;
     time_slot_id: number;

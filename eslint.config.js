@@ -129,7 +129,7 @@ export default [
             '@stylistic': stylistic,
         },
         rules: {
-            curly: ['error', 'all'],
+            curly: ['error', 'all', 'multi-line'],
             '@stylistic/brace-style': [
                 'error',
                 '1tbs',

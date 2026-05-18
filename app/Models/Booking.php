@@ -9,6 +9,7 @@ class Booking extends Model
     protected $fillable = [
         'client_name',
         'client_email',
+        'user_id',
         'service_id',
         'availability_id',
         'time_slot_id',
@@ -21,6 +22,11 @@ class Booking extends Model
     protected $casts = [
         'date' => 'date',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function timeSlot()
     {

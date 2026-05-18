@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ServiceSeeder::class,
             AvailabilityAndTimeSlotSeeder::class,
-            BookingSeeder::class,
+            // BookingSeeder::class,
         ]);
     }
 }

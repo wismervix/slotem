@@ -1,8 +1,10 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
 // import { AppLogo } from '@/Components/AppLogo'; // Assume you have a logo component
 
 export default function GuestLayout({ children }: PropsWithChildren) {
+    const { auth } = usePage().props as any;
+
     return (
         <div className="min-h-screen bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-white">
             {/* Header */}
@@ -38,7 +40,8 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                         </Link>
 
                         <Link
-                            href={route('admin.dashboard')}
+                            // href={route('admin.dashboard')}
+                            href={route('admin.login')}
                             className="text-slate-600 transition hover:text-purple-600 dark:text-slate-300"
                         >
                             Admin
@@ -46,12 +49,27 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <Link
-                            href={route('login')}
-                            className="hidden text-sm font-medium text-purple-600 transition hover:text-purple-500 sm:block"
-                        >
-                            Login
-                        </Link>
+                        {auth.user ? (
+                            <>
+                                <span className="hidden text-sm font-medium text-purple-600 transition hover:text-purple-500 sm:block">
+                                    Hi, {auth.user.name}
+                                </span>
+
+                                <Link
+                                    href={route('user.bookings')}
+                                    className="hidden text-sm font-medium text-purple-600 transition hover:text-purple-500 sm:block"
+                                >
+                                    View Bookings
+                                </Link>
+                            </>
+                        ) : (
+                            <Link
+                                href={route('user.login')}
+                                className="hidden text-sm font-medium text-purple-600 transition hover:text-purple-500 sm:block"
+                            >
+                                Login
+                            </Link>
+                        )}
 
                         <Link
                             href={route('services')}
