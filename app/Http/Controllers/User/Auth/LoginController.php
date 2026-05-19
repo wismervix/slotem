@@ -11,6 +11,15 @@ use Illuminate\Support\Facades\Mail;
 
 class LoginController extends Controller
 {
+    private function nameFromEmail(string $email): string
+    {
+        $name = explode('@', $email)[0];
+
+        $name = str_replace(['.', '_', '-'], ' ', $name);
+
+        return ucwords($name);
+    }
+
     public function showLoginForm()
     {
         return inertia('User/Auth/Login');
@@ -61,9 +70,10 @@ class LoginController extends Controller
             ]);
         }
 
-        $user = User::firstOrCreate([
-            'email' => $request->email
-        ]);
+        $user = User::firstOrCreate(
+            ['email' => $request->email],
+            ['name' => $this->nameFromEmail($request->email)]
+        );
 
         Auth::login($user);
         $request->session()->regenerate();

@@ -86,6 +86,12 @@ class BookingController extends Controller
         }
 
         $booking = $bookingService->createBooking($validated);
+        
+        if ($booking->user->name !== $validated['client_name']) {
+            $booking->user->update([
+                'name' => $validated['client_name']
+            ]);
+        }
 
         Auth::login($booking->user);
         $request->session()->regenerate();

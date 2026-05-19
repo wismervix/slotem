@@ -72,7 +72,7 @@ export default function ContactUs() {
 
                     <div className="flex items-center space-x-4">
                         <Link
-                            href={route('login')}
+                            href={route('user.login')}
                             className="px-4 py-2 text-sm font-medium text-white/70 transition-colors hover:text-white"
                         >
                             Login
