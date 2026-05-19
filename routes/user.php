@@ -18,5 +18,7 @@ Route::group(['prefix' => 'user'], function () {
     Route::middleware('auth')->controller(DashboardController::class)->group(function () {
         Route::get('/dashboard', 'index')->name('user.dashboard');
         Route::get('/bookings', 'bookings')->name('user.bookings');
+        Route::get('/profile', 'profile')->name('user.profile');
+        Route::get('/notifications', 'notifications')->name('user.notifications');
     });
 });

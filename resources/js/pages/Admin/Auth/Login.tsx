@@ -1,3 +1,4 @@
+import { Link, useForm } from '@inertiajs/react';
 import {
     Mail,
     Lock,
@@ -11,7 +12,25 @@ import {
 import { motion } from 'motion/react';
 import GuestLayout from '@/layouts/Guest/GuestLayout';
 
-export default function App() {
+export default function AdminLogin() {
+    const { data, setData, post, processing, errors } = useForm({
+        email: '',
+        password: '',
+        remember: false,
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        post(route('admin.login.store'), {
+            preserveScroll: true,
+
+            onSuccess: () => {
+                console.log('Login successful!');
+            },
+        });
+    };
+
     return (
         <GuestLayout>
             <main className="flex flex-1 items-center justify-center px-8 py-24">
@@ -52,7 +71,7 @@ export default function App() {
                     >
                         <form
                             className="flex flex-col gap-6"
-                            onSubmit={(e) => e.preventDefault()}
+                            onSubmit={handleSubmit}
                         >
                             <div className="flex flex-col gap-2">
                                 <label
@@ -64,13 +83,28 @@ export default function App() {
                                 <div className="group relative">
                                     <Mail className="text-outline absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transition-colors group-focus-within:text-primary" />
                                     <input
-                                        className="placeholder:text-outline w-full rounded-xl border border-outline-variant bg-white py-3 pr-4 pl-10 text-on-surface transition-all outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                        className={`font-body-md w-full rounded-lg border bg-white py-3 pr-4 pl-10 text-on-surface transition-all placeholder:text-neutral-400 focus:outline-none dark:border-outline-variant-dark dark:text-gray-400 ${
+                                            errors.email
+                                                ? 'border-red-500 focus:ring-red-500'
+                                                : 'border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary'
+                                        }`}
                                         id="email"
-                                        placeholder="name@business.com"
+                                        name="email"
+                                        placeholder="name@company.com"
                                         required
                                         type="email"
+                                        value={data.email}
+                                        onChange={(e) =>
+                                            setData('email', e.target.value)
+                                        }
                                     />
                                 </div>
+
+                                {errors.email && (
+                                    <p className="mt-2 text-sm text-red-500">
+                                        {errors.email}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="flex flex-col gap-2">
@@ -91,13 +125,28 @@ export default function App() {
                                 <div className="group relative">
                                     <Lock className="text-outline absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transition-colors group-focus-within:text-primary" />
                                     <input
-                                        className="placeholder:text-outline w-full rounded-xl border border-outline-variant bg-white py-3 pr-4 pl-10 text-on-surface transition-all outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                                         id="password"
                                         placeholder="••••••••"
                                         required
                                         type="password"
+                                        className={`font-body-md w-full rounded-lg border bg-white py-3 pr-4 pl-10 text-on-surface transition-all placeholder:text-neutral-400 focus:outline-none dark:border-outline-variant-dark dark:text-gray-400 ${
+                                            errors.password
+                                                ? 'border-red-500 focus:ring-red-500'
+                                                : 'border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary'
+                                        }`}
+                                        name="password"
+                                        value={data.password}
+                                        onChange={(e) =>
+                                            setData('password', e.target.value)
+                                        }
                                     />
                                 </div>
+
+                                {errors.password && (
+                                    <p className="mt-2 text-sm text-red-500">
+                                        {errors.password}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="flex items-center gap-2">
@@ -105,6 +154,10 @@ export default function App() {
                                     className="h-4 w-4 cursor-pointer rounded border-outline-variant text-primary focus:ring-primary"
                                     id="remember"
                                     type="checkbox"
+                                    checked={data.remember}
+                                    onChange={(e) =>
+                                        setData('remember', e.target.checked)
+                                    }
                                 />
                                 <label
                                     className="cursor-pointer text-sm text-on-surface-variant select-none"
@@ -119,9 +172,18 @@ export default function App() {
                                 whileTap={{ scale: 0.98 }}
                                 className="hover:bg-primary-hover group flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 font-semibold text-white shadow-lg shadow-primary/20 transition-all active:scale-[0.98]"
                                 type="submit"
+                                disabled={processing}
                             >
-                                <span>Sign In to Dashboard</span>
-                                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                                <span>
+                                    {processing
+                                        ? 'Signing In to Dashboard...'
+                                        : 'Sign In to Dashboard'}
+                                </span>
+
+                                {!processing && (
+                                    <ArrowRight className="h-5 w-5" />
+                                )}
+                                <span></span>
                             </motion.button>
                         </form>
 

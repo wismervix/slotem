@@ -15,6 +15,7 @@ class DashboardController extends Controller
     {
         return inertia('User/Dashboard');
     }
+
     public function bookings()
     {
         /** @var User $user */
@@ -29,5 +30,15 @@ class DashboardController extends Controller
         return inertia('User/ViewBookings', [
             'bookings' => $bookings
         ]);
+    }
+
+    public function profile()
+    {
+        return inertia('User/Profile');
+    }
+
+    public function notifications()
+    {
+        return inertia('User/Notifications');
     }
 }

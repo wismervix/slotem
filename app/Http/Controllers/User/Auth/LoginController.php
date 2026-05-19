@@ -80,7 +80,7 @@ class LoginController extends Controller
 
         $otp->delete();
 
-        return redirect()->route('user.bookings');
+        return redirect()->route('user.dashboard');
     }
 
     public function logout(Request $request)

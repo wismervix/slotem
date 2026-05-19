@@ -1,0 +1,50 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-primary: #630ed4;
+  --color-primary-container: #7c3aed;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #ede0ff;
+  
+  --color-secondary: #565e74;
+  --color-secondary-container: #dae2fd;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #5c647a;
+  
+  --color-tertiary: #7d3d00;
+  --color-tertiary-container: #a15100;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-container: #ffe0cd;
+  
+  --color-background: #fef7ff;
+  --color-surface: #fef7ff;
+  --color-on-surface: #1d1a24;
+  --color-on-surface-variant: #4a4455;
+  
+  --color-surface-container: #f3ebfa;
+  --color-surface-container-low: #f9f1ff;
+  --color-surface-container-high: #ede5f4;
+  --color-surface-container-highest: #e8dfee;
+  --color-surface-container-lowest: #ffffff;
+  
+  --color-outline: #7b7487;
+  --color-outline-variant: #ccc3d8;
+  
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-error: #ffffff;
+  --color-on-error-container: #93000a;
+
+  --radius-xl: 0.5rem;
+  --radius-2xl: 0.75rem;
+  --radius-3xl: 1rem;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-on-surface font-sans;
+  }
+}
