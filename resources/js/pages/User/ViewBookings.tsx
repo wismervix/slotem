@@ -6,7 +6,6 @@ import { motion } from 'motion/react';
 import BookingCard from '@/components/User/BookingCard';
 import HistoryItem from '@/components/User/HistoryItem';
 
-import './booking.css';
 
 type ViewBookingsProps = {
     bookings: Booking[];
@@ -145,7 +144,7 @@ const ViewBookings = ({ bookings }: ViewBookingsProps) => {
                 <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
-                    className="text-on-primary flex h-14 w-14 items-center justify-center rounded-full bg-primary shadow-lg"
+                    className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg"
                 >
                     <Plus className="h-8 w-8" />
                 </motion.button>

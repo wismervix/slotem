@@ -5,23 +5,49 @@
 
 @theme {
     --font-sans:
-        'Instrument Sans',
-        'Inter',
-        ui-sans-serif,
-        system-ui,
-        sans-serif,
-        'Apple Color Emoji',
-        'Segoe UI Emoji',
-        'Segoe UI Symbol',
+        'Instrument Sans', 'Inter', ui-sans-serif, system-ui, sans-serif,
+        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
-        
-  --font-heading: "Bebas Neue", cursive;
+
+    --font-heading: 'Bebas Neue', cursive;
+
+    --color-background: #fef7ff;
+    --color-on-background: #1d1a24;
 
     --color-primary: #630ed4;
+    --color-primary-light: #7c3aed;
+    --color-primary-fixed: #eaddff;
+    --color-primary-fixed-dim: #d2bbff;
     --color-primary-foreground: #ffffff;
     --color-primary-container: #7c3aed;
+    --color-on-primary: #ffffff;
+    --color-on-primary-fixed: #25005a;
+    --color-on-primary-container: #ede0ff;
+    --color-on-primary-fixed-variant: #5a00c6;
+
+    --color-secondary: #565e74;
+    --color-secondary-fixed: #dae2fd;
+    --color-secondary-fixed-dim: #bec6e0;
+    --color-secondary-container: #dae2fd;
+    --color-on-secondary: #ffffff;
+    --color-on-secondary-container: #5c647a;
+    --color-on-secondary-fixed: #131b2e;
+    --color-on-secondary-fixed-variant: #3f465c;
+
+    --color-tertiary: #7d3d00;
+    --color-tertiary-container: #a15100;
+    --color-tertiary-fixed: #ffdcc6;
+    --color-tertiary-fixed-dim: #ffb784;
+    --color-on-tertiary-fixed-variant: #713700;
+    --color-on-tertiary: #ffffff;
+    --color-on-tertiary-container: #ffe0cd;
+    --color-on-tertiary-fixed: #301400;
 
     --color-surface: #fef7ff;
+    --color-surface-dim: #dfd7e6;
+    --color-surface-tint: #732ee4;
+    --color-surface-bright: #fef7ff;
+    --color-surface-variant: #e8dfee;
     --color-on-surface: #1d1a24;
     --color-on-surface-dark: #f1e9ff;
     --color-on-surface-variant: #4a4455;
@@ -33,24 +59,55 @@
     --color-surface-container-low: #f9f1ff;
     --color-surface-container-high: #ede5f4;
     --color-surface-container-highest: #e8dfee;
-
-    --color-secondary-container: #dae2fd;
-    --color-on-secondary-container: #5c647a;
+    --color-surface-container-lowest: #ffffff;
 
     --color-surface-accent: #efe4ff;
     --color-surface-accent-dark: #3a3150;
 
+    --color-inverse-surface: #332f39;
+    --color-inverse-primary: #d2bbff;
+    --color-inverse-on-surface: #f6eefc;
+
+    --color-outline: #7b7487;
     --color-outline-variant: #ccc3d8;
     --color-outline-variant-dark: #4b4458;
 
-    --color-tertiary-fixed: #ffdcc6;
-    --color-on-tertiary-fixed: #301400;
-
+    --color-error: #ba1a1a;
     --color-error-container: #ffdad6;
+    --color-on-error: #ffffff;
     --color-on-error-container: #93000a;
+
+    --color-brand-primary: #630ed4;
+    --color-brand-primary-container: #7c3aed;
+    --color-brand-on-primary-container: #ede0ff;
+
+    --color-brand-secondary: #565e74;
+    --color-brand-secondary-container: #dae2fd;
+    --color-brand-on-secondary-container: #131b2e;
+
+    --color-brand-tertiary-container: #a15100;
+    --color-brand-on-tertiary-container: #ffe0cd;
+
+    --color-brand-surface: #fef7ff;
+    --color-brand-surface-container-low: #f9f1ff;
+    --color-brand-surface-container: #f3ebfa;
+    --color-brand-surface-container-high: #ede5f4;
+    --color-brand-surface-container-highest: #e8dfee;
+    --color-brand-surface-variant: #e8dfee;
+
+    --color-brand-on-surface: #1d1a24;
+    --color-brand-on-surface-variant: #4a4455;
+
+    --color-brand-outline: #7b7487;
+    --color-brand-outline-variant: #ccc3d8;
+
+    --color-brand-error: #ba1a1a;
+
+    --color-brand-background: #fef7ff;
 
     --radius-xl: 0.5rem;
     --radius-2xl: 1rem;
+    --radius-3xl: 1rem;
 }
 
 @layer base {

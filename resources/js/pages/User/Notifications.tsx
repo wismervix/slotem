@@ -9,7 +9,6 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState } from 'react';
-import './dashboard.css';
 
 type NotificationCategory = 'All' | 'Bookings' | 'Reminders' | 'Updates';
 

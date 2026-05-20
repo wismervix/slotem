@@ -3,3 +3,4 @@ export * from './service';
 export * from './booking';
 export * from './availability';
 export * from './time-slot';
+export * from './calendar-view-types';

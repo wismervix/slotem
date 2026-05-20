@@ -17,14 +17,14 @@ Route::group(['prefix' => 'admin'], function () {
     Route::middleware('auth:admin')->group(function () {
         Route::controller(DashboardController::class)->group(function () {
             Route::get('/dashboard', 'index')->name('admin.dashboard');
+            Route::get('/availability', 'availability')->name('admin.availability');
+            Route::get('/settings')->name('admin.settings');
+            Route::get('/profile')->name('admin.profile');
         });
         Route::controller(BookingController::class)->group(function () {
             Route::get('/bookings', 'index')->name('admin.bookings');
             Route::get('/bookings/create', 'create')->name('admin.bookings.create');
         });
-        Route::get('/availability')->name('admin.availability');
-        Route::get('/settings')->name('admin.settings');
-        Route::get('/profile')->name('admin.profile');
     });
 
 });

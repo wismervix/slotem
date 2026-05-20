@@ -11,4 +11,8 @@ class DashboardController extends Controller
     {
         return inertia('Admin/Dashboard');
     }
+    public function availability()
+    {
+        return inertia('Admin/Availability');
+    }
 }

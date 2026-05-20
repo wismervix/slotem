@@ -9,7 +9,6 @@ import {
     Bell,
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import './dashboard.css';
 
 const stats = [
     {
