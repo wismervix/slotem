@@ -14,12 +14,14 @@ import {
     HelpCircle,
     Ban,
     CalendarDays,
+    CalendarClock,
 } from 'lucide-react';
 
 interface ListViewProps {
     appointments: Appointment[];
     searchQuery: string;
     onCancelAppointment: (id: string) => void;
+    onRescheduleAppointment: (id: string) => void;
     onNavigateToTab: (tab: any) => void;
 }
 
@@ -27,6 +29,7 @@ export default function ListView({
     appointments,
     searchQuery,
     onCancelAppointment,
+    onRescheduleAppointment,
     onNavigateToTab,
 }: ListViewProps) {
     const [statusFilter, setStatusFilter] = useState<
@@ -84,6 +87,8 @@ export default function ListView({
         }
     };
 
+    // console.log('Appointments: ', appointments);
+
     return (
         <div className="space-y-4 pb-10">
             {/* Search and filter toolbar */}
@@ -122,7 +127,12 @@ export default function ListView({
                                 : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                         }`}
                     >
-                        Pending
+                        Pending (
+                        {
+                            appointments.filter((a) => a.status === 'Pending')
+                                .length
+                        }
+                        )
                     </button>
                     <button
                         onClick={() => setStatusFilter('Cancelled')}
@@ -132,7 +142,12 @@ export default function ListView({
                                 : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                         }`}
                     >
-                        Cancelled
+                        Cancelled (
+                        {
+                            appointments.filter((a) => a.status === 'Cancelled')
+                                .length
+                        }
+                        )
                     </button>
                 </div>
 
@@ -216,7 +231,34 @@ export default function ListView({
                                 </div>
 
                                 <div className="flex gap-2">
-                                    {appt.status !== 'Cancelled' ? (
+                                    {appt.status === 'Confirmed' ? (
+                                        <>
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    onRescheduleAppointment(
+                                                        appt.id,
+                                                    )
+                                                }
+                                                className="flex items-center gap-1 rounded-lg border border-outline-variant px-3 py-1.5 text-xs font-bold text-on-surface transition-colors hover:bg-surface-container-dark dark:text-on-surface-dark"
+                                                title="Reschedule this appointment"
+                                            >
+                                                <CalendarClock className="h-3.5 w-3.5" />
+                                                Reschedule
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    onCancelAppointment(appt.id)
+                                                }
+                                                className="flex items-center gap-1 rounded-lg bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 transition-colors hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-900/30"
+                                                title="Cancel this appointment"
+                                            >
+                                                <Ban className="h-3.5 w-3.5" />
+                                                Cancel
+                                            </button>
+                                        </>
+                                    ) : appt.status !== 'Cancelled' ? (
                                         <button
                                             type="button"
                                             onClick={() =>

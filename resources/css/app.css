@@ -114,4 +114,32 @@
     body {
         @apply bg-surface font-sans text-on-surface;
     }
+
+    .dark {
+        --color-background: #141218;
+        --color-on-background: #f1e9ff;
+
+        --color-surface: #141218;
+        --color-surface-dim: #141218;
+        --color-surface-bright: #3b383e;
+
+        --color-surface-container-lowest: #0f0d13;
+        --color-surface-container-low: #1d1a24;
+        --color-surface-container: #2d2638;
+        --color-surface-container-high: #352d42;
+        --color-surface-container-highest: #403846;
+
+        --color-surface-variant: #4a4455;
+
+        --color-on-surface: #f1e9ff;
+        --color-on-surface-variant: #b8adc8;
+
+        --color-outline: #958e9f;
+        --color-outline-variant: #4b4458;
+
+        --color-primary: #d2bbff;
+        --color-primary-container: #7c3aed;
+        --color-on-primary: #25005a;
+        --color-on-primary-container: #f4ecff;
+    }
 }

@@ -27,6 +27,9 @@ export interface UserProfile {
     preferredClinic: string;
     memberSince: string;
     marketingConsent: boolean;
+    productUpdates: boolean;
+    smsReminders: boolean;
+    soundEnabled: boolean;
 }
 
 export type ViewTab = 'dashboard' | 'bookings' | 'profile' | 'notifications';

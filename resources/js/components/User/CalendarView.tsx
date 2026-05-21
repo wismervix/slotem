@@ -59,9 +59,9 @@ export default function CalendarView({
     };
 
     return (
-        <div className="overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-xs transition-colors hover:border-primary/30 dark:bg-neutral-900">
+        <div className="overflow-x-auto rounded-2xl border border-outline-variant bg-white shadow-xs transition-colors hover:border-primary/30 dark:bg-neutral-900">
             {/* Weekdays Labels */}
-            <div className="grid grid-cols-7 border-b border-outline-variant bg-gray-50/50 dark:bg-neutral-800/50">
+            <div className="grid min-w-[1100px] grid-cols-7 border-b border-outline-variant bg-gray-50/50 dark:bg-neutral-800/50">
                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(
                     (day) => (
                         <div
@@ -76,7 +76,7 @@ export default function CalendarView({
 
             {/* Days Interactive Grid */}
             <div
-                className="grid grid-flow-row grid-cols-7"
+                className="grid min-w-[1100px] grid-flow-row grid-cols-7"
                 style={{ gridAutoRows: 'minmax(115px, auto)' }}
             >
                 {/* Render 1 to 31 days */}

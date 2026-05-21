@@ -8,15 +8,18 @@ import {
     ArrowUpRight,
     Sparkles,
     Stethoscope,
+    Scissors,
     Smile,
     TrendingUp,
     CheckCircle,
+    XCircle,
     Eye,
     Settings,
     Flame,
     ChevronRight,
     Bookmark,
 } from 'lucide-react';
+import { motion } from 'motion/react';
 
 interface DashboardViewProps {
     appointments: Appointment[];
@@ -113,6 +116,56 @@ export default function DashboardView({
             })
             .join(' L ') +
         ` L ${chartWidth},${chartHeight} L 0,${chartHeight} Z`;
+
+    const upcomingAppointments = [
+        {
+            icon: Stethoscope,
+            service: 'Therapeutic Massage',
+            provider: 'Dr. Sarah Jenkins',
+            date: 'Oct 24, 2023',
+            time: '10:30 AM',
+            color: 'bg-surface-container-high',
+        },
+        {
+            icon: Scissors,
+            service: 'Premium Haircut',
+            provider: 'Michael Rossi',
+            date: 'Oct 28, 2023',
+            time: '02:15 PM',
+            color: 'bg-surface-container-high',
+        },
+    ];
+
+    const history = [
+        {
+            service: 'Dental Cleaning',
+            provider: 'Smile Dental Lab',
+            date: 'Oct 12, 2023',
+            status: 'Completed',
+            statusColor: 'bg-green-100 text-green-800',
+        },
+        {
+            service: 'Skin Consultation',
+            provider: 'Dermacare Studio',
+            date: 'Sep 28, 2023',
+            status: 'Cancelled',
+            statusColor: 'bg-red-100 text-red-800',
+        },
+        {
+            service: 'Yoga Session',
+            provider: 'Zen Flow Center',
+            date: 'Sep 15, 2023',
+            status: 'Completed',
+            statusColor: 'bg-green-100 text-green-800',
+        },
+        {
+            service: 'Car Service',
+            provider: 'AutoPro Garage',
+            date: 'Aug 30, 2023',
+            status: 'Completed',
+            statusColor: 'bg-green-100 text-green-800',
+        },
+    ];
 
     return (
         <div className="h-full space-y-6 overflow-y-auto pr-1 pb-10">
@@ -516,6 +569,146 @@ export default function DashboardView({
                         </div>
                     ))}
                 </div>
+            </div>
+
+            <div className="grid grid-cols-12 gap-6">
+                {/* Upcoming */}
+                <section className="col-span-12 flex flex-col gap-4 lg:col-span-7">
+                    <div className="flex items-center justify-between text-on-surface dark:text-on-surface-dark">
+                        <h2 className="text-2xl font-bold">
+                            Upcoming Appointments
+                        </h2>
+                        <button className="text-xs font-medium text-primary hover:underline">
+                            View All
+                        </button>
+                    </div>
+
+                    <div className="flex flex-col gap-4">
+                        {upcomingAppointments.map((apt, idx) => (
+                            <motion.div
+                                key={idx}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: idx * 0.1 + 0.4 }}
+                                className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:border-outline-variant-dark dark:bg-surface-container-highest dark:shadow-black/20 dark:hover:bg-surface-container-high"
+                            >
+                                <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+                                    <div className="flex items-center gap-4">
+                                        <div
+                                            className={`flex h-14 w-14 items-center justify-center rounded-xl ${apt.color} dark:bg-surface-accent-dark text-primary dark:ring-1 dark:ring-white/5`}
+                                        >
+                                            <apt.icon size={28} />
+                                        </div>
+
+                                        <div>
+                                            <h4 className="text-lg font-semibold text-on-surface">
+                                                {apt.service}
+                                            </h4>
+
+                                            <p className="text-sm text-on-surface-variant">
+                                                {apt.provider}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-8 px-4">
+                                        <div className="flex flex-col">
+                                            <span className="text-xs font-medium tracking-wide text-on-surface-variant uppercase">
+                                                Date
+                                            </span>
+
+                                            <span className="font-semibold text-on-surface">
+                                                {apt.date}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex flex-col">
+                                            <span className="text-xs font-medium tracking-wide text-on-surface-variant uppercase">
+                                                Time
+                                            </span>
+
+                                            <span className="font-semibold text-on-surface">
+                                                {apt.time}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-2">
+                                        <button className="rounded-xl border border-outline-variant bg-surface-container-low p-2 text-secondary transition-all hover:bg-surface-container-high hover:text-primary dark:border-outline-variant-dark dark:bg-surface-container-high dark:text-on-surface-variant dark:hover:bg-surface-accent-dark dark:hover:text-primary">
+                                            <Clock size={18} />
+                                        </button>
+
+                                        <button className="rounded-xl border border-error/20 bg-transparent p-2 text-error transition-all hover:bg-error-container dark:border-error/30 dark:hover:bg-red-500/10">
+                                            <XCircle size={18} />
+                                        </button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* History */}
+                <section className="col-span-12 flex flex-col gap-4 lg:col-span-5">
+                    <h2 className="text-2xl font-bold text-on-surface dark:text-on-surface-dark">
+                        Booking History
+                    </h2>
+
+                    <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest dark:border-outline-variant dark:bg-surface-container-low">
+                        <table className="w-full border-collapse text-left">
+                            <thead>
+                                <tr className="border-b border-outline-variant bg-surface-container-low dark:border-outline-variant dark:bg-surface-container">
+                                    <th className="px-4 py-3 text-xs font-medium text-on-surface-variant uppercase">
+                                        Service
+                                    </th>
+                                    <th className="px-4 py-3 text-xs font-medium text-on-surface-variant uppercase">
+                                        Date
+                                    </th>
+                                    <th className="px-4 py-3 text-xs font-medium text-on-surface-variant uppercase">
+                                        Status
+                                    </th>
+                                </tr>
+                            </thead>
+
+                            <tbody className="divide-y divide-outline-variant/30 dark:divide-outline-variant/50">
+                                {history.map((row, idx) => (
+                                    <tr
+                                        key={idx}
+                                        className="transition-colors hover:bg-surface-container dark:hover:bg-surface-container-high"
+                                    >
+                                        <td className="px-4 py-4">
+                                            <span className="block text-sm font-semibold text-on-surface">
+                                                {row.service}
+                                            </span>
+
+                                            <span className="text-xs text-on-surface-variant">
+                                                {row.provider}
+                                            </span>
+                                        </td>
+
+                                        <td className="px-4 py-4 text-sm text-on-surface">
+                                            {row.date}
+                                        </td>
+
+                                        <td className="px-4 py-4">
+                                            <span
+                                                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${row.statusColor}`}
+                                            >
+                                                {row.status}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+
+                        <div className="bg-surface-container-low p-3 text-center dark:bg-surface-container">
+                            <button className="text-sm font-semibold text-primary hover:underline">
+                                Download Report
+                            </button>
+                        </div>
+                    </div>
+                </section>
             </div>
         </div>
     );
