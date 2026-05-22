@@ -101,8 +101,10 @@ const DEFAULT_NOTIFICATIONS: NotificationItem[] = [
         message:
             'Your slot at Smile Clinic West with Dr. Sarah Jenkins is verified. Please bring your health policy credential.',
         timestamp: '2 hours ago',
+        category: 'Bookings',
         read: false,
         type: 'success',
+        dateGroup: 'Today',
     },
     {
         id: 'notif-2',
@@ -112,6 +114,8 @@ const DEFAULT_NOTIFICATIONS: NotificationItem[] = [
         timestamp: '1 day ago',
         read: false,
         type: 'reminder',
+        category: 'Reminders',
+        dateGroup: 'Today',
     },
     {
         id: 'notif-3',
@@ -120,7 +124,53 @@ const DEFAULT_NOTIFICATIONS: NotificationItem[] = [
             'Welcome! Organize your visits, search, and schedule appointments instantly.',
         timestamp: '3 days ago',
         read: true,
+        category: 'Updates',
         type: 'info',
+    },
+    {
+        id: 'notif-4',
+        title: 'Booking Confirmed: Dental Cleaning',
+        message:
+            'Your appointment with Dr. Aris Thorne is confirmed for October 24, at 10:30 AM. Please arrive 10 minutes early.',
+        timestamp: '2h ago',
+        category: 'Bookings',
+        type: 'booking',
+        read: false,
+        dateGroup: 'Today',
+    },
+    {
+        id: 'notif-5',
+        title: 'System Update: Version 2.4.0',
+        message:
+            "We've improved the calendar loading speeds and fixed minor bugs in the time-picker interface. Explore the new 'Quick Book' feature.",
+        timestamp: '5h ago',
+        category: 'Updates',
+        type: 'update',
+        read: false,
+        dateGroup: 'Today',
+    },
+    {
+        id: 'notif-6',
+        title: 'Reminder: Haircut tomorrow',
+        message:
+            "Don't forget your 3:00 PM session at 'The Grooming Room' with stylist Sarah. See you then!",
+        timestamp: '1d ago',
+        category: 'Reminders',
+        type: 'reminder',
+        read: true,
+        dateGroup: 'Yesterday',
+    },
+    {
+        id: 'notif-7',
+        title: 'Pro Tip: Sync your Calendar',
+        message:
+            'Integrate Slotem with Google or Outlook to never miss an appointment again. Setup takes less than a minute.',
+        timestamp: '1d ago',
+        category: 'Updates',
+        type: 'tip',
+        read: true,
+        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAsr3YTd83_V5nWJGolJ7N2_x5ZRO6nRXkK1vzmDyrofI0tcU-alzlOFw4h3dIeS-ZMSHHjBfpyk7v_p4Wwv2J1OzOjV7dmUGInPSN1GlQIrw867R3pZxuFqZq7SRty2TzXC8dZCkH63_ST0ZbjfYb1PEZDdOyXTDegEOqZgm8ipP6bXMtm5CEBwO8PrjdqM-deByD-_6M3Ou5Ec1aVJevoQ5O8YPUkUbaH6UVqlNJFpY4j0tOWVzcWIil3ltJi6ctXpXgH7b736Oo',
+        dateGroup: 'Yesterday',
     },
 ];
 
@@ -133,20 +183,19 @@ const DEFAULT_PROFILE: UserProfile = {
     marketingConsent: true,
     productUpdates: true,
     smsReminders: true,
-    soundEnabled: true, 
+    soundEnabled: true,
 };
 
 export default function App() {
     const [activeTab, setActiveTab] = useState<ViewTab>('bookings');
+
     const [appointments, setAppointments] = useState<Appointment[]>(() => {
         const saved = localStorage.getItem('slotem_appointments');
 
         if (!saved) return DEFAULT_APPOINTMENTS;
 
         try {
-            const parsed = JSON.parse(saved);
-
-            return parsed.length ? parsed : DEFAULT_APPOINTMENTS;
+            return JSON.parse(saved);
         } catch {
             return DEFAULT_APPOINTMENTS;
         }
@@ -156,7 +205,15 @@ export default function App() {
     const [notifications, setNotifications] = useState<NotificationItem[]>(
         () => {
             const saved = localStorage.getItem('slotem_notifications');
-            return saved ? JSON.parse(saved) : DEFAULT_NOTIFICATIONS;
+
+            if (!saved) return DEFAULT_NOTIFICATIONS;
+
+            try {
+                return JSON.parse(saved);
+            } catch {
+                return DEFAULT_NOTIFICATIONS;
+            }
+            // return saved ? JSON.parse(saved) : DEFAULT_NOTIFICATIONS;
         },
     );
 
@@ -216,8 +273,10 @@ export default function App() {
             title: `Scheduled: ${added.title}`,
             message: `Your booking for ${added.title} with ${added.provider} on ${added.date} at ${added.time} was scheduled successfully.`,
             timestamp: 'Just now',
+            category: 'Bookings',
             read: false,
             type: 'success',
+            dateGroup: 'Today',
         };
 
         setNotifications((prev) => [alert, ...prev]);
@@ -239,6 +298,8 @@ export default function App() {
                 timestamp: 'Just now',
                 read: false,
                 type: 'reminder',
+                category: 'Reminders',
+                dateGroup: 'Today',
             };
             setNotifications((prev) => [alert, ...prev]);
         }
@@ -260,6 +321,8 @@ export default function App() {
                 timestamp: 'Just now',
                 read: false,
                 type: 'reminder',
+                category: 'Reminders',
+                dateGroup: 'Today',
             };
             setNotifications((prev) => [alert, ...prev]);
         }
@@ -277,6 +340,16 @@ export default function App() {
 
     const handleMarkAllReadNotifications = () => {
         setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    };
+
+    const markNotificationAsRead = (id: string) => {
+        setNotifications((prev) =>
+            prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
+        );
+    };
+
+    const deleteNotification = (id: string) => {
+        setNotifications((prev) => prev.filter((n) => n.id !== id));
     };
 
     const handleSaveProfile = (updated: UserProfile) => {
@@ -608,6 +681,8 @@ export default function App() {
                                 onToggleRead={handleToggleReadNotification}
                                 onClearAll={handleClearAllNotifications}
                                 onMarkAllAsRead={handleMarkAllReadNotifications}
+                                onDelete={deleteNotification}
+                                onMarkAsRead={markNotificationAsRead}
                             />
                         )}
                     </section>

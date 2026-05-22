@@ -11,13 +11,20 @@ export interface Appointment {
     price?: number;
 }
 
+type NotificationCategory = 'All' | 'Bookings' | 'Reminders' | 'Updates';
+
+type NotificationType = 'booking' | 'update' | 'reminder' | 'tip' | 'success' | 'info' | 'reminder';
+
 export interface NotificationItem {
     id: string;
     title: string;
     message: string;
     timestamp: string;
+    category: NotificationCategory;
     read: boolean;
-    type: 'success' | 'info' | 'reminder';
+    type: NotificationType;
+    image?: string;
+    dateGroup?: 'Today' | 'Yesterday';
 }
 
 export interface UserProfile {
