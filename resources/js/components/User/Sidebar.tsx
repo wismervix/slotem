@@ -4,41 +4,32 @@ import {
     Calendar,
     Bell,
     User,
-    ChevronDown,
-    ChevronRight,
     Plus,
+    Menu,
+    X,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useState } from 'react';
-
-type MenuKey = 'bookings' | 'settings';
-
-type ChildNavItem = {
-    name: string;
-    route: string;
-};
 
 type NavItem = {
     name: string;
     icon: LucideIcon;
     route?: string;
-    children?: ChildNavItem[];
-    menuKey?: MenuKey;
 };
 
-export default function Sidebar() {
-    const [openMenus, setOpenMenus] = useState<Record<MenuKey, boolean>>({
-        bookings: true,
-        settings: false,
-    });
+interface SidebarProps {
+    unreadNotificationsCount: number;
+    openBookingModal: (isOpen: boolean) => void;
+    mobileSidebarOpen: boolean;
+    setMobileSidebarOpen: (isOpen: boolean) => void;
+}
 
-    const toggleMenu = (menu: MenuKey) => {
-        setOpenMenus((prev) => ({
-            ...prev,
-            [menu]: !prev[menu],
-        }));
-    };
-
+export default function Sidebar({
+    unreadNotificationsCount,
+    openBookingModal,
+    mobileSidebarOpen,
+    setMobileSidebarOpen,
+}: SidebarProps) {
     const navItems: NavItem[] = [
         {
             name: 'Dashboard',
@@ -62,135 +53,128 @@ export default function Sidebar() {
             icon: Bell,
             route: 'user.notifications',
         },
-
-        // {
-        //     name: 'Settings',
-        //     icon: Settings,
-        //     menuKey: 'settings',
-        //     children: [
-        //         {
-        //             name: 'Profile',
-        //             route: 'user.profile',
-        //         },
-        //     ],
-        // },
     ];
 
     const isActiveRoute = (routeName: string): boolean => {
         return route().current(routeName);
     };
 
-    const isChildActive = (children?: ChildNavItem[]): boolean => {
-        return children?.some((child) => route().current(child.route)) ?? false;
-    };
-
     return (
-        <aside className="fixed top-0 left-0 z-50 flex h-screen w-64 flex-col border-r border-outline-variant bg-surface-container-low p-4">
-            <div className="mb-8 px-2">
-                <h2 className="text-lg font-bold text-primary">Slotem User</h2>
+        <>
+            {/* Mobile top navigation header bar */}
+            <div className="flex shrink-0 items-center justify-between border-b border-outline-variant bg-[#f9f1ff] p-4 md:hidden dark:border-neutral-800 dark:bg-neutral-900">
+                <div className="flex items-center gap-2">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-black text-white select-none">
+                        S
+                    </span>
+                    <div>
+                        <h1 className="text-base leading-tight font-black text-primary dark:text-primary-fixed">
+                            Slotem
+                        </h1>
+                        <p className="text-[10px] leading-none text-gray-500">
+                            Management Suite
+                        </p>
+                    </div>
+                </div>
 
-                <p className="text-xs font-medium text-on-surface-variant">
-                    Management Suite
-                </p>
+                <div className="flex items-center gap-3">
+                    {/* Notifications micro badge */}
+                    <Link
+                        href={route('user.notifications')}
+                        className="relative p-1 text-gray-600 transition-colors hover:text-primary dark:text-gray-300"
+                    >
+                        <Bell className="h-5 w-5" />
+                        {unreadNotificationsCount > 0 && (
+                            <span className="absolute -top-1 -right-1 flex h-4.5 w-4.5 scale-90 items-center justify-center rounded-full bg-red-600 text-[9px] font-extrabold text-white ring-2 ring-white">
+                                {unreadNotificationsCount}
+                            </span>
+                        )}
+                    </Link>
+
+                    <button
+                        onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+                        className="rounded-lg bg-gray-100 p-1.5 text-gray-700 hover:bg-gray-200 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                    >
+                        <Menu className="h-5 w-5" />
+                    </button>
+                </div>
             </div>
 
-            <nav className="flex-grow space-y-1">
-                {navItems.map((item) => {
-                    const Icon = item.icon;
+            {/* Sidebar navigation */}
+            <aside
+                className={`fixed top-0 bottom-0 left-0 z-40 flex h-screen w-64 shrink-0 flex-col gap-2 overflow-y-auto border-r border-outline-variant bg-[#f9f1ff] p-4 transition-transform duration-300 md:relative md:translate-x-0 dark:border-neutral-800 dark:bg-neutral-900 ${
+                    mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+                }`}
+            >
+                <div className="mb-6 flex items-center justify-between">
+                    <div className="space-y-0.5">
+                        <h1 className="text-2xl font-black tracking-tight text-primary dark:text-primary-fixed">
+                            Slotem
+                        </h1>
+                        <p className="text-xs font-medium tracking-wide text-secondary opacity-80 dark:text-secondary-fixed">
+                            Management Suite
+                        </p>
+                    </div>
 
-                    // DROPDOWN MENU
-                    if (item.children) {
-                        const active = isChildActive(item.children);
-                        const menuKey = item.menuKey!;
+                    <button
+                        onClick={() => setMobileSidebarOpen(false)}
+                        className="rounded-lg bg-gray-100 p-1 md:hidden dark:bg-neutral-800"
+                    >
+                        <X className="h-5 w-5 text-gray-500" />
+                    </button>
+                </div>
+
+                {/* Tab Buttons bar */}
+                <nav className="flex-grow space-y-1">
+                    {navItems.map((item) => {
+                        const Icon = item.icon;
+
+                        // NORMAL LINK
+                        const active = item.route
+                            ? isActiveRoute(item.route)
+                            : false;
 
                         return (
-                            <div key={item.name}>
-                                <button
-                                    onClick={() => toggleMenu(menuKey)}
-                                    className={`flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium transition-colors ${
-                                        active
-                                            ? 'bg-secondary-container text-primary'
-                                            : 'text-on-surface-variant hover:bg-surface-container-highest'
-                                    }`}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <Icon
-                                            size={20}
-                                            fill={
-                                                active ? 'currentColor' : 'none'
-                                            }
-                                        />
+                            <Link
+                                key={item.name}
+                                href={item.route ? route(item.route) : '#'}
+                                className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-colors ${
+                                    active
+                                        ? 'bg-secondary-container text-primary'
+                                        : 'text-on-surface-variant hover:bg-surface-container-highest'
+                                }`}
+                            >
+                                <Icon
+                                    size={20}
+                                    fill={active ? 'currentColor' : 'none'}
+                                />
 
-                                        {item.name}
-                                    </div>
-
-                                    {openMenus[menuKey] ? (
-                                        <ChevronDown size={16} />
-                                    ) : (
-                                        <ChevronRight size={16} />
-                                    )}
-                                </button>
-
-                                {openMenus[menuKey] && (
-                                    <div className="mt-1 ml-6 space-y-1">
-                                        {item.children.map((child) => {
-                                            const activeChild = isActiveRoute(
-                                                child.route,
-                                            );
-
-                                            return (
-                                                <Link
-                                                    key={child.name}
-                                                    href={route(child.route)}
-                                                    className={`block rounded-xl px-4 py-2 text-sm transition-colors ${
-                                                        activeChild
-                                                            ? 'bg-primary text-primary-foreground'
-                                                            : 'text-on-surface-variant hover:bg-surface-container-highest'
-                                                    }`}
-                                                >
-                                                    {child.name}
-                                                </Link>
-                                            );
-                                        })}
-                                    </div>
-                                )}
-                            </div>
+                                {item.name}
+                            </Link>
                         );
-                    }
+                    })}
+                </nav>
 
-                    // NORMAL LINK
-                    const active = item.route
-                        ? isActiveRoute(item.route)
-                        : false;
+                {/* Action Button at bottom */}
+                <button
+                    onClick={() => {
+                        openBookingModal(true);
+                        setMobileSidebarOpen(false);
+                    }}
+                    className="mt-auto flex cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-xs font-bold text-white shadow-md shadow-primary/10 transition-all hover:shadow-lg active:scale-95"
+                >
+                    <Plus className="h-4 w-4 shrink-0" />
+                    Book New Appointment
+                </button>
+            </aside>
 
-                    return (
-                        <Link
-                            key={item.name}
-                            href={item.route ? route(item.route) : '#'}
-                            className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-colors ${
-                                active
-                                    ? 'bg-secondary-container text-primary'
-                                    : 'text-on-surface-variant hover:bg-surface-container-highest'
-                            }`}
-                        >
-                            <Icon
-                                size={20}
-                                fill={active ? 'currentColor' : 'none'}
-                            />
-
-                            {item.name}
-                        </Link>
-                    );
-                })}
-            </nav>
-
-            <Link
-                href={route('services')}
-                className="mt-auto flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3 font-semibold text-primary-foreground"
-            >
-                <Plus size={20} />
-                New Booking
-            </Link>
-        </aside>
+            {/* Backdrop for mobile navigation drawer */}
+            {mobileSidebarOpen && (
+                <div
+                    onClick={() => setMobileSidebarOpen(false)}
+                    className="fixed inset-0 z-30 bg-black/30 backdrop-blur-xs md:hidden"
+                />
+            )}
+        </>
     );
 }

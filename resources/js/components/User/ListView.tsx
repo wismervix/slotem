@@ -16,13 +16,13 @@ import {
     CalendarDays,
     CalendarClock,
 } from 'lucide-react';
+import { Link } from '@inertiajs/react';
 
 interface ListViewProps {
     appointments: Appointment[];
     searchQuery: string;
     onCancelAppointment: (id: string) => void;
     onRescheduleAppointment: (id: string) => void;
-    onNavigateToTab: (tab: any) => void;
 }
 
 export default function ListView({
@@ -30,7 +30,6 @@ export default function ListView({
     searchQuery,
     onCancelAppointment,
     onRescheduleAppointment,
-    onNavigateToTab,
 }: ListViewProps) {
     const [statusFilter, setStatusFilter] = useState<
         'all' | 'Confirmed' | 'Pending' | 'Cancelled'
@@ -170,12 +169,12 @@ export default function ListView({
                             Try adjusting your filters or search keywords, or
                             create a brand new appointment!
                         </p>
-                        <button
-                            onClick={() => onNavigateToTab('bookings')}
+                        <Link
+                        href={route('user.bookings')}
                             className="mt-2 rounded-lg bg-primary px-4 py-2 text-xs font-bold text-white"
                         >
                             Start New Appointment
-                        </button>
+                        </Link>
                     </div>
                 ) : (
                     filtered.map((appt) => (

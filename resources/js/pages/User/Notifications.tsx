@@ -1,90 +1,53 @@
+import NotificationsView from '@/components/User/NotificationsView';
+import { DEFAULT_NOTIFICATIONS } from '@/data/notifications';
 import UserLayout from '@/layouts/User/UserLayout';
+import { NotificationItem } from '@/types';
+import React, { useState } from 'react';
 import {
-    CalendarCheck,
-    History,
-    BellRing,
+    Bell,
+    Check,
+    Trash2,
+    Clock,
+    CheckCircle,
+    Bookmark,
+    AlertCircle,
+    Megaphone,
     CircleHelp,
     CheckCircle2,
-    Trash2,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import React, { useState } from 'react';
-
-type NotificationCategory = 'All' | 'Bookings' | 'Reminders' | 'Updates';
-
-interface Notification {
-    id: string;
-    title: string;
-    message: string;
-    time: string;
-    category: NotificationCategory;
-    type: 'booking' | 'update' | 'reminder' | 'tip';
-    read: boolean;
-    image?: string;
-    dateGroup: 'Today' | 'Yesterday';
-}
-
-const INITIAL_NOTIFICATIONS: Notification[] = [
-    {
-        id: '1',
-        title: 'Booking Confirmed: Dental Cleaning',
-        message:
-            'Your appointment with Dr. Aris Thorne is confirmed for October 24, at 10:30 AM. Please arrive 10 minutes early.',
-        time: '2h ago',
-        category: 'Bookings',
-        type: 'booking',
-        read: false,
-        dateGroup: 'Today',
-    },
-    {
-        id: '2',
-        title: 'System Update: Version 2.4.0',
-        message:
-            "We've improved the calendar loading speeds and fixed minor bugs in the time-picker interface. Explore the new 'Quick Book' feature.",
-        time: '5h ago',
-        category: 'Updates',
-        type: 'update',
-        read: false,
-        dateGroup: 'Today',
-    },
-    {
-        id: '3',
-        title: 'Reminder: Haircut tomorrow',
-        message:
-            "Don't forget your 3:00 PM session at 'The Grooming Room' with stylist Sarah. See you then!",
-        time: '1d ago',
-        category: 'Reminders',
-        type: 'reminder',
-        read: true,
-        dateGroup: 'Yesterday',
-    },
-    {
-        id: '4',
-        title: 'Pro Tip: Sync your Calendar',
-        message:
-            'Integrate Slotem with Google or Outlook to never miss an appointment again. Setup takes less than a minute.',
-        time: '1d ago',
-        category: 'Updates',
-        type: 'tip',
-        read: true,
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAsr3YTd83_V5nWJGolJ7N2_x5ZRO6nRXkK1vzmDyrofI0tcU-alzlOFw4h3dIeS-ZMSHHjBfpyk7v_p4Wwv2J1OzOjV7dmUGInPSN1GlQIrw867R3pZxuFqZq7SRty2TzXC8dZCkH63_ST0ZbjfYb1PEZDdOyXTDegEOqZgm8ipP6bXMtm5CEBwO8PrjdqM-deByD-_6M3Ou5Ec1aVJevoQ5O8YPUkUbaH6UVqlNJFpY4j0tOWVzcWIil3ltJi6ctXpXgH7b736Oo',
-        dateGroup: 'Yesterday',
-    },
-];
 
 export default function UserNotifications() {
-    const [notifications, setNotifications] = useState<Notification[]>(
-        INITIAL_NOTIFICATIONS,
-    );
-    const [activeCategory, setActiveCategory] =
-        useState<NotificationCategory>('All');
-    const [activeNav, setActiveNav] = useState('Notifications');
+    const [notifications, setNotifications] = useState<NotificationItem[]>(
+        () => {
+            const saved = localStorage.getItem('slotem_notifications');
 
-    const filteredNotifications = notifications.filter(
-        (n) => activeCategory === 'All' || n.category === activeCategory,
+            if (!saved) return DEFAULT_NOTIFICATIONS;
+
+            try {
+                return JSON.parse(saved);
+            } catch {
+                return DEFAULT_NOTIFICATIONS;
+            }
+            // return saved ? JSON.parse(saved) : DEFAULT_NOTIFICATIONS;
+        },
     );
 
-    const markAsRead = (id: string) => {
+    const handleToggleReadNotification = (id: string) => {
+        setNotifications((prev) =>
+            prev.map((n) => (n.id === id ? { ...n, read: !n.read } : n)),
+        );
+    };
+
+    const handleClearAllNotifications = () => {
+        setNotifications([]);
+    };
+
+    const handleMarkAllReadNotifications = () => {
+        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    };
+
+    const markNotificationAsRead = (id: string) => {
         setNotifications((prev) =>
             prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
         );
@@ -94,130 +57,251 @@ export default function UserNotifications() {
         setNotifications((prev) => prev.filter((n) => n.id !== id));
     };
 
-    const markAllRead = () => {
-        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    };
+    const [filter, setFilter] = React.useState<
+        'all' | 'unread' | 'bookings' | 'reminders' | 'updates'
+    >('all');
 
-    const counts = {
-        All: notifications.length,
-        Bookings: notifications.filter((n) => n.category === 'Bookings').length,
-        Reminders: notifications.filter((n) => n.category === 'Reminders')
-            .length,
-        Updates: notifications.filter((n) => n.category === 'Updates').length,
+    const filtered = notifications.filter((item) => {
+        if (filter === 'unread') return !item.read;
+        if (filter === 'bookings') return item.category === 'Bookings';
+        if (filter === 'reminders') return item.category === 'Reminders';
+        if (filter === 'updates') return item.category === 'Updates';
+        return true;
+    });
+
+    const getIcon = (type: string) => {
+        switch (type) {
+            case 'success':
+                return (
+                    <CheckCircle className="h-5 w-5 shrink-0 text-emerald-500" />
+                );
+            case 'reminder':
+                return <Clock className="h-5 w-5 shrink-0 text-amber-500" />;
+            default:
+                return <Megaphone className="h-5 w-5 shrink-0 text-blue-500" />;
+        }
     };
 
     return (
         <UserLayout>
-            <header className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
-                <div>
-                    <h1 className="text-brand-on-surface text-3xl font-bold">
-                        Notifications
-                    </h1>
-                    <p className="text-brand-on-surface-variant mt-2">
-                        Stay updated with your latest schedule and system
-                        alerts.
-                    </p>
-                </div>
-                <button
-                    onClick={markAllRead}
-                    className="border-brand-outline-variant text-brand-on-surface-variant hover:bg-brand-surface-container self-start rounded-lg border px-4 py-2 text-sm font-medium transition-colors active:scale-95 md:self-auto"
-                >
-                    Mark all as read
-                </button>
-            </header>
-
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-                {/* Filters & Help */}
-                <div className="flex flex-col gap-6 lg:col-span-3">
-                    <div className="border-brand-outline-variant rounded-2xl border bg-white p-4 shadow-sm">
-                        <h3 className="text-brand-on-surface mb-4 text-lg font-semibold">
-                            Categories
-                        </h3>
-                        <ul className="space-y-1">
-                            {(
-                                Object.keys(counts) as NotificationCategory[]
-                            ).map((cat) => (
-                                <li
-                                    key={cat}
-                                    onClick={() => setActiveCategory(cat)}
-                                    className={`flex cursor-pointer items-center justify-between rounded-xl p-3 transition-colors ${
-                                        activeCategory === cat
-                                            ? 'bg-brand-surface-container-high font-medium'
-                                            : 'hover:bg-brand-surface-container'
-                                    }`}
-                                >
-                                    <span className="text-sm">
-                                        {cat === 'All' ? 'All Alerts' : cat}
-                                    </span>
-                                    <span
-                                        className={`rounded-full px-2 py-0.5 text-[10px] ${
-                                            activeCategory === cat
-                                                ? 'bg-brand-primary text-white'
-                                                : 'text-brand-on-surface-variant font-medium'
-                                        }`}
-                                    >
-                                        {counts[cat]}
-                                    </span>
-                                </li>
-                            ))}
-                        </ul>
+            <div className="max-w-4xl space-y-6 pb-10">
+                {/* Top action header for filters */}
+                <div className="flex flex-col items-start justify-between gap-4 rounded-2xl border border-outline-variant bg-white p-4 shadow-xs sm:flex-row sm:items-center dark:bg-neutral-900">
+                    <div className="flex rounded-xl bg-gray-100 p-1 text-xs font-semibold dark:bg-neutral-800">
+                        <button
+                            onClick={() => setFilter('all')}
+                            className={`rounded-lg px-3 py-1.5 transition-all ${
+                                filter === 'all'
+                                    ? 'bg-white text-primary shadow-xs dark:bg-neutral-900'
+                                    : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                            }`}
+                        >
+                            All Alerts ({notifications.length})
+                        </button>
+                        <button
+                            onClick={() => setFilter('unread')}
+                            className={`rounded-lg px-3 py-1.5 transition-all ${
+                                filter === 'unread'
+                                    ? 'bg-white text-primary shadow-xs dark:bg-neutral-900'
+                                    : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                            }`}
+                        >
+                            Unread (
+                            {notifications.filter((n) => !n.read).length})
+                        </button>
+                        <button
+                            onClick={() => setFilter('bookings')}
+                            className={`rounded-lg px-3 py-1.5 transition-all ${
+                                filter === 'bookings'
+                                    ? 'bg-white text-primary shadow-xs dark:bg-neutral-900'
+                                    : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                            }`}
+                        >
+                            Bookings (
+                            {
+                                notifications.filter(
+                                    (n) => n.category === 'Bookings' && !n.read,
+                                ).length
+                            }
+                            )
+                        </button>
+                        <button
+                            onClick={() => setFilter('reminders')}
+                            className={`rounded-lg px-3 py-1.5 transition-all ${
+                                filter === 'reminders'
+                                    ? 'bg-white text-primary shadow-xs dark:bg-neutral-900'
+                                    : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                            }`}
+                        >
+                            Reminders (
+                            {
+                                notifications.filter(
+                                    (n) =>
+                                        n.category === 'Reminders' && !n.read,
+                                ).length
+                            }
+                            )
+                        </button>
+                        <button
+                            onClick={() => setFilter('updates')}
+                            className={`rounded-lg px-3 py-1.5 transition-all ${
+                                filter === 'updates'
+                                    ? 'bg-white text-primary shadow-xs dark:bg-neutral-900'
+                                    : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                            }`}
+                        >
+                            Broadcasts (
+                            {
+                                notifications.filter(
+                                    (n) => n.category === 'Updates' && !n.read,
+                                ).length
+                            }
+                            )
+                        </button>
                     </div>
 
-                    <div className="bg-brand-secondary-container group relative overflow-hidden rounded-2xl p-6">
+                    <div className="flex shrink-0 items-center gap-3 text-xs font-bold">
+                        <button
+                            type="button"
+                            onClick={handleMarkAllReadNotifications}
+                            disabled={
+                                notifications.filter((n) => !n.read).length ===
+                                0
+                            }
+                            className="flex items-center gap-1 text-primary hover:underline disabled:no-underline disabled:opacity-50"
+                        >
+                            <Check className="h-4 w-4" />
+                            Mark all read
+                        </button>
+
+                        <span className="text-gray-300">|</span>
+
+                        <button
+                            type="button"
+                            onClick={handleClearAllNotifications}
+                            disabled={notifications.length === 0}
+                            className="flex items-center gap-1 text-red-600 hover:underline disabled:no-underline disabled:opacity-50"
+                        >
+                            <Trash2 className="h-4 w-4" />
+                            Clear all
+                        </button>
+                    </div>
+                </div>
+
+                {/* Notifications stack */}
+                <div className="space-y-3">
+                    {filtered.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center space-y-3 rounded-2xl border border-outline-variant bg-white p-12 text-center dark:bg-neutral-900">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-50 text-gray-400 dark:bg-neutral-800">
+                                <Bell className="h-6 w-6" />
+                            </div>
+                            <h4 className="text-sm font-bold text-gray-900 dark:text-white">
+                                Quiet as a whisper
+                            </h4>
+                            <p className="max-w-sm text-xs text-gray-500">
+                                You are completely caught up! We will ping you
+                                here when upcoming bookings are confirmed or
+                                need action.
+                            </p>
+                        </div>
+                    ) : (
+                        filtered.map((item) => (
+                            <motion.div
+                                layout
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, x: 20 }}
+                                key={item.id}
+                                onClick={() =>
+                                    handleToggleReadNotification(item.id)
+                                }
+                                className={`group relative flex cursor-pointer gap-4 overflow-hidden rounded-xl border p-4 transition-all duration-300 ${
+                                    item.read
+                                        ? 'border-outline-variant bg-white opacity-75 dark:bg-neutral-900'
+                                        : 'border-primary bg-primary/5 ring-1 ring-primary/10'
+                                }`}
+                            >
+                                {!item.read && (
+                                    <div className="absolute top-0 bottom-0 left-0 w-1 bg-brand-primary" />
+                                )}
+                                <div className="pt-0.5">
+                                    {getIcon(item.type)}
+                                </div>
+
+                                <div className="flex-grow space-y-1">
+                                    <div className="flex items-start justify-between gap-4">
+                                        <h4
+                                            className={`text-xs font-bold text-gray-900 dark:text-white ${!item.read ? 'font-extrabold' : ''}`}
+                                        >
+                                            {item.title}
+                                        </h4>
+                                        <span className="flex shrink-0 items-center gap-1 text-[10px] font-medium text-gray-400">
+                                            <Clock className="h-3 w-3" />
+                                            {item.timestamp}
+                                        </span>
+                                    </div>
+                                    <p className="text-xs leading-normal text-gray-500 dark:text-neutral-300">
+                                        {item.message}
+                                    </p>
+                                    {!item.read && (
+                                        <span className="mt-1 inline-block rounded-full bg-primary px-2 py-0.5 text-[9px] font-extrabold text-white uppercase">
+                                            NEW alert
+                                        </span>
+                                    )}
+                                    <div className="mt-4 flex gap-4 opacity-0 transition-opacity group-hover:opacity-100">
+                                        {!item.read && (
+                                            <button
+                                                onClick={() =>
+                                                    markNotificationAsRead(
+                                                        item.id,
+                                                    )
+                                                }
+                                                className="flex items-center gap-1.5 text-sm font-semibold text-brand-primary active:scale-95"
+                                            >
+                                                <CheckCircle2 size={14} />
+                                                Mark as read
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={() =>
+                                                deleteNotification(item.id)
+                                            }
+                                            className="flex items-center gap-1.5 text-sm font-semibold text-brand-error active:scale-95"
+                                        >
+                                            <Trash2 size={14} />
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))
+                    )}
+                </div>
+
+                <div className="flex justify-center pt-4">
+                    <button className="rounded-xl px-6 py-3 font-medium text-brand-primary transition-colors hover:bg-brand-primary-container/20">
+                        Load older notifications
+                    </button>
+                </div>
+
+                <div className="flex">
+                    <div className="group relative ml-auto w-2xs overflow-hidden rounded-2xl bg-brand-secondary-container p-6">
                         <div className="relative z-10">
-                            <h4 className="text-brand-on-secondary-container text-lg font-semibold">
+                            <h4 className="text-lg font-semibold text-brand-on-secondary-container">
                                 Need Help?
                             </h4>
-                            <p className="text-brand-on-secondary-container/80 mt-2 text-xs">
+                            <p className="mt-2 text-xs text-brand-on-secondary-container/80">
                                 Our support team is available 24/7 for
                                 scheduling assistance.
                             </p>
-                            <button className="text-brand-on-secondary-container hover:text-brand-primary mt-4 text-xs font-bold underline transition-colors">
+                            <button className="mt-4 text-xs font-bold text-brand-on-secondary-container underline transition-colors hover:text-brand-primary">
                                 Contact Support
                             </button>
                         </div>
                         <CircleHelp
                             size={80}
-                            className="text-brand-on-secondary-container/10 absolute -right-4 -bottom-4 transition-transform duration-500 group-hover:scale-110"
+                            className="absolute -right-4 -bottom-4 text-brand-on-secondary-container/10 transition-transform duration-500 group-hover:scale-110"
                         />
-                    </div>
-                </div>
-
-                {/* Feed */}
-                <div className="space-y-8 lg:col-span-9">
-                    {['Today', 'Yesterday'].map((group) => {
-                        const groupNotes = filteredNotifications.filter(
-                            (n) => n.dateGroup === group,
-                        );
-                        if (groupNotes.length === 0) return null;
-
-                        return (group === 'Yesterday' &&
-                            groupNotes.length > 0) ||
-                            group === 'Today' ? (
-                            <div key={group} className="space-y-4">
-                                <h3 className="text-brand-outline px-1 text-xs font-semibold tracking-widest uppercase">
-                                    {group}
-                                </h3>
-                                <div className="space-y-3">
-                                    <AnimatePresence mode="popLayout">
-                                        {groupNotes.map((note) => (
-                                            <NotificationRow
-                                                key={note.id}
-                                                note={note}
-                                                onMarkRead={markAsRead}
-                                                onDelete={deleteNotification}
-                                            />
-                                        ))}
-                                    </AnimatePresence>
-                                </div>
-                            </div>
-                        ) : null;
-                    })}
-
-                    <div className="flex justify-center pt-4">
-                        <button className="text-brand-primary hover:bg-brand-primary-container/20 rounded-xl px-6 py-3 font-medium transition-colors">
-                            Load older notifications
-                        </button>
                     </div>
                 </div>
             </div>
@@ -225,114 +309,3 @@ export default function UserNotifications() {
     );
 }
 
-interface NotificationRowProps {
-    note: Notification;
-    onMarkRead: (id: string) => void;
-    onDelete: (id: string) => void;
-}
-
-const NotificationRow: React.FC<NotificationRowProps> = ({
-    note,
-    onMarkRead,
-    onDelete,
-}) => {
-    const isTip = note.type === 'tip';
-
-    return (
-        <motion.div
-            layout
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className={`group border-brand-outline-variant relative flex items-stretch overflow-hidden rounded-2xl border shadow-sm transition-all duration-300 hover:shadow-md ${
-                note.read
-                    ? 'bg-brand-surface-container-low opacity-90'
-                    : 'bg-white'
-            }`}
-        >
-            {!note.read && (
-                <div className="bg-brand-primary absolute top-0 bottom-0 left-0 w-1" />
-            )}
-
-            {note.image && (
-                <div className="hidden w-32 min-w-[128px] md:block">
-                    <img
-                        src={note.image}
-                        alt={note.title}
-                        className="h-full w-full object-cover"
-                        referrerPolicy="no-referrer"
-                    />
-                </div>
-            )}
-
-            <div className="flex flex-grow gap-4 p-5">
-                {!note.image && (
-                    <div
-                        className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full ${
-                            note.type === 'booking'
-                                ? 'bg-brand-primary-container text-brand-on-primary-container'
-                                : note.type === 'update'
-                                  ? 'bg-brand-tertiary-container text-brand-on-tertiary-container'
-                                  : 'bg-brand-secondary-container text-brand-on-secondary-container'
-                        }`}
-                    >
-                        {note.type === 'booking' ? (
-                            <CalendarCheck size={20} />
-                        ) : note.type === 'update' ? (
-                            <History size={20} />
-                        ) : (
-                            <BellRing size={20} />
-                        )}
-                    </div>
-                )}
-
-                <div className="flex-grow">
-                    <div className="flex items-start justify-between gap-4">
-                        <h4 className="text-brand-on-surface leading-snug font-semibold">
-                            {note.title}
-                        </h4>
-                        <span className="text-brand-outline text-[12px] font-medium whitespace-nowrap">
-                            {note.time}
-                        </span>
-                    </div>
-                    <p className="text-brand-on-surface-variant mt-2 line-clamp-2 text-sm md:line-clamp-none">
-                        {note.message}
-                    </p>
-
-                    {isTip ? (
-                        <div className="mt-4 flex gap-4">
-                            <button className="bg-brand-primary rounded-lg px-4 py-1.5 text-xs font-semibold text-white transition-transform hover:opacity-90 active:scale-95">
-                                Enable Sync
-                            </button>
-                            <button
-                                onClick={() => onDelete(note.id)}
-                                className="text-brand-on-surface-variant text-xs font-medium hover:underline"
-                            >
-                                Dismiss
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="mt-4 flex gap-4 opacity-0 transition-opacity group-hover:opacity-100">
-                            {!note.read && (
-                                <button
-                                    onClick={() => onMarkRead(note.id)}
-                                    className="text-brand-primary flex items-center gap-1.5 text-sm font-semibold active:scale-95"
-                                >
-                                    <CheckCircle2 size={14} />
-                                    Mark as read
-                                </button>
-                            )}
-                            <button
-                                onClick={() => onDelete(note.id)}
-                                className="text-brand-error flex items-center gap-1.5 text-sm font-semibold active:scale-95"
-                            >
-                                <Trash2 size={14} />
-                                Delete
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </motion.div>
-    );
-};
