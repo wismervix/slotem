@@ -30,7 +30,7 @@ export interface NotificationItem {
 export interface UserProfile {
     name: string;
     email: string;
-    phone: string;
+    phone?: string;
     preferredClinic: string;
     memberSince: string;
     marketingConsent: boolean;
@@ -38,5 +38,3 @@ export interface UserProfile {
     smsReminders: boolean;
     soundEnabled: boolean;
 }
-
-export type ViewTab = 'dashboard' | 'bookings' | 'profile' | 'notifications';
