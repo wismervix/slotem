@@ -124,12 +124,6 @@ export default function UserLayout({
         setProfile(updated);
     };
 
-    // Direct quick schedule helper from Dashboard recommendations
-    const handleScheduleQuickSlot = (presetIdx: number, forcedDate: string) => {
-        onSelectDate(forcedDate);
-        setIsBookModalOpen(true);
-    };
-
     // Quick helper to format selected date nicely, e.g. "Tuesday, Oct 24"
     const formatSelectedDateHeading = (dateStr: string) => {
         const parts = dateStr.split('-');
