@@ -108,8 +108,51 @@ const ViewBookings = ({ bookings }: ViewBookingsProps) => {
             setNotifications((prev) => [alert, ...prev]);
         }
     };
+
+    // Handler functions
+    const handleAddNewAppointment = (newAppt: {
+        title: string;
+        provider: string;
+        date: string;
+        time: string;
+        duration: number;
+        category: 'dental' | 'wellness' | 'consultation' | 'general';
+        notes: string;
+        price: number;
+    }) => {
+        const id = `appt-${Date.now()}`;
+        const added: Appointment = {
+            ...newAppt,
+            id,
+            status: 'Confirmed',
+        };
+
+        setAppointments((prev) => [added, ...prev]);
+
+        // Push interactive notification
+        const alert: NotificationItem = {
+            id: `notif-${Date.now()}`,
+            title: `Scheduled: ${added.title}`,
+            message: `Your booking for ${added.title} with ${added.provider} on ${added.date} at ${added.time} was scheduled successfully.`,
+            timestamp: 'Just now',
+            category: 'Bookings',
+            read: false,
+            type: 'success',
+            dateGroup: 'Today',
+        };
+
+        setNotifications((prev) => [alert, ...prev]);
+    };
     return (
         <UserLayout
+            appointments={appointments}
+            selectedDate={selectedDate}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            onSelectDate={setSelectedDate}
+            handleRescheduleAppointment={handleRescheduleAppointment}
+            handleCancelAppointment={handleCancelAppointment}
+            handleAddNewAppointment={handleAddNewAppointment}
             headerActions={
                 <div className="flex shrink-0 rounded-xl bg-gray-100 p-1 text-xs font-semibold dark:bg-neutral-800">
                     <button
@@ -139,24 +182,24 @@ const ViewBookings = ({ bookings }: ViewBookingsProps) => {
                 </div>
             }
         >
-            {(subView === 'calendar' ? (
-            <CalendarView
-                appointments={appointments}
-                selectedDate={selectedDate}
-                searchQuery={searchQuery}
-                onSelectDate={setSelectedDate}
-                onOpenBookingModal={() => setIsBookModalOpen(true)}
-            />
+            {subView === 'calendar' ? (
+                <CalendarView
+                    appointments={appointments}
+                    selectedDate={selectedDate}
+                    searchQuery={searchQuery}
+                    onSelectDate={setSelectedDate}
+                    onOpenBookingModal={() => setIsBookModalOpen(true)}
+                />
             ) : (
-            <ListView
-                appointments={appointments}
-                searchQuery={searchQuery}
-                onCancelAppointment={handleCancelAppointment}
-                onRescheduleAppointment={handleRescheduleAppointment}
-            />
-            ))}
+                <ListView
+                    appointments={appointments}
+                    searchQuery={searchQuery}
+                    onCancelAppointment={handleCancelAppointment}
+                    onRescheduleAppointment={handleRescheduleAppointment}
+                />
+            )}
         </UserLayout>
     );
-};
+};;
 
 export default ViewBookings;

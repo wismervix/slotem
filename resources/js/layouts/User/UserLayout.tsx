@@ -24,23 +24,38 @@ import {
 
 interface Props {
     children: ReactNode;
+    appointments: Appointment[];
+    selectedDate: string; // YYYY-MM-DD
+    searchQuery: string;
+    setSearchQuery: (query: string) => void;
+    onSelectDate: (date: string) => void;
+    handleRescheduleAppointment: (id: string) => void;
+    handleCancelAppointment: (id: string) => void;
+    handleAddNewAppointment: (newAppt: {
+        title: string;
+        provider: string;
+        date: string;
+        time: string;
+        duration: number;
+        category: 'dental' | 'wellness' | 'consultation' | 'general';
+        notes: string;
+        price: number;
+    }) => void;
     headerActions?: ReactNode;
 }
 
-export default function UserLayout({ children, headerActions }: Props) {
-    const [appointments, setAppointments] = useState<Appointment[]>(() => {
-        const saved = localStorage.getItem('slotem_appointments');
-
-        if (!saved) return DEFAULT_APPOINTMENTS;
-
-        try {
-            return JSON.parse(saved);
-        } catch {
-            return DEFAULT_APPOINTMENTS;
-        }
-        // return saved ? JSON.parse(saved) : DEFAULT_APPOINTMENTS;
-    });
-
+export default function UserLayout({
+    children,
+    appointments,
+    selectedDate,
+    searchQuery,
+    setSearchQuery,
+    onSelectDate,
+    handleRescheduleAppointment,
+    handleCancelAppointment,
+    handleAddNewAppointment,
+    headerActions,
+}: Props) {
     const [notifications, setNotifications] = useState<NotificationItem[]>(
         () => {
             const saved = localStorage.getItem('slotem_notifications');
@@ -65,19 +80,9 @@ export default function UserLayout({ children, headerActions }: Props) {
     const isDashboardPage = route().current('user.dashboard');
     const isProfilePage = route().current('user.profile');
     // const isNotificationsPage = route().current('user.notifications');
-    const [selectedDate, setSelectedDate] = useState<string>('2023-10-26');
-    const [searchQuery, setSearchQuery] = useState<string>('');
     const [subView, setSubView] = useState<'calendar' | 'list'>('calendar');
     const [isBookModalOpen, setIsBookModalOpen] = useState(false);
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-
-    // Sync to local storage
-    useEffect(() => {
-        localStorage.setItem(
-            'slotem_appointments',
-            JSON.stringify(appointments),
-        );
-    }, [appointments]);
 
     useEffect(() => {
         localStorage.setItem(
@@ -91,86 +96,6 @@ export default function UserLayout({ children, headerActions }: Props) {
     }, [profile]);
 
     // Handler functions
-    const handleAddNewAppointment = (newAppt: {
-        title: string;
-        provider: string;
-        date: string;
-        time: string;
-        duration: number;
-        category: 'dental' | 'wellness' | 'consultation' | 'general';
-        notes: string;
-        price: number;
-    }) => {
-        const id = `appt-${Date.now()}`;
-        const added: Appointment = {
-            ...newAppt,
-            id,
-            status: 'Confirmed',
-        };
-
-        setAppointments((prev) => [added, ...prev]);
-
-        // Push interactive notification
-        const alert: NotificationItem = {
-            id: `notif-${Date.now()}`,
-            title: `Scheduled: ${added.title}`,
-            message: `Your booking for ${added.title} with ${added.provider} on ${added.date} at ${added.time} was scheduled successfully.`,
-            timestamp: 'Just now',
-            category: 'Bookings',
-            read: false,
-            type: 'success',
-            dateGroup: 'Today',
-        };
-
-        setNotifications((prev) => [alert, ...prev]);
-    };
-
-    const handleRescheduleAppointment = (id: string) => {
-        setAppointments((prev) =>
-            prev.map((a) =>
-                a.id === id ? { ...a, status: 'Confirmed' as const } : a,
-            ),
-        );
-
-        const confirmed = appointments.find((a) => a.id === id);
-        if (confirmed) {
-            const alert: NotificationItem = {
-                id: `notif-${Date.now()}`,
-                title: `Confirmed: ${confirmed.title}`,
-                message: `Your appointment for ${confirmed.title} on ${confirmed.date} has been successfully cancelled. Co-payments will be refunded.`,
-                timestamp: 'Just now',
-                read: false,
-                type: 'reminder',
-                category: 'Reminders',
-                dateGroup: 'Today',
-            };
-            setNotifications((prev) => [alert, ...prev]);
-        }
-    };
-
-    const handleCancelAppointment = (id: string) => {
-        setAppointments((prev) =>
-            prev.map((a) =>
-                a.id === id ? { ...a, status: 'Cancelled' as const } : a,
-            ),
-        );
-
-        const cancelled = appointments.find((a) => a.id === id);
-        if (cancelled) {
-            const alert: NotificationItem = {
-                id: `notif-${Date.now()}`,
-                title: `Cancelled: ${cancelled.title}`,
-                message: `Your appointment for ${cancelled.title} on ${cancelled.date} has been successfully cancelled. Co-payments will be refunded.`,
-                timestamp: 'Just now',
-                read: false,
-                type: 'reminder',
-                category: 'Reminders',
-                dateGroup: 'Today',
-            };
-            setNotifications((prev) => [alert, ...prev]);
-        }
-    };
-
     const handleToggleReadNotification = (id: string) => {
         setNotifications((prev) =>
             prev.map((n) => (n.id === id ? { ...n, read: !n.read } : n)),
@@ -201,7 +126,7 @@ export default function UserLayout({ children, headerActions }: Props) {
 
     // Direct quick schedule helper from Dashboard recommendations
     const handleScheduleQuickSlot = (presetIdx: number, forcedDate: string) => {
-        setSelectedDate(forcedDate);
+        onSelectDate(forcedDate);
         setIsBookModalOpen(true);
     };
 
@@ -407,9 +332,7 @@ export default function UserLayout({ children, headerActions }: Props) {
                                                 <div
                                                     key={appt.id}
                                                     onClick={() =>
-                                                        setSelectedDate(
-                                                            appt.date,
-                                                        )
+                                                        onSelectDate(appt.date)
                                                     }
                                                     className="group flex cursor-pointer flex-col justify-between rounded-xl border border-outline-variant bg-white p-3.5 shadow-xs transition-all hover:border-primary hover:shadow-xs dark:border-neutral-800 dark:bg-neutral-900"
                                                 >
@@ -473,7 +396,7 @@ export default function UserLayout({ children, headerActions }: Props) {
                                         </p>
                                         <button
                                             onClick={() => {
-                                                setSelectedDate('2023-10-27');
+                                                onSelectDate('2023-10-27');
                                                 setIsBookModalOpen(true);
                                             }}
                                             className="rounded-xl bg-white px-4 py-2 text-[10px] font-black text-primary shadow-sm transition-all hover:bg-neutral-100"
