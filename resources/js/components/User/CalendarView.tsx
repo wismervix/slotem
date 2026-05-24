@@ -1,5 +1,12 @@
-import React from 'react';
-import { Appointment } from '@/types';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useMemo, useState } from 'react';
+
+import {
+    formatDate,
+    generateCalendarDays,
+    isPastDate,
+} from '@/lib/calendar-utils';
+import { Appointment, Booking, Availability } from '@/types';
 import {
     Smile,
     Sparkles,
@@ -10,40 +17,64 @@ import {
 } from 'lucide-react';
 
 interface CalendarViewProps {
-    appointments: Appointment[];
+    bookings: Booking[];
+    availabilities: Availability[];
     selectedDate: string; // YYYY-MM-DD
-    searchQuery: string;
     onSelectDate: (date: string) => void;
+    appointments: Appointment[];
+    searchQuery: string;
     onOpenBookingModal: () => void;
 }
 
 export default function CalendarView({
+    bookings,
+    availabilities,
     appointments,
     selectedDate,
     searchQuery,
     onSelectDate,
     onOpenBookingModal,
 }: CalendarViewProps) {
-    // October 2023 Helper Info:
-    // Starts on Sunday (Oct 1). Has 31 days.
-    // We can build an elegant list of days.
-    const year = 2023;
-    const month = 9; // October (0-indexed in Date is 9, but let's draw strictly)
+    const today = new Date();
 
-    // Array of days for our grid. October 2023 starts exactly on Sunday 1st.
-    // There are 31 days.
-    // To keep the grid layout correct, let's list them:
-    // Week 1: 1, 2, 3, 4, 5, 6, 7
-    // Week 2: 8, 9, 10, 11, 12, 13, 14
-    // Week 3: 15, 16, 17, 18, 19, 20, 21
-    // Week 4: 22, 23, 24, 25, 26 (Today), 27, 28
-    // Week 5: 29, 30, 31, and next month bleed 1, 2, 3, 4
-    const daysInOctober = 31;
-    const nextMonthBleed = 4; // 1, 2, 3, 4 Nov
+    const [currentMonth, setCurrentMonth] = useState(today.getMonth());
 
-    const getDayFormattedStr = (dayNum: number) => {
-        return `2023-10-${dayNum.toString().padStart(2, '0')}`;
-    };
+    const [currentYear, setCurrentYear] = useState(today.getFullYear());
+
+    const days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+
+    const calendarDays = useMemo(() => {
+        return generateCalendarDays(currentMonth, currentYear);
+    }, [currentMonth, currentYear]);
+
+    function goToPreviousMonth() {
+        if (currentMonth === 0) {
+            setCurrentMonth(11);
+            setCurrentYear((prev) => prev - 1);
+        } else {
+            setCurrentMonth((prev) => prev - 1);
+        }
+    }
+
+    function goToNextMonth() {
+        if (currentMonth === 11) {
+            setCurrentMonth(0);
+            setCurrentYear((prev) => prev + 1);
+        } else {
+            setCurrentMonth((prev) => prev + 1);
+        }
+    }
+
+    function monthLabel() {
+        return new Date(currentYear, currentMonth).toLocaleString('default', {
+            month: 'long',
+            year: 'numeric',
+        });
+    }
+
+    const isCurrentMonth =
+        currentMonth === today.getMonth() &&
+        currentYear === today.getFullYear();
 
     const getCategoryTheme = (category: string) => {
         switch (category) {
@@ -59,143 +90,163 @@ export default function CalendarView({
     };
 
     return (
-        <div className="overflow-x-auto rounded-2xl border border-outline-variant bg-white shadow-xs transition-colors hover:border-primary/30 dark:bg-neutral-900">
-            {/* Weekdays Labels */}
-            <div className="grid min-w-[1100px] grid-cols-7 border-b border-outline-variant bg-gray-50/50 dark:bg-neutral-800/50">
-                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(
-                    (day) => (
+        <>
+            <div className="mb-8 flex items-center justify-between">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                    {monthLabel()}
+                </h2>
+
+                <div className="flex space-x-2">
+                    <button
+                        disabled={isCurrentMonth}
+                        onClick={goToPreviousMonth}
+                        className={`rounded-full p-2 transition-colors ${
+                            isCurrentMonth
+                                ? 'cursor-default opacity-30'
+                                : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                        }`}
+                    >
+                        <ChevronLeft
+                            size={20}
+                            className="text-gray-600 dark:text-gray-300"
+                        />
+                    </button>
+
+                    <button
+                        onClick={goToNextMonth}
+                        className="rounded-full p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                        <ChevronRight
+                            size={20}
+                            className="text-gray-600 dark:text-gray-300"
+                        />
+                    </button>
+                </div>
+            </div>
+
+            <div className="overflow-x-auto rounded-2xl border border-outline-variant bg-white shadow-xs transition-colors hover:border-primary/30 dark:bg-neutral-900">
+                {/* Weekdays Labels */}
+                <div className="grid min-w-[1100px] grid-cols-7 border-b border-outline-variant bg-gray-50/50 dark:bg-neutral-800/50">
+                    {days.map((day) => (
                         <div
                             key={day}
                             className="border-r border-outline-variant py-3 text-center text-xs font-bold tracking-widest text-secondary uppercase last:border-r-0"
                         >
                             {day}
                         </div>
-                    ),
-                )}
-            </div>
+                    ))}
+                </div>
 
-            {/* Days Interactive Grid */}
-            <div
-                className="grid min-w-[1100px] grid-flow-row grid-cols-7"
-                style={{ gridAutoRows: 'minmax(115px, auto)' }}
-            >
-                {/* Render 1 to 31 days */}
-                {Array.from({ length: daysInOctober }).map((_, index) => {
-                    const dayNum = index + 1;
-                    const formattedDate = getDayFormattedStr(dayNum);
+                {/* Days Interactive Grid */}
+                <div
+                    className="grid min-w-[1100px] grid-flow-row grid-cols-7"
+                    style={{ gridAutoRows: 'minmax(115px, auto)' }}
+                >
+                    {/* Render 1 to 31 days */}
+                    {/* {Array.from({ length: daysInOctober }).map((_, index) => { */}
+                    {calendarDays.map(({ date, currentMonth }, idx) => {
+                        const formattedDate = formatDate(date);
 
-                    // Check if today: October 26, 2023
-                    const isToday = dayNum === 26;
+                        const isToday =
+                            formatDate(new Date()) === formattedDate;
 
-                    // Check if selected
-                    const isSelected = selectedDate === formattedDate;
+                        const isSelected = selectedDate === formattedDate;
 
-                    // Find active appointments on this day (non-cancelled) and match search query
-                    const rawDayAppts = appointments.filter(
-                        (a) =>
-                            a.date === formattedDate &&
-                            a.status !== 'Cancelled',
-                    );
-                    const dayAppts = rawDayAppts.filter(
-                        (a) =>
-                            a.title
-                                .toLowerCase()
-                                .includes(searchQuery.toLowerCase()) ||
-                            a.provider
-                                .toLowerCase()
-                                .includes(searchQuery.toLowerCase()),
-                    );
+                        const available = availabilities.some(
+                            (a) =>
+                                a.date === formattedDate &&
+                                a.time_slots.some((slot) => !slot.is_booked),
+                        );
 
-                    return (
-                        <div
-                            key={formattedDate}
-                            onClick={() => onSelectDate(formattedDate)}
-                            onDoubleClick={() => {
-                                onSelectDate(formattedDate);
-                                onOpenBookingModal();
-                            }}
-                            className={`group relative flex cursor-pointer flex-col justify-between border-r border-b border-outline-variant p-3.5 transition-all hover:bg-gray-50/50 dark:hover:bg-neutral-800/30 ${
-                                isToday
-                                    ? 'z-10 bg-primary/5 ring-2 ring-primary ring-inset'
-                                    : ''
-                            } ${isSelected ? 'bg-neutral-100/70 dark:bg-neutral-800/70' : 'bg-white dark:bg-neutral-900'}`}
-                        >
-                            {/* Day Header details */}
-                            <div className="mb-2 flex items-start justify-between">
-                                {isToday ? (
-                                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-white shadow-sm">
-                                        26
+                        const disabled = isPastDate(date) || !available;
+
+                        // Find active appointments on this day (non-cancelled) and match search query
+                        const rawDayAppts = appointments.filter(
+                            (a) =>
+                                a.date === formattedDate &&
+                                a.status !== 'Cancelled',
+                        );
+                        const dayAppts = rawDayAppts.filter(
+                            (a) =>
+                                a.title
+                                    .toLowerCase()
+                                    .includes(searchQuery.toLowerCase()) ||
+                                a.provider
+                                    .toLowerCase()
+                                    .includes(searchQuery.toLowerCase()),
+                        );
+
+                        return (
+                            <div
+                                key={formattedDate}
+                                onClick={() => onSelectDate(formattedDate)}
+                                onDoubleClick={() => {
+                                    onSelectDate(formattedDate);
+                                    onOpenBookingModal();
+                                }}
+                                className={`group relative flex cursor-pointer flex-col justify-between border-r border-b border-outline-variant p-3.5 transition-all hover:bg-gray-50/50 dark:hover:bg-neutral-800/30 ${
+                                    isToday
+                                        ? 'z-10 bg-primary/5 ring-2 ring-primary ring-inset'
+                                        : ''
+                                } ${isSelected ? 'bg-neutral-100/70 dark:bg-neutral-800/70' : 'bg-white dark:bg-neutral-900'}`}
+                            >
+                                {/* Day Header details */}
+                                <div className="mb-2 flex items-start justify-between">
+                                    {isToday ? (
+                                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-white shadow-sm">
+                                            26
+                                        </span>
+                                    ) : (
+                                        <span
+                                            className={`text-xs font-bold ${dayAppts.length > 0 ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}
+                                        >
+                                            {date.getDate()}
+                                        </span>
+                                    )}
+
+                                    {isToday && (
+                                        <span className="rounded-md bg-primary-container/20 px-1.5 py-0.5 text-[9px] font-extrabold tracking-wider text-primary uppercase">
+                                            Today
+                                        </span>
+                                    )}
+
+                                    {/* Micro Plus/Schedule trigger on hover for clean UX */}
+                                    <span className="shrink-0 text-[10px] font-extrabold text-primary uppercase opacity-0 transition-opacity group-hover:opacity-100">
+                                        + Book
                                     </span>
-                                ) : (
-                                    <span
-                                        className={`text-xs font-bold ${dayAppts.length > 0 ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}
-                                    >
-                                        {dayNum}
-                                    </span>
-                                )}
+                                </div>
 
-                                {isToday && (
-                                    <span className="rounded-md bg-primary-container/20 px-1.5 py-0.5 text-[9px] font-extrabold tracking-wider text-primary uppercase">
-                                        Today
-                                    </span>
-                                )}
+                                {/* Day badges (appointments) */}
+                                <div className="mt-auto space-y-1">
+                                    {dayAppts.slice(0, 2).map((appt) => (
+                                        <div
+                                            key={appt.id}
+                                            title={`${appt.title} at ${appt.provider}`}
+                                            className={`truncate rounded-lg border-l-4 p-1.5 font-sans text-[10px] leading-normal shadow-xs ${getCategoryTheme(appt.category)}`}
+                                        >
+                                            <p className="truncate leading-tight font-extrabold">
+                                                {appt.title}
+                                            </p>
+                                            <p className="mt-0.5 flex items-center gap-0.5 font-mono text-[9px] leading-none opacity-80">
+                                                <Clock className="inline h-2.5 w-2.5" />{' '}
+                                                {appt.time}
+                                            </p>
+                                        </div>
+                                    ))}
 
-                                {/* Micro Plus/Schedule trigger on hover for clean UX */}
-                                <span className="shrink-0 text-[10px] font-extrabold text-primary uppercase opacity-0 transition-opacity group-hover:opacity-100">
-                                    + Book
-                                </span>
-                            </div>
-
-                            {/* Day badges (appointments) */}
-                            <div className="mt-auto space-y-1">
-                                {dayAppts.slice(0, 2).map((appt) => (
-                                    <div
-                                        key={appt.id}
-                                        title={`${appt.title} at ${appt.provider}`}
-                                        className={`truncate rounded-lg border-l-4 p-1.5 font-sans text-[10px] leading-normal shadow-xs ${getCategoryTheme(appt.category)}`}
-                                    >
-                                        <p className="truncate leading-tight font-extrabold">
-                                            {appt.title}
+                                    {/* Overflows indicator */}
+                                    {dayAppts.length > 2 && (
+                                        <p className="block pl-1 text-[9px] font-bold text-primary dark:text-primary-fixed">
+                                            + {dayAppts.length - 2} more slots
                                         </p>
-                                        <p className="mt-0.5 flex items-center gap-0.5 font-mono text-[9px] leading-none opacity-80">
-                                            <Clock className="inline h-2.5 w-2.5" />{' '}
-                                            {appt.time}
-                                        </p>
-                                    </div>
-                                ))}
-
-                                {/* Overflows indicator */}
-                                {dayAppts.length > 2 && (
-                                    <p className="block pl-1 text-[9px] font-bold text-primary dark:text-primary-fixed">
-                                        + {dayAppts.length - 2} more slots
-                                    </p>
-                                )}
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    );
-                })}
+                        );
+                    })}
 
-                {/* Bleed next month days (November 1 to 4) matches the visual mockup exactly */}
-                {Array.from({ length: nextMonthBleed }).map((_, index) => {
-                    const nextDayNum = index + 1;
-                    return (
-                        <div
-                            key={`bleed-${nextDayNum}`}
-                            className="flex flex-col justify-between border-r border-b border-outline-variant bg-gray-50/30 p-3.5 opacity-40 select-none dark:bg-neutral-900/30"
-                        >
-                            <div className="flex items-start justify-between">
-                                <span className="text-xs font-bold text-gray-400">
-                                    {nextDayNum}
-                                </span>
-                                <span className="text-[8px] font-extrabold tracking-widest text-gray-300 uppercase">
-                                    Nov
-                                </span>
-                            </div>
-                            <div />
-                        </div>
-                    );
-                })}
+                </div>
             </div>
-        </div>
+        </>
     );
 }

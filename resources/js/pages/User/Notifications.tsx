@@ -1,4 +1,3 @@
-import NotificationsView from '@/components/User/NotificationsView';
 import { DEFAULT_NOTIFICATIONS } from '@/data/notifications';
 import UserLayout from '@/layouts/User/UserLayout';
 import { NotificationItem } from '@/types';
@@ -20,16 +19,7 @@ import { motion, AnimatePresence } from 'motion/react';
 export default function UserNotifications() {
     const [notifications, setNotifications] = useState<NotificationItem[]>(
         () => {
-            const saved = localStorage.getItem('slotem_notifications');
-
-            if (!saved) return DEFAULT_NOTIFICATIONS;
-
-            try {
-                return JSON.parse(saved);
-            } catch {
-                return DEFAULT_NOTIFICATIONS;
-            }
-            // return saved ? JSON.parse(saved) : DEFAULT_NOTIFICATIONS;
+            return DEFAULT_NOTIFICATIONS;
         },
     );
 
@@ -83,7 +73,7 @@ export default function UserNotifications() {
     };
 
     return (
-        <UserLayout>
+        <UserLayout notifications={notifications}>
             <div className="max-w-4xl space-y-6 pb-10">
                 {/* Top action header for filters */}
                 <div className="flex flex-col items-start justify-between gap-4 rounded-2xl border border-outline-variant bg-white p-4 shadow-xs sm:flex-row sm:items-center dark:bg-neutral-900">
@@ -308,4 +298,3 @@ export default function UserNotifications() {
         </UserLayout>
     );
 }
-

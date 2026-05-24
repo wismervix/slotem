@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Appointment } from '@/types';
+import { Appointment, Booking, Availability } from '@/types';
 import {
     Smile,
     Sparkles,
@@ -19,6 +19,8 @@ import {
 import { Link } from '@inertiajs/react';
 
 interface ListViewProps {
+    bookings: Booking[];
+        availabilities: Availability[];
     appointments: Appointment[];
     searchQuery: string;
     onCancelAppointment: (id: string) => void;
@@ -26,6 +28,8 @@ interface ListViewProps {
 }
 
 export default function ListView({
+    bookings,
+    availabilities,
     appointments,
     searchQuery,
     onCancelAppointment,
@@ -170,7 +174,7 @@ export default function ListView({
                             create a brand new appointment!
                         </p>
                         <Link
-                        href={route('user.bookings')}
+                            href={route('user.bookings')}
                             className="mt-2 rounded-lg bg-primary px-4 py-2 text-xs font-bold text-white"
                         >
                             Start New Appointment

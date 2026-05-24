@@ -1,4 +1,3 @@
-import ProfileView from '@/components/User/ProfileView';
 import { DEFAULT_PROFILE } from '@/data/profile';
 import UserLayout from '@/layouts/User/UserLayout';
 import { UserProfile } from '@/types/calendar-view-types';

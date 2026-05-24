@@ -28,41 +28,20 @@ import { Link } from '@inertiajs/react';
 
 export default function UserDashboard() {
     const [appointments, setAppointments] = useState<Appointment[]>(() => {
-        const saved = localStorage.getItem('slotem_appointments');
-
-        if (!saved) return DEFAULT_APPOINTMENTS;
-
-        try {
-            return JSON.parse(saved);
-        } catch {
-            return DEFAULT_APPOINTMENTS;
-        }
-        // return saved ? JSON.parse(saved) : DEFAULT_APPOINTMENTS;
+        return DEFAULT_APPOINTMENTS;
     });
 
     const [notifications, setNotifications] = useState<NotificationItem[]>(
         () => {
-            const saved = localStorage.getItem('slotem_notifications');
-
-            if (!saved) return DEFAULT_NOTIFICATIONS;
-
-            try {
-                return JSON.parse(saved);
-            } catch {
-                return DEFAULT_NOTIFICATIONS;
-            }
-            // return saved ? JSON.parse(saved) : DEFAULT_NOTIFICATIONS;
+            return DEFAULT_NOTIFICATIONS;
         },
     );
 
     const [profile, setProfile] = useState<UserProfile>(() => {
-        const saved = localStorage.getItem('slotem_profile');
-        return saved ? JSON.parse(saved) : DEFAULT_PROFILE;
+        return DEFAULT_PROFILE;
     });
 
     const [selectedDate, setSelectedDate] = useState<string>('2023-10-26');
-
-    const [searchQuery, setSearchQuery] = useState('');
 
     const [isBookModalOpen, setIsBookModalOpen] = useState(false);
 
@@ -288,10 +267,9 @@ export default function UserDashboard() {
 
     return (
         <UserLayout
+            notifications={notifications}
             appointments={appointments}
             selectedDate={selectedDate}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
             onSelectDate={setSelectedDate}
             handleRescheduleAppointment={handleRescheduleAppointment}
             handleCancelAppointment={handleCancelAppointment}
@@ -690,7 +668,7 @@ export default function UserDashboard() {
                                                 rec.date,
                                             )
                                         }
-                                        className="flex shrink-0 items-center gap-1 rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-[11px] font-extrabold text-gray-900 shadow-xs hover:bg-on-surface-variant dark:hover:bg-on-surface-variant-dark dark:bg-neutral-900 dark:text-white"
+                                        className="flex shrink-0 items-center gap-1 rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-[11px] font-extrabold text-gray-900 shadow-xs hover:bg-on-surface-variant dark:bg-neutral-900 dark:text-white dark:hover:bg-on-surface-variant-dark"
                                     >
                                         Book
                                         <ArrowUpRight className="h-3.5 w-3.5 text-primary" />

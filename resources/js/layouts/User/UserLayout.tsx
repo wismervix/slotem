@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/react';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import Footer from '@/components/User/Footer';
 import Sidebar from '@/components/User/Sidebar';
 import BookModal from '@/components/User/BookModal';
@@ -13,25 +13,19 @@ import {
     Clock,
     Ban,
 } from 'lucide-react';
-import { DEFAULT_APPOINTMENTS } from '@/data/appointments';
-import { DEFAULT_NOTIFICATIONS } from '@/data/notifications';
-import { DEFAULT_PROFILE } from '@/data/profile';
-import {
-    Appointment,
-    NotificationItem,
-    UserProfile,
-} from '@/types/calendar-view-types';
+import { Appointment, NotificationItem } from '@/types/calendar-view-types';
 
 interface Props {
     children: ReactNode;
-    appointments: Appointment[];
-    selectedDate: string; // YYYY-MM-DD
-    searchQuery: string;
-    setSearchQuery: (query: string) => void;
-    onSelectDate: (date: string) => void;
-    handleRescheduleAppointment: (id: string) => void;
-    handleCancelAppointment: (id: string) => void;
-    handleAddNewAppointment: (newAppt: {
+    notifications?: NotificationItem[];
+    appointments?: Appointment[];
+    selectedDate?: string; // YYYY-MM-DD
+    searchQuery?: string;
+    setSearchQuery?: (query: string) => void;
+    onSelectDate?: (date: string) => void;
+    handleRescheduleAppointment?: (id: string) => void;
+    handleCancelAppointment?: (id: string) => void;
+    handleAddNewAppointment?: (newAppt: {
         title: string;
         provider: string;
         date: string;
@@ -46,84 +40,25 @@ interface Props {
 
 export default function UserLayout({
     children,
-    appointments,
-    selectedDate,
-    searchQuery,
-    setSearchQuery,
-    onSelectDate,
-    handleRescheduleAppointment,
-    handleCancelAppointment,
-    handleAddNewAppointment,
-    headerActions,
+    notifications = [],
+    appointments = [],
+    selectedDate = '',
+    searchQuery = '',
+    setSearchQuery = () => {},
+    onSelectDate = () => {},
+    handleRescheduleAppointment = () => {},
+    handleCancelAppointment = () => {},
+    handleAddNewAppointment = () => {},
+    headerActions = null,
 }: Props) {
-    const [notifications, setNotifications] = useState<NotificationItem[]>(
-        () => {
-            const saved = localStorage.getItem('slotem_notifications');
-
-            if (!saved) return DEFAULT_NOTIFICATIONS;
-
-            try {
-                return JSON.parse(saved);
-            } catch {
-                return DEFAULT_NOTIFICATIONS;
-            }
-            // return saved ? JSON.parse(saved) : DEFAULT_NOTIFICATIONS;
-        },
-    );
-
-    const [profile, setProfile] = useState<UserProfile>(() => {
-        const saved = localStorage.getItem('slotem_profile');
-        return saved ? JSON.parse(saved) : DEFAULT_PROFILE;
-    });
-
     const isBookingsPage = route().current('user.bookings');
     const isDashboardPage = route().current('user.dashboard');
     const isProfilePage = route().current('user.profile');
     // const isNotificationsPage = route().current('user.notifications');
-    const [subView, setSubView] = useState<'calendar' | 'list'>('calendar');
     const [isBookModalOpen, setIsBookModalOpen] = useState(false);
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-    useEffect(() => {
-        localStorage.setItem(
-            'slotem_notifications',
-            JSON.stringify(notifications),
-        );
-    }, [notifications]);
-
-    useEffect(() => {
-        localStorage.setItem('slotem_profile', JSON.stringify(profile));
-    }, [profile]);
-
     // Handler functions
-    const handleToggleReadNotification = (id: string) => {
-        setNotifications((prev) =>
-            prev.map((n) => (n.id === id ? { ...n, read: !n.read } : n)),
-        );
-    };
-
-    const handleClearAllNotifications = () => {
-        setNotifications([]);
-    };
-
-    const handleMarkAllReadNotifications = () => {
-        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    };
-
-    const markNotificationAsRead = (id: string) => {
-        setNotifications((prev) =>
-            prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
-        );
-    };
-
-    const deleteNotification = (id: string) => {
-        setNotifications((prev) => prev.filter((n) => n.id !== id));
-    };
-
-    const handleSaveProfile = (updated: UserProfile) => {
-        setProfile(updated);
-    };
-
     // Quick helper to format selected date nicely, e.g. "Tuesday, Oct 24"
     const formatSelectedDateHeading = (dateStr: string) => {
         const parts = dateStr.split('-');

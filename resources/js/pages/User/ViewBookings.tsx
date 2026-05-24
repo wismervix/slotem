@@ -2,41 +2,29 @@ import { DEFAULT_APPOINTMENTS } from '@/data/appointments';
 import CalendarView from '@/components/User/CalendarView';
 import ListView from '@/components/User/ListView';
 import UserLayout from '@/layouts/User/UserLayout';
-import type { Appointment, Booking, NotificationItem } from '@/types';
+import type {
+    Appointment,
+    Booking,
+    NotificationItem,
+    Availability,
+} from '@/types';
 import { useEffect, useState } from 'react';
 import { DEFAULT_NOTIFICATIONS } from '@/data/notifications';
 import { CalendarDays } from 'lucide-react';
 
 type ViewBookingsProps = {
     bookings: Booking[];
+        availabilities: Availability[];
 };
 
-const ViewBookings = ({ bookings }: ViewBookingsProps) => {
+const ViewBookings = ({ bookings, availabilities }: ViewBookingsProps) => {
     const [appointments, setAppointments] = useState<Appointment[]>(() => {
-        const saved = localStorage.getItem('slotem_appointments');
-
-        if (!saved) return DEFAULT_APPOINTMENTS;
-
-        try {
-            return JSON.parse(saved);
-        } catch {
-            return DEFAULT_APPOINTMENTS;
-        }
-        // return saved ? JSON.parse(saved) : DEFAULT_APPOINTMENTS;
+        return DEFAULT_APPOINTMENTS;
     });
 
     const [notifications, setNotifications] = useState<NotificationItem[]>(
         () => {
-            const saved = localStorage.getItem('slotem_notifications');
-
-            if (!saved) return DEFAULT_NOTIFICATIONS;
-
-            try {
-                return JSON.parse(saved);
-            } catch {
-                return DEFAULT_NOTIFICATIONS;
-            }
-            // return saved ? JSON.parse(saved) : DEFAULT_NOTIFICATIONS;
+            return DEFAULT_NOTIFICATIONS;
         },
     );
 
@@ -47,21 +35,6 @@ const ViewBookings = ({ bookings }: ViewBookingsProps) => {
     const [selectedDate, setSelectedDate] = useState('2023-10-26');
 
     const [isBookModalOpen, setIsBookModalOpen] = useState(false);
-
-    // Sync to local storage
-    useEffect(() => {
-        localStorage.setItem(
-            'slotem_appointments',
-            JSON.stringify(appointments),
-        );
-    }, [appointments]);
-
-    useEffect(() => {
-        localStorage.setItem(
-            'slotem_notifications',
-            JSON.stringify(notifications),
-        );
-    }, [notifications]);
 
     const handleRescheduleAppointment = (id: string) => {
         setAppointments((prev) =>
@@ -143,8 +116,12 @@ const ViewBookings = ({ bookings }: ViewBookingsProps) => {
 
         setNotifications((prev) => [alert, ...prev]);
     };
+
+    console.log('Bookings: ', bookings);
+
     return (
         <UserLayout
+            notifications={notifications}
             appointments={appointments}
             selectedDate={selectedDate}
             searchQuery={searchQuery}
@@ -184,6 +161,8 @@ const ViewBookings = ({ bookings }: ViewBookingsProps) => {
         >
             {subView === 'calendar' ? (
                 <CalendarView
+                    bookings={bookings}
+                    availabilities={availabilities}
                     appointments={appointments}
                     selectedDate={selectedDate}
                     searchQuery={searchQuery}
@@ -192,6 +171,8 @@ const ViewBookings = ({ bookings }: ViewBookingsProps) => {
                 />
             ) : (
                 <ListView
+                    bookings={bookings}
+                    availabilities={availabilities}
                     appointments={appointments}
                     searchQuery={searchQuery}
                     onCancelAppointment={handleCancelAppointment}
@@ -200,6 +181,6 @@ const ViewBookings = ({ bookings }: ViewBookingsProps) => {
             )}
         </UserLayout>
     );
-};;
+};
 
 export default ViewBookings;

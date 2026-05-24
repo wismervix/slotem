@@ -144,12 +144,26 @@ export default function Sidebar({
                                         : 'text-on-surface-variant hover:bg-surface-container-highest'
                                 }`}
                             >
-                                <Icon
-                                    size={20}
-                                    fill={active ? 'currentColor' : 'none'}
-                                />
+                                <div className="flex items-center gap-3">
+                                    <Icon
+                                        size={20}
+                                        fill={active ? 'currentColor' : 'none'}
+                                    />
 
-                                {item.name}
+                                    {item.name}
+                                </div>
+                                {item.name === 'Notifications' &&
+                                    unreadNotificationsCount > 0 && (
+                                        <span
+                                            className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${
+                                                active
+                                                    ? 'bg-white text-primary'
+                                                    : 'bg-primary text-white'
+                                            }`}
+                                        >
+                                            {unreadNotificationsCount}
+                                        </span>
+                                    )}
                             </Link>
                         );
                     })}

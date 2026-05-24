@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 
 
 use App\Models\User;
+use App\Models\Availability;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
@@ -27,8 +28,14 @@ class DashboardController extends Controller
             ->latest()
             ->get();
 
+        $availabilities = Availability::with('timeSlots')
+            ->whereDate('date', '>=', now()->toDateString())
+            ->get();
+
+
         return inertia('User/ViewBookings', [
-            'bookings' => $bookings
+            'bookings' => $bookings,
+            'availabilities' => $availabilities
         ]);
     }
 
