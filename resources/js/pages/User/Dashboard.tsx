@@ -2,7 +2,7 @@ import UserLayout from '@/layouts/User/UserLayout';
 import { DEFAULT_APPOINTMENTS } from '@/data/appointments';
 import { DEFAULT_NOTIFICATIONS } from '@/data/notifications';
 import { DEFAULT_PROFILE } from '@/data/profile';
-import { Appointment, NotificationItem, UserProfile } from '@/types';
+import { Appointment, Booking, NotificationItem, UserProfile } from '@/types';
 import { useState } from 'react';
 import {
     Calendar,
@@ -26,7 +26,11 @@ import {
 import { motion } from 'motion/react';
 import { Link } from '@inertiajs/react';
 
-export default function UserDashboard() {
+interface UserDashboardProps {
+ bookings: Booking
+};
+
+export default function UserDashboard({bookings}:UserDashboardProps) {
     const [appointments, setAppointments] = useState<Appointment[]>(() => {
         return DEFAULT_APPOINTMENTS;
     });
@@ -268,7 +272,6 @@ export default function UserDashboard() {
     return (
         <UserLayout
             notifications={notifications}
-            appointments={appointments}
             selectedDate={selectedDate}
             onSelectDate={setSelectedDate}
             handleRescheduleAppointment={handleRescheduleAppointment}

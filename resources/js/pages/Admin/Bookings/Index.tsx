@@ -21,8 +21,8 @@ import StatCard from '@/components/Admin/StatCard';
 import StatusBadge from '@/components/Admin/StatusBadge';
 import { services } from '@/data/services';
 import AdminLayout from '@/layouts/Admin/AdminLayout';
-import { formatTime } from '@/pages/Guest/Booking/Create';
 import type { Booking } from '@/types/booking';
+import { formatTime } from '@/lib/calendar-utils';
 
 interface BookingsProps {
     bookings: Booking[];

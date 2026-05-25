@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Appointment, Booking, Availability } from '@/types';
+import { Booking } from '@/types';
 import {
     Smile,
     Sparkles,
@@ -15,79 +15,165 @@ import {
     Ban,
     CalendarDays,
     CalendarClock,
+    Scissors,
+    UserCheck,
+    ShieldCheck,
+    Paintbrush,
 } from 'lucide-react';
 import { Link } from '@inertiajs/react';
+import { formatTime } from '@/lib/calendar-utils';
 
 interface ListViewProps {
     bookings: Booking[];
-        availabilities: Availability[];
-    appointments: Appointment[];
     searchQuery: string;
     onCancelAppointment: (id: string) => void;
     onRescheduleAppointment: (id: string) => void;
 }
 
+type BookingStatusGroup = 'all' | 'pending' | 'confirmed' | 'failed';
+
 export default function ListView({
     bookings,
-    availabilities,
-    appointments,
     searchQuery,
     onCancelAppointment,
     onRescheduleAppointment,
 }: ListViewProps) {
+    // const [statusFilter, setStatusFilter] = useState<
+    //     'all' | 'pending' | 'cancelled' | 'approved' | 'completed' | 'rejected'
+    // >('all');
     const [statusFilter, setStatusFilter] = useState<
-        'all' | 'Confirmed' | 'Pending' | 'Cancelled'
+        'all' | 'pending' | 'failed' | 'confirmed'
     >('all');
 
-    const filtered = appointments.filter((appt) => {
+    const getStatusGroup = (status: Booking['status']): BookingStatusGroup => {
+        switch (status) {
+            case 'approved':
+            case 'completed':
+                return 'confirmed';
+
+            case 'rejected':
+            case 'cancelled':
+                return 'failed';
+
+            case 'pending':
+                return 'pending';
+
+            default:
+                return 'pending';
+        }
+    };
+
+    const filtered = bookings.filter((booking) => {
         // Search match
         const matchesSearch =
-            appt.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            appt.provider.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (appt.notes &&
-                appt.notes.toLowerCase().includes(searchQuery.toLowerCase()));
+            booking.service?.name
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase()) ||
+            (booking.service?.description ?? '')
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase());
 
         // Status match
+        // const matchesStatus =
+        //     statusFilter === 'all' || booking.status === statusFilter;
         const matchesStatus =
-            statusFilter === 'all' || appt.status === statusFilter;
+            statusFilter === 'all' ||
+            getStatusGroup(booking.status) === statusFilter;
 
         return matchesSearch && matchesStatus;
     });
 
-    const getCategoryIcon = (category: string) => {
-        switch (category) {
-            case 'dental':
-                return <Smile className="h-4 w-4 text-primary" />;
-            case 'wellness':
+    const confirmedCount = bookings.filter(
+        (b) => getStatusGroup(b.status) === 'confirmed',
+    ).length;
+
+    const failedCount = bookings.filter(
+        (b) => getStatusGroup(b.status) === 'failed',
+    ).length;
+
+    const getServiceIcon = (serviceIcon: string) => {
+        switch (serviceIcon) {
+            case 'scissors':
+                return <Scissors className="h-4 w-4 text-primary" />;
+            case 'user-check':
+                return <UserCheck className="h-4 w-4 text-secondary" />;
+            case 'sparkles':
                 return <Sparkles className="h-4 w-4 text-tertiary" />;
-            case 'general':
-                return <Activity className="h-4 w-4 text-blue-600" />;
+            case 'paintbrush':
+                return (
+                    <Paintbrush className="h-4 w-4 text-blue-800 dark:text-blue-300" />
+                );
+            case 'shield-check':
+                return (
+                    <ShieldCheck className="h-4 w-4 text-teal-800 dark:text-teal-300" />
+                );
             default:
-                return <CalendarDays className="h-4 w-4 text-secondary" />;
+                return (
+                    <Activity className="h-4 w-4 text-purple-800 dark:text-purple-300" />
+                );
         }
     };
 
-    const getStatusPill = (status: string) => {
-        switch (status) {
-            case 'Confirmed':
-                return (
-                    <span className="shrink-0 rounded-full border border-emerald-200/50 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 uppercase dark:bg-emerald-950/20 dark:text-emerald-400">
-                        Confirmed
-                    </span>
-                );
-            case 'Cancelled':
-                return (
-                    <span className="shrink-0 rounded-full border border-red-200/50 bg-red-50 px-2.5 py-0.5 text-[10px] font-bold text-red-700 uppercase dark:bg-red-950/20 dark:text-red-400">
-                        Cancelled
-                    </span>
-                );
-            default:
-                return (
-                    <span className="shrink-0 rounded-full border border-amber-200/50 bg-amber-50 px-2.5 py-0.5 text-[10px] font-bold text-amber-700 uppercase dark:bg-amber-950/20 dark:text-amber-400">
-                        Pending
-                    </span>
-                );
-        }
+    // const getStatusPill = (status: string) => {
+    //     switch (status) {
+    //         case 'completed':
+    //             return (
+    //                 <span className="shrink-0 rounded-full border border-emerald-200/50 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 uppercase dark:bg-emerald-950/20 dark:text-emerald-400">
+    //                     Completed
+    //                 </span>
+    //             );
+    //         case 'approved':
+    //             return (
+    //                 <span className="shrink-0 rounded-full border border-emerald-200/50 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 uppercase dark:bg-emerald-950/20 dark:text-emerald-400">
+    //                     Approved
+    //                 </span>
+    //             );
+    //         case 'rejected':
+    //             return (
+    //                 <span className="shrink-0 rounded-full border border-red-200/50 bg-red-50 px-2.5 py-0.5 text-[10px] font-bold text-red-700 uppercase dark:bg-red-950/20 dark:text-red-400">
+    //                     Rejected
+    //                 </span>
+    //             );
+    //         case 'cancelled':
+    //             return (
+    //                 <span className="shrink-0 rounded-full border border-red-200/50 bg-red-50 px-2.5 py-0.5 text-[10px] font-bold text-red-700 uppercase dark:bg-red-950/20 dark:text-red-400">
+    //                     Cancelled
+    //                 </span>
+    //             );
+    //         default:
+    //             return (
+    //                 <span className="shrink-0 rounded-full border border-amber-200/50 bg-amber-50 px-2.5 py-0.5 text-[10px] font-bold text-amber-700 uppercase dark:bg-amber-950/20 dark:text-amber-400">
+    //                     Pending
+    //                 </span>
+    //             );
+    //     }
+    // };
+
+    const getStatusPill = (status: Booking['status']) => {
+    const group = getStatusGroup(status);
+
+    if (group === 'confirmed') {
+        return (
+            <span className="shrink-0 rounded-full border border-emerald-200/50 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 uppercase dark:bg-emerald-950/20 dark:text-emerald-400">
+                Confirmed
+            </span>
+        );
+    }
+
+    if (group === 'failed') {
+        return (
+            <span className="shrink-0 rounded-full border border-red-200/50 bg-red-50 px-2.5 py-0.5 text-[10px] font-bold text-red-700 uppercase dark:bg-red-950/20 dark:text-red-400">
+                Failed
+            </span>
+        );
+    }
+
+    return (
+        <span className="shrink-0 rounded-full border border-amber-200/50 bg-amber-50 px-2.5 py-0.5 text-[10px] font-bold text-amber-700 uppercase dark:bg-amber-950/20 dark:text-amber-400">
+            Pending
+        </span>
+    );
+
     };
 
     // console.log('Appointments: ', appointments);
@@ -105,57 +191,73 @@ export default function ListView({
                                 : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                         }`}
                     >
-                        All Bookings ({appointments.length})
+                        All Bookings ({bookings.length})
                     </button>
-                    <button
-                        onClick={() => setStatusFilter('Confirmed')}
+                    {/* <button
+                        onClick={() => setStatusFilter('completed')}
                         className={`rounded-lg px-3 py-1.5 transition-all ${
-                            statusFilter === 'Confirmed'
+                            statusFilter === 'completed'
                                 ? 'bg-white text-primary shadow-xs dark:bg-neutral-900'
                                 : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                         }`}
                     >
-                        Confirmed (
+                        Completed (
                         {
-                            appointments.filter((a) => a.status === 'Confirmed')
+                            bookings.filter((a) => a.status === 'completed')
                                 .length
                         }
                         )
+                    </button> */}
+                    <button
+                        onClick={() => setStatusFilter('confirmed')}
+                        className={`rounded-lg px-3 py-1.5 transition-all ${
+                            statusFilter === 'confirmed'
+                                ? 'bg-white text-primary shadow-xs dark:bg-neutral-900'
+                                : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                        }`}
+                    >
+                        Confirmed ({confirmedCount})
                     </button>
                     <button
-                        onClick={() => setStatusFilter('Pending')}
+                        onClick={() => setStatusFilter('pending')}
                         className={`rounded-lg px-3 py-1.5 transition-all ${
-                            statusFilter === 'Pending'
+                            statusFilter === 'pending'
                                 ? 'bg-white text-primary shadow-xs dark:bg-neutral-900'
                                 : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                         }`}
                     >
                         Pending (
-                        {
-                            appointments.filter((a) => a.status === 'Pending')
-                                .length
-                        }
-                        )
+                        {bookings.filter((a) => a.status === 'pending').length})
                     </button>
                     <button
-                        onClick={() => setStatusFilter('Cancelled')}
+                        onClick={() => setStatusFilter('failed')}
                         className={`rounded-lg px-3 py-1.5 transition-all ${
-                            statusFilter === 'Cancelled'
+                            statusFilter === 'failed'
+                                ? 'bg-white text-primary shadow-xs dark:bg-neutral-900'
+                                : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                        }`}
+                    >
+                        Failed ({failedCount})
+                    </button>
+                    {/* <button
+                        onClick={() => setStatusFilter('cancelled')}
+                        className={`rounded-lg px-3 py-1.5 transition-all ${
+                            statusFilter === 'cancelled'
                                 ? 'bg-white text-primary shadow-xs dark:bg-neutral-900'
                                 : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                         }`}
                     >
                         Cancelled (
                         {
-                            appointments.filter((a) => a.status === 'Cancelled')
+                            bookings.filter((a) => a.status === 'cancelled')
                                 .length
                         }
                         )
-                    </button>
+                    </button> */}
                 </div>
 
                 <p className="text-[11px] font-bold tracking-widest text-gray-400 sm:text-right">
-                    SHOWING {filtered.length} OF {appointments.length} RESULTS
+                    SHOWING {filtered.length} OF {bookings.length} RESULTS
                 </p>
             </div>
 
@@ -167,7 +269,7 @@ export default function ListView({
                             <Search className="h-6 w-6" />
                         </div>
                         <h4 className="text-sm font-bold text-gray-900 dark:text-white">
-                            No matching appointments
+                            No matching booking appointments
                         </h4>
                         <p className="max-w-xs text-xs leading-normal text-secondary">
                             Try adjusting your filters or search keywords, or
@@ -181,40 +283,48 @@ export default function ListView({
                         </Link>
                     </div>
                 ) : (
-                    filtered.map((appt) => (
+                    filtered.map((booking) => (
                         <div
-                            key={appt.id}
-                            className={`flex flex-col justify-between gap-4 rounded-2xl border bg-white p-4 transition-all hover:shadow-xs md:flex-row dark:bg-neutral-900 ${
-                                appt.status === 'Cancelled' ? 'opacity-65' : ''
+                            key={booking.id}
+                            className={`group flex flex-col justify-between gap-4 rounded-2xl border bg-white p-4 transition-all duration-300 hover:shadow-xs md:flex-row dark:bg-neutral-900 ${
+                                getStatusGroup(booking.status) === 'failed'
+                                    ? // booking.status === 'cancelled'
+                                      'opacity-65'
+                                    : ''
                             }`}
                         >
                             {/* Left Column: Icon and demographic Details */}
                             <div className="flex items-start gap-4">
                                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-outline-variant bg-gray-50 dark:bg-neutral-800">
-                                    {getCategoryIcon(appt.category)}
+                                    {getServiceIcon(
+                                        booking.service?.icon || '',
+                                    )}
                                 </div>
 
                                 <div className="space-y-1.5">
                                     <div className="flex flex-wrap items-center gap-2">
                                         <h4 className="text-sm font-extrabold text-gray-900 dark:text-white">
-                                            {appt.title}
+                                            {booking.service?.name}
                                         </h4>
-                                        {getStatusPill(appt.status)}
-                                        {appt.price && (
+                                        {getStatusPill(booking.status)}
+                                        {booking.service?.price && (
                                             <span className="text-xs font-extrabold text-primary">
-                                                ${appt.price}
+                                                ${booking.service?.price}
                                             </span>
                                         )}
                                     </div>
 
                                     <p className="flex items-center gap-1 text-xs font-medium text-secondary">
                                         <MapPin className="h-3.5 w-3.5" />
-                                        {appt.provider}
+                                        {booking.service?.description?.slice(
+                                            0,
+                                            20,
+                                        )}
                                     </p>
 
-                                    {appt.notes && (
+                                    {booking.service?.description && (
                                         <p className="text-[11px] leading-normal text-gray-400 italic">
-                                            "{appt.notes}"
+                                            "{booking.service?.description}"
                                         </p>
                                     )}
                                 </div>
@@ -225,22 +335,31 @@ export default function ListView({
                                 <div className="space-y-0.5 text-right">
                                     <div className="flex items-center justify-end gap-1.5 text-xs font-bold text-gray-900 dark:text-white">
                                         <CalendarDays className="h-3.5 w-3.5 text-primary" />
-                                        {appt.date}
+                                        {new Intl.DateTimeFormat('en-US', {
+                                            weekday: 'long',
+                                            month: 'short',
+                                            day: 'numeric',
+                                            year: 'numeric',
+                                        }).format(new Date(booking.date))}
                                     </div>
                                     <div className="flex items-center justify-end gap-1 text-[10px] font-semibold text-secondary">
                                         <Clock className="h-3.5 w-3.5" />
-                                        {appt.time} ({appt.duration} mins)
+                                        {formatTime(booking.start_time)} —{' '}
+                                        {formatTime(booking.end_time)} (
+                                        {booking.service?.duration} mins)
                                     </div>
                                 </div>
 
-                                <div className="flex gap-2">
-                                    {appt.status === 'Confirmed' ? (
+                                <div className="flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                                    {/* {booking.status === 'completed' ? ( */}
+                                    {getStatusGroup(booking.status) ===
+                                    'confirmed' ? (
                                         <>
                                             <button
                                                 type="button"
                                                 onClick={() =>
                                                     onRescheduleAppointment(
-                                                        appt.id,
+                                                        String(booking.id),
                                                     )
                                                 }
                                                 className="flex items-center gap-1 rounded-lg border border-outline-variant px-3 py-1.5 text-xs font-bold text-on-surface transition-colors hover:bg-surface-container-dark dark:text-on-surface-dark"
@@ -252,7 +371,9 @@ export default function ListView({
                                             <button
                                                 type="button"
                                                 onClick={() =>
-                                                    onCancelAppointment(appt.id)
+                                                    onCancelAppointment(
+                                                        String(booking.id),
+                                                    )
                                                 }
                                                 className="flex items-center gap-1 rounded-lg bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 transition-colors hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-900/30"
                                                 title="Cancel this appointment"
@@ -261,11 +382,13 @@ export default function ListView({
                                                 Cancel
                                             </button>
                                         </>
-                                    ) : appt.status !== 'Cancelled' ? (
+                                    ) : booking.status !== 'cancelled' ? (
                                         <button
                                             type="button"
                                             onClick={() =>
-                                                onCancelAppointment(appt.id)
+                                                onCancelAppointment(
+                                                    String(booking.id),
+                                                )
                                             }
                                             className="flex items-center gap-1 rounded-lg bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 transition-colors hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-900/30"
                                             title="Cancel this appointment"

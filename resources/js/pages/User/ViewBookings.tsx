@@ -8,9 +8,9 @@ import type {
     NotificationItem,
     Availability,
 } from '@/types';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { DEFAULT_NOTIFICATIONS } from '@/data/notifications';
-import { CalendarDays } from 'lucide-react';
+import { CalendarDays, List } from 'lucide-react';
 
 type ViewBookingsProps = {
     bookings: Booking[];
@@ -117,12 +117,10 @@ const ViewBookings = ({ bookings, availabilities }: ViewBookingsProps) => {
         setNotifications((prev) => [alert, ...prev]);
     };
 
-    console.log('Bookings: ', bookings);
-
     return (
         <UserLayout
+            bookings={bookings}
             notifications={notifications}
-            appointments={appointments}
             selectedDate={selectedDate}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
@@ -141,7 +139,7 @@ const ViewBookings = ({ bookings, availabilities }: ViewBookingsProps) => {
                                 : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                         }`}
                     >
-                        <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                        <List className="h-4 w-4" />
                         List View
                     </button>
                     <button
@@ -163,7 +161,6 @@ const ViewBookings = ({ bookings, availabilities }: ViewBookingsProps) => {
                 <CalendarView
                     bookings={bookings}
                     availabilities={availabilities}
-                    appointments={appointments}
                     selectedDate={selectedDate}
                     searchQuery={searchQuery}
                     onSelectDate={setSelectedDate}
@@ -172,8 +169,6 @@ const ViewBookings = ({ bookings, availabilities }: ViewBookingsProps) => {
             ) : (
                 <ListView
                     bookings={bookings}
-                    availabilities={availabilities}
-                    appointments={appointments}
                     searchQuery={searchQuery}
                     onCancelAppointment={handleCancelAppointment}
                     onRescheduleAppointment={handleRescheduleAppointment}

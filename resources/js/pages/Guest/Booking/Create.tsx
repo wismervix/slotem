@@ -12,26 +12,13 @@ import { useState, useEffect } from 'react';
 import { Stepper } from '@/components/Shared/Stepper';
 import GuestLayout from '@/layouts/Guest/GuestLayout';
 import type { Service, TimeSlot } from '@/types';
+import { formatTime } from '@/lib/calendar-utils';
 
 interface CreateProps {
     service: Service;
     selectedDate: string;
     slot: TimeSlot;
 }
-
-export const formatTime = (time: string) => {
-    const [hours, minutes] = time.split(':');
-
-    const date = new Date();
-    date.setHours(Number(hours));
-    date.setMinutes(Number(minutes));
-
-    return new Intl.DateTimeFormat('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-    }).format(date);
-};
 
 const Create = ({ service, selectedDate, slot }: CreateProps) => {
     const [isBooked, setIsBooked] = useState(false);

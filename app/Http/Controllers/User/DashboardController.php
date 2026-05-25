@@ -14,7 +14,18 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        return inertia('User/Dashboard');
+        /** @var User $user */
+        $user = Auth::user();
+
+        $bookings = $user
+            ->bookings()
+            ->with('service')
+            ->latest()
+            ->get();
+
+        return inertia('User/Dashboard', [
+            'bookings' => $bookings,
+        ]);
     }
 
     public function bookings()

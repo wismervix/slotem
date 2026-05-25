@@ -1,3 +1,5 @@
+import { Service } from "./service";
+
 export type BookingStatus =
     | 'pending'
     | 'approved'
@@ -11,6 +13,7 @@ export interface Booking {
     client_email: string;
     user_id: number;
     service_id: number;
+    service?: Service;
     availability_id: number;
     time_slot_id: number;
     date: string;

@@ -12,13 +12,21 @@ import {
     Sparkles,
     Clock,
     Ban,
+    Scissors,
+    UserCheck,
+    ShieldCheck,
+    Paintbrush,
+    Calendar,
 } from 'lucide-react';
 import { Appointment, NotificationItem } from '@/types/calendar-view-types';
+import { Booking, ServiceIcon } from '@/types';
+import { getServiceTheme, serviceIcons } from '@/lib/service-icons';
+import { formatTime } from '@/lib/calendar-utils';
 
 interface Props {
     children: ReactNode;
+    bookings?: Booking[];
     notifications?: NotificationItem[];
-    appointments?: Appointment[];
     selectedDate?: string; // YYYY-MM-DD
     searchQuery?: string;
     setSearchQuery?: (query: string) => void;
@@ -40,8 +48,8 @@ interface Props {
 
 export default function UserLayout({
     children,
+    bookings = [],
     notifications = [],
-    appointments = [],
     selectedDate = '',
     searchQuery = '',
     setSearchQuery = () => {},
@@ -79,18 +87,29 @@ export default function UserLayout({
     };
 
     // Find active bookings on the selected calendar date to display on right Details Sidebar
-    const selectedDateBookings = appointments.filter(
-        (a) => a.date === selectedDate && a.status !== 'Cancelled',
+    const selectedDateBookings = bookings.filter(
+        (booking) =>
+            booking.date.split('T')[0] === selectedDate &&
+            booking.status !== 'cancelled' &&
+            booking.status !== 'rejected',
     );
 
-    // Future active appointments for upcoming right section (Oct 24, Oct 28 etc)
-    const upcomingAppointments = appointments
-        .filter((a) => a.status === 'Confirmed')
+    const upcomingBookings = bookings
+        .filter(
+            (booking) =>
+                booking.status !== 'cancelled' &&
+                booking.status !== 'rejected' &&
+                booking.date >= new Date().toISOString().split('T')[0],
+        )
         .sort((a, b) => a.date.localeCompare(b.date));
 
     const unreadNotificationsCount = notifications.filter(
         (n) => !n.read,
     ).length;
+
+    const getServiceIcon = (iconKey?: ServiceIcon) => {
+        return iconKey ? serviceIcons[iconKey] : Smile;
+    };
 
     return (
         <div className="flex min-h-screen flex-col bg-[#fef7ff] font-sans text-gray-900 antialiased transition-colors duration-200 md:flex-row dark:bg-neutral-950 dark:text-neutral-100">
@@ -139,7 +158,7 @@ export default function UserLayout({
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Search appointments..."
+                                placeholder="Search booking appointments..."
                                 className="w-full rounded-xl border border-outline-variant bg-white py-2.5 pr-4 pl-9 text-xs font-medium focus:border-transparent focus:ring-2 focus:ring-primary focus:outline-none dark:border-neutral-800 dark:bg-neutral-900"
                             />
                         </div>
@@ -184,130 +203,192 @@ export default function UserLayout({
                                         </p>
                                     </div>
                                 ) : (
-                                    selectedDateBookings.map((appt) => (
-                                        <div
-                                            key={appt.id}
-                                            className="space-y-3 rounded-xl border border-outline-variant bg-gray-50/50 p-4 dark:bg-neutral-800/30"
-                                        >
-                                            <div className="flex gap-3">
-                                                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 font-mono text-lg font-bold text-primary select-none">
-                                                    {appt.category ===
-                                                    'dental' ? (
-                                                        <Smile className="h-4 w-4" />
-                                                    ) : (
-                                                        <Sparkles className="h-4 w-4" />
-                                                    )}
-                                                </div>
-                                                <div>
-                                                    <h4 className="text-xs font-extrabold text-gray-900 dark:text-white">
-                                                        {appt.title}
-                                                    </h4>
-                                                    <p className="text-[10px] font-medium text-gray-500">
-                                                        {appt.provider}
-                                                    </p>
-                                                </div>
-                                            </div>
+                                    selectedDateBookings.map((booking) => {
+                                        const IconComponent = getServiceIcon(
+                                            booking.service?.icon,
+                                        );
 
-                                            <div className="space-y-1 text-[10px] leading-normal font-semibold text-secondary">
-                                                <div className="flex items-center gap-1">
-                                                    <Clock className="h-3.5 w-3.5" />
-                                                    <span>
-                                                        {appt.time} (
-                                                        {appt.duration} mins)
-                                                    </span>
-                                                </div>
-
-                                                {appt.notes && (
-                                                    <p className="mt-1 border-l border-outline-variant pl-1 text-gray-400 italic dark:text-neutral-400">
-                                                        "{appt.notes}"
-                                                    </p>
-                                                )}
-                                            </div>
-
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    handleCancelAppointment(
-                                                        appt.id,
-                                                    )
-                                                }
-                                                className="flex w-full items-center justify-center gap-1 rounded-lg border border-red-200/40 bg-red-50 py-1.5 text-[10px] font-bold text-red-600 transition-colors hover:bg-red-100 dark:border-transparent dark:bg-red-950/20 dark:hover:bg-red-900/30"
+                                        return (
+                                            <div
+                                                key={booking.id}
+                                                className="space-y-3 rounded-xl border border-outline-variant bg-gray-50/50 p-4 dark:bg-neutral-800/30"
                                             >
-                                                <Ban className="h-3 w-3" />
-                                                Cancel Appointment
-                                            </button>
-                                        </div>
-                                    ))
+                                                <div className="flex gap-3">
+                                                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 font-mono text-lg font-bold text-primary select-none">
+                                                        {
+                                                            <IconComponent className="h-4 w-4" />
+                                                        }
+                                                    </div>
+
+                                                    <div>
+                                                        <h4 className="text-xs font-extrabold text-gray-900 dark:text-white">
+                                                            {
+                                                                booking.service
+                                                                    ?.name
+                                                            }
+                                                        </h4>
+
+                                                        <p className="max-w-[160px] truncate text-[10px] font-medium text-gray-500">
+                                                            {
+                                                                booking.service
+                                                                    ?.description
+                                                            }
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-1 text-[10px] leading-normal font-semibold text-secondary">
+                                                    <div className="flex items-center gap-1">
+                                                        <Clock className="h-3.5 w-3.5" />
+
+                                                        <span>
+                                                            {formatTime(
+                                                                booking.start_time,
+                                                            )}{' '}
+                                                            -{' '}
+                                                            {formatTime(
+                                                                booking.end_time,
+                                                            )}{' '}
+                                                            (
+                                                            {
+                                                                booking.service
+                                                                    ?.duration
+                                                            }{' '}
+                                                            mins)
+                                                        </span>
+                                                    </div>
+
+                                                    <p className="text-[9px] text-gray-400">
+                                                        Client:{' '}
+                                                        {booking.client_name}
+                                                    </p>
+                                                </div>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        handleCancelAppointment(
+                                                            String(booking.id),
+                                                        )
+                                                    }
+                                                    className="flex w-full items-center justify-center gap-1 rounded-lg border border-red-200/40 bg-red-50 py-1.5 text-[10px] font-bold text-red-600 transition-colors hover:bg-red-100 dark:border-transparent dark:bg-red-950/20 dark:hover:bg-red-900/30"
+                                                >
+                                                    <Ban className="h-3 w-3" />
+                                                    Cancel Booking
+                                                </button>
+                                            </div>
+                                        );
+                                    })
                                 )}
                             </div>
 
                             <hr className="border-outline-variant dark:border-neutral-800" />
 
-                            {/* Upcoming Appointments matches the screenshot exactly */}
+                            {/* Upcoming Bookings matches the screenshot exactly */}
                             <div className="min-h-[300px] flex-grow space-y-3 overflow-y-auto pr-1">
                                 <h3 className="text-xs font-black tracking-wider text-gray-500 uppercase">
-                                    Upcoming Appointments
+                                    Upcoming Bookings
                                 </h3>
 
                                 <div className="flex flex-col gap-3">
-                                    {upcomingAppointments.length === 0 ? (
+                                    {upcomingBookings.length === 0 ? (
                                         <p className="py-4 text-center text-[10px] font-bold text-gray-400 italic">
                                             No future sessions scheduled.
                                         </p>
                                     ) : (
-                                        upcomingAppointments
+                                        upcomingBookings
                                             .slice(0, 3)
-                                            .map((appt) => (
-                                                <div
-                                                    key={appt.id}
-                                                    onClick={() =>
-                                                        onSelectDate(appt.date)
-                                                    }
-                                                    className="group flex cursor-pointer flex-col justify-between rounded-xl border border-outline-variant bg-white p-3.5 shadow-xs transition-all hover:border-primary hover:shadow-xs dark:border-neutral-800 dark:bg-neutral-900"
-                                                >
-                                                    <div className="mb-2 flex items-start justify-between gap-2">
-                                                        <div className="flex items-center gap-2.5">
-                                                            <div
-                                                                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-                                                                    appt.category ===
-                                                                    'dental'
-                                                                        ? 'bg-primary/10 text-primary'
-                                                                        : 'bg-tertiary-fixed text-tertiary'
-                                                                }`}
-                                                            >
-                                                                {appt.category ===
-                                                                'dental' ? (
-                                                                    <Smile className="h-4 w-4" />
-                                                                ) : (
-                                                                    <Sparkles className="h-4 w-4" />
+                                            .map((booking) => {
+                                        const IconComponent = getServiceIcon(
+                                            booking.service?.icon,
+                                        );
+
+                                                return (
+                                                    <div
+                                                        key={booking.id}
+                                                        onClick={() =>
+                                                            onSelectDate(
+                                                                booking.date,
+                                                            )
+                                                        }
+                                                        className="group flex cursor-pointer flex-col justify-between rounded-xl border border-outline-variant bg-white p-3.5 shadow-xs transition-all hover:border-primary hover:shadow-xs dark:border-neutral-800 dark:bg-neutral-900"
+                                                    >
+                                                        <div className="mb-2 flex items-start justify-between gap-2">
+                                                            <div className="flex items-center gap-2.5">
+                                                                <div
+                                                                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${getServiceTheme(
+                                                                        booking
+                                                                            .service
+                                                                            ?.icon ??
+                                                                            '',
+                                                                    )}`}
+                                                                >
+                                                                    {
+                                                                        <IconComponent className="h-4 w-4" />
+                                                                    }
+                                                                </div>
+                                                                <div>
+                                                                    <p className="max-w-[130px] truncate text-xs font-extrabold text-gray-900 transition-colors group-hover:text-primary dark:text-white">
+                                                                        {
+                                                                            booking
+                                                                                .service
+                                                                                ?.name
+                                                                        }
+                                                                    </p>
+                                                                    <p className="max-w-[130px] truncate text-[9px] font-semibold text-gray-500">
+                                                                        {
+                                                                            booking
+                                                                                .service
+                                                                                ?.description
+                                                                        }
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+
+                                                            <span className="rounded-full border border-emerald-200/50 bg-emerald-50 px-2 py-0.5 text-[8px] font-extrabold tracking-wider text-emerald-700 uppercase dark:bg-emerald-950/20 dark:text-emerald-400">
+                                                                Confirmed
+                                                            </span>
+                                                        </div>
+
+                                                        <div className="mt-1 flex flex-col items-start justify-between gap-3 text-[10px] font-semibold text-secondary">
+                                                            <div className="flex items-center gap-1 text-[9px]">
+                                                                <Calendar className="h-3.5 w-3.5 text-primary" />
+                                                                {new Intl.DateTimeFormat(
+                                                                    'en-US',
+                                                                    {
+                                                                        weekday:
+                                                                            'long',
+                                                                        month: 'short',
+                                                                        day: 'numeric',
+                                                                        year: 'numeric',
+                                                                    },
+                                                                ).format(
+                                                                    new Date(
+                                                                        booking.date,
+                                                                    ),
                                                                 )}
                                                             </div>
-                                                            <div>
-                                                                <p className="max-w-[130px] truncate text-xs font-extrabold text-gray-900 transition-colors group-hover:text-primary dark:text-white">
-                                                                    {appt.title}
-                                                                </p>
-                                                                <p className="max-w-[130px] truncate text-[9px] font-semibold text-gray-500">
-                                                                    {
-                                                                        appt.provider
-                                                                    }
-                                                                </p>
+                                                            <div className="flex items-center gap-1 text-[9px]">
+                                                                <Clock className="h-3.5 w-3.5 text-primary" />
+                                                                {formatTime(
+                                                                    booking.start_time,
+                                                                )}{' '}
+                                                                -{' '}
+                                                                {formatTime(
+                                                                    booking.end_time,
+                                                                )}{' '}
+                                                                (
+                                                                {
+                                                                    booking
+                                                                        .service
+                                                                        ?.duration
+                                                                }{' '}
+                                                                mins)
                                                             </div>
                                                         </div>
-
-                                                        <span className="rounded-full border border-emerald-200/50 bg-emerald-50 px-2 py-0.5 text-[8px] font-extrabold tracking-wider text-emerald-700 uppercase dark:bg-emerald-950/20 dark:text-emerald-400">
-                                                            Confirmed
-                                                        </span>
                                                     </div>
-
-                                                    <div className="mt-1 flex items-center justify-between text-[10px] font-semibold text-secondary">
-                                                        <div className="flex items-center gap-1 text-[9px]">
-                                                            <Clock className="h-3.5 w-3.5 text-primary" />
-                                                            {appt.date},{' '}
-                                                            {appt.time}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))
+                                                );
+                                            })
                                     )}
                                 </div>
                             </div>

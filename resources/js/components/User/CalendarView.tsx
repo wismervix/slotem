@@ -3,10 +3,11 @@ import { useMemo, useState } from 'react';
 
 import {
     formatDate,
+    formatTime,
     generateCalendarDays,
     isPastDate,
 } from '@/lib/calendar-utils';
-import { Appointment, Booking, Availability } from '@/types';
+import { Booking, Availability } from '@/types';
 import {
     Smile,
     Sparkles,
@@ -15,13 +16,13 @@ import {
     ShieldAlert,
     Heart,
 } from 'lucide-react';
+import { getServiceTheme } from '@/lib/service-icons';
 
 interface CalendarViewProps {
     bookings: Booking[];
     availabilities: Availability[];
     selectedDate: string; // YYYY-MM-DD
     onSelectDate: (date: string) => void;
-    appointments: Appointment[];
     searchQuery: string;
     onOpenBookingModal: () => void;
 }
@@ -29,7 +30,6 @@ interface CalendarViewProps {
 export default function CalendarView({
     bookings,
     availabilities,
-    appointments,
     selectedDate,
     searchQuery,
     onSelectDate,
@@ -76,18 +76,13 @@ export default function CalendarView({
         currentMonth === today.getMonth() &&
         currentYear === today.getFullYear();
 
-    const getCategoryTheme = (category: string) => {
-        switch (category) {
-            case 'dental':
-                return 'bg-primary-container text-on-primary-container border-l-4 border-primary';
-            case 'wellness':
-                return 'bg-tertiary-fixed text-on-tertiary-fixed border-l-4 border-tertiary';
-            case 'general':
-                return 'bg-blue-100 dark:bg-blue-950/30 text-blue-800 dark:text-blue-300 border-l-4 border-blue-600';
-            default:
-                return 'bg-purple-100 dark:bg-purple-950/30 text-purple-800 dark:text-purple-300 border-l-4 border-purple-600';
-        }
-    };
+    function truncate(text: string, maxLength: number) {
+        return text.length > maxLength
+            ? text.slice(0, maxLength) + '...'
+            : text;
+    }
+
+    console.log('Bookings: ', bookings);
 
     return (
         <>
@@ -161,20 +156,30 @@ export default function CalendarView({
                         const disabled = isPastDate(date) || !available;
 
                         // Find active appointments on this day (non-cancelled) and match search query
-                        const rawDayAppts = appointments.filter(
-                            (a) =>
-                                a.date === formattedDate &&
-                                a.status !== 'Cancelled',
-                        );
-                        const dayAppts = rawDayAppts.filter(
-                            (a) =>
-                                a.title
-                                    .toLowerCase()
-                                    .includes(searchQuery.toLowerCase()) ||
-                                a.provider
-                                    .toLowerCase()
-                                    .includes(searchQuery.toLowerCase()),
-                        );
+                        const activeBookings = bookings.filter((booking) => {
+                            const bookingDate = booking.date.split('T')[0];
+
+                            return (
+                                bookingDate === formattedDate &&
+                                booking.status !== 'cancelled' &&
+                                booking.status !== 'rejected'
+                            );
+                        });
+
+                        const dayBookings = activeBookings.filter((booking) => {
+                            const query = searchQuery.toLowerCase();
+
+                            const name =
+                                booking.service?.name?.toLowerCase() ?? 'No name';
+                            const description =
+                                booking.service?.description?.toLowerCase() ??
+                                'No description';
+
+                            return (
+                                name.includes(query) ||
+                                description.includes(query)
+                            );
+                        });
 
                         return (
                             <div
@@ -194,11 +199,11 @@ export default function CalendarView({
                                 <div className="mb-2 flex items-start justify-between">
                                     {isToday ? (
                                         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-white shadow-sm">
-                                            26
+                                            {date.getDate()}
                                         </span>
                                     ) : (
                                         <span
-                                            className={`text-xs font-bold ${dayAppts.length > 0 ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}
+                                            className={`text-xs font-bold ${dayBookings.length > 0 ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}
                                         >
                                             {date.getDate()}
                                         </span>
@@ -218,33 +223,47 @@ export default function CalendarView({
 
                                 {/* Day badges (appointments) */}
                                 <div className="mt-auto space-y-1">
-                                    {dayAppts.slice(0, 2).map((appt) => (
+                                    {dayBookings.slice(0, 2).map((booking) => (
                                         <div
-                                            key={appt.id}
-                                            title={`${appt.title} at ${appt.provider}`}
-                                            className={`truncate rounded-lg border-l-4 p-1.5 font-sans text-[10px] leading-normal shadow-xs ${getCategoryTheme(appt.category)}`}
+                                            key={booking.id}
+                                            title={`${booking.service?.name} • ${formatTime(booking.start_time)} - ${formatTime(booking.end_time)}`}
+                                            className={`truncate rounded-lg border-l-4 p-1.5 font-sans text-[10px] leading-normal shadow-xs ${getServiceTheme(
+                                                booking.service?.icon ?? '',
+                                            )}`}
                                         >
                                             <p className="truncate leading-tight font-extrabold">
-                                                {appt.title}
+                                                {booking.service?.name}
                                             </p>
+
+                                            {/* Service Description */}
+                                            {booking.service?.description && (
+                                                <p className="truncate text-[9px] opacity-75">
+                                                    {truncate(
+                                                        booking.service
+                                                            .description,
+                                                        24,
+                                                    )}
+                                                </p>
+                                            )}
                                             <p className="mt-0.5 flex items-center gap-0.5 font-mono text-[9px] leading-none opacity-80">
                                                 <Clock className="inline h-2.5 w-2.5" />{' '}
-                                                {appt.time}
+                                                {formatTime(booking.start_time)}{' '}
+                                                                                                — {formatTime(booking.end_time)}
                                             </p>
                                         </div>
                                     ))}
 
                                     {/* Overflows indicator */}
-                                    {dayAppts.length > 2 && (
+                                    {dayBookings.length > 2 && (
                                         <p className="block pl-1 text-[9px] font-bold text-primary dark:text-primary-fixed">
-                                            + {dayAppts.length - 2} more slots
+                                            + {dayBookings.length - 2} more
+                                            slots
                                         </p>
                                     )}
                                 </div>
                             </div>
                         );
                     })}
-
                 </div>
             </div>
         </>

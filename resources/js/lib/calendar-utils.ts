@@ -7,6 +7,20 @@ export function formatDate(date: Date): string {
     return `${year}-${month}-${day}`;
 }
 
+export const formatTime = (time: string) => {
+    const [hours, minutes] = time.split(':');
+
+    const date = new Date();
+    date.setHours(Number(hours));
+    date.setMinutes(Number(minutes));
+
+    return new Intl.DateTimeFormat('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+    }).format(date);
+};
+
 export function isSameDate(a: Date, b: Date): boolean {
     return (
         a.getFullYear() === b.getFullYear() &&
