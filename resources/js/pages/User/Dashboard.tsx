@@ -27,10 +27,10 @@ import { motion } from 'motion/react';
 import { Link } from '@inertiajs/react';
 
 interface UserDashboardProps {
- bookings: Booking
-};
+    bookings: Booking[];
+}
 
-export default function UserDashboard({bookings}:UserDashboardProps) {
+export default function UserDashboard({ bookings }: UserDashboardProps) {
     const [appointments, setAppointments] = useState<Appointment[]>(() => {
         return DEFAULT_APPOINTMENTS;
     });
@@ -148,6 +148,14 @@ export default function UserDashboard({bookings}:UserDashboardProps) {
     const toggleGoal = (id: string) => {
         setCheckedGoals((prev) => ({ ...prev, [id]: !prev[id] }));
     };
+
+    const completedBookings = bookings.filter((a) => a.status === 'completed');
+    const activeBookings = bookings.filter((a) => a.status === 'approved');
+    const pendingBookings = bookings.filter((a) => a.status === 'pending');
+
+    const totalSpent = bookings.reduce((sum, booking) => {
+        return sum + (Number(booking.service?.price) ?? 0);
+    }, 0);
 
     const activeAppts = appointments.filter((a) => a.status === 'Confirmed');
     const pendingAppts = appointments.filter((a) => a.status === 'Pending');
@@ -295,7 +303,7 @@ export default function UserDashboard({bookings}:UserDashboardProps) {
                             </span>
                             , you currently have{' '}
                             <strong className="text-white underline">
-                                {activeAppts.length}
+                                {activeBookings.length}
                             </strong>{' '}
                             active consultations and wellness appointments
                             scheduled for this cycle. Keep healthy!
@@ -332,41 +340,37 @@ export default function UserDashboard({bookings}:UserDashboardProps) {
                         </div>
                         <div>
                             <p className="text-xs font-semibold text-gray-500 uppercase">
-                                Confirmed
+                                Completed
                             </p>
                             <h4 className="mt-0.5 text-xl font-extrabold text-gray-900 dark:text-white">
-                                {activeAppts.length}
-                            </h4>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-4 rounded-xl border border-outline-variant bg-white p-4 transition-colors hover:border-tertiary dark:bg-neutral-900">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-tertiary-fixed/30 text-tertiary">
-                            <Clock className="h-5 w-5" />
-                        </div>
-                        <div>
-                            <p className="text-xs font-semibold text-gray-500 uppercase">
-                                Total Spent
-                            </p>
-                            <h4 className="mt-0.5 text-xl font-extrabold text-gray-900 dark:text-white">
-                                $
-                                {appointments.reduce(
-                                    (sum, item) => sum + (item.price || 0),
-                                    0,
-                                )}
+                                {completedBookings.length}
                             </h4>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-4 rounded-xl border border-outline-variant bg-white p-4 transition-colors hover:border-emerald-500 dark:bg-neutral-900">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20">
+                            <Clock className="h-5 w-5" />
+                        </div>
+                        <div>
+                            <p className="text-xs font-semibold text-gray-500 uppercase">
+                                Total Spent
+                            </p>
+                            <h4 className="mt-0.5 text-xl font-extrabold text-gray-900 dark:text-emerald-400">
+                                ${totalSpent}
+                            </h4>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 rounded-xl border border-outline-variant bg-white p-4 transition-colors hover:border-amber-500 dark:bg-neutral-900">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-600 dark:bg-amber-950/20">
                             <ShieldCheck className="h-5 w-5" />
                         </div>
                         <div>
                             <p className="text-xs font-semibold text-gray-500 uppercase">
                                 Account Rank
                             </p>
-                            <h4 className="text-md mt-0.5 font-extrabold text-emerald-700 dark:text-emerald-400">
+                            <h4 className="text-md mt-0.5 font-extrabold text-amber-700 dark:text-amber-400">
                                 Premium Gold
                             </h4>
                         </div>
