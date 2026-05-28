@@ -2,7 +2,7 @@ import { NotificationItem } from '@/types';
 
 export const DEFAULT_NOTIFICATIONS: NotificationItem[] = [
     {
-        id: 'notif-1',
+        id: 1,
         title: 'Dental Consultation Confirmed',
         message:
             'Your slot at Smile Clinic West with Dr. Sarah Jenkins is verified. Please bring your health policy credential.',
@@ -13,7 +13,7 @@ export const DEFAULT_NOTIFICATIONS: NotificationItem[] = [
         dateGroup: 'Today',
     },
     {
-        id: 'notif-2',
+        id: 2,
         title: 'Reminder: Deep Tissue Massage',
         message:
             'Upcoming session at Zen Wellness Center on Oct 28, 02:00 PM is coming up. Drink lots of water.',
@@ -24,7 +24,7 @@ export const DEFAULT_NOTIFICATIONS: NotificationItem[] = [
         dateGroup: 'Today',
     },
     {
-        id: 'notif-3',
+        id: 3,
         title: 'Welcome to Slotem Management Suite',
         message:
             'Welcome! Organize your visits, search, and schedule appointments instantly.',
@@ -34,7 +34,7 @@ export const DEFAULT_NOTIFICATIONS: NotificationItem[] = [
         type: 'info',
     },
     {
-        id: 'notif-4',
+        id: 4,
         title: 'Booking Confirmed: Dental Cleaning',
         message:
             'Your appointment with Dr. Aris Thorne is confirmed for October 24, at 10:30 AM. Please arrive 10 minutes early.',
@@ -45,7 +45,7 @@ export const DEFAULT_NOTIFICATIONS: NotificationItem[] = [
         dateGroup: 'Today',
     },
     {
-        id: 'notif-5',
+        id: 5,
         title: 'System Update: Version 2.4.0',
         message:
             "We've improved the calendar loading speeds and fixed minor bugs in the time-picker interface. Explore the new 'Quick Book' feature.",
@@ -56,7 +56,7 @@ export const DEFAULT_NOTIFICATIONS: NotificationItem[] = [
         dateGroup: 'Today',
     },
     {
-        id: 'notif-6',
+        id: 6,
         title: 'Reminder: Haircut tomorrow',
         message:
             "Don't forget your 3:00 PM session at 'The Grooming Room' with stylist Sarah. See you then!",
@@ -67,7 +67,7 @@ export const DEFAULT_NOTIFICATIONS: NotificationItem[] = [
         dateGroup: 'Yesterday',
     },
     {
-        id: 'notif-7',
+        id: 7,
         title: 'Pro Tip: Sync your Calendar',
         message:
             'Integrate Slotem with Google or Outlook to never miss an appointment again. Setup takes less than a minute.',

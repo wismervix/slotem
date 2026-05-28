@@ -16,7 +16,7 @@ type NotificationCategory = 'All' | 'Bookings' | 'Reminders' | 'Updates';
 type NotificationType = 'booking' | 'update' | 'reminder' | 'tip' | 'success' | 'info' | 'reminder';
 
 export interface NotificationItem {
-    id: string;
+    id: number;
     title: string;
     message: string;
     timestamp: string;

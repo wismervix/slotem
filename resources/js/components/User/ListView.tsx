@@ -26,8 +26,8 @@ import { formatTime } from '@/lib/calendar-utils';
 interface ListViewProps {
     bookings: Booking[];
     searchQuery: string;
-    onCancelAppointment: (id: string) => void;
-    onRescheduleAppointment: (id: string) => void;
+    onCancelAppointment: (id: number) => void;
+    onRescheduleAppointment: (id: number) => void;
 }
 
 type BookingStatusGroup = 'all' | 'pending' | 'confirmed' | 'failed';
@@ -150,30 +150,29 @@ export default function ListView({
     // };
 
     const getStatusPill = (status: Booking['status']) => {
-    const group = getStatusGroup(status);
+        const group = getStatusGroup(status);
 
-    if (group === 'confirmed') {
+        if (group === 'confirmed') {
+            return (
+                <span className="shrink-0 rounded-full border border-emerald-200/50 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 uppercase dark:bg-emerald-950/20 dark:text-emerald-400">
+                    Confirmed
+                </span>
+            );
+        }
+
+        if (group === 'failed') {
+            return (
+                <span className="shrink-0 rounded-full border border-red-200/50 bg-red-50 px-2.5 py-0.5 text-[10px] font-bold text-red-700 uppercase dark:bg-red-950/20 dark:text-red-400">
+                    Failed
+                </span>
+            );
+        }
+
         return (
-            <span className="shrink-0 rounded-full border border-emerald-200/50 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 uppercase dark:bg-emerald-950/20 dark:text-emerald-400">
-                Confirmed
+            <span className="shrink-0 rounded-full border border-amber-200/50 bg-amber-50 px-2.5 py-0.5 text-[10px] font-bold text-amber-700 uppercase dark:bg-amber-950/20 dark:text-amber-400">
+                Pending
             </span>
         );
-    }
-
-    if (group === 'failed') {
-        return (
-            <span className="shrink-0 rounded-full border border-red-200/50 bg-red-50 px-2.5 py-0.5 text-[10px] font-bold text-red-700 uppercase dark:bg-red-950/20 dark:text-red-400">
-                Failed
-            </span>
-        );
-    }
-
-    return (
-        <span className="shrink-0 rounded-full border border-amber-200/50 bg-amber-50 px-2.5 py-0.5 text-[10px] font-bold text-amber-700 uppercase dark:bg-amber-950/20 dark:text-amber-400">
-            Pending
-        </span>
-    );
-
     };
 
     // console.log('Appointments: ', appointments);
@@ -359,7 +358,7 @@ export default function ListView({
                                                 type="button"
                                                 onClick={() =>
                                                     onRescheduleAppointment(
-                                                        String(booking.id),
+                                                        booking.id,
                                                     )
                                                 }
                                                 className="flex items-center gap-1 rounded-lg border border-outline-variant px-3 py-1.5 text-xs font-bold text-on-surface transition-colors hover:bg-surface-container-dark dark:text-on-surface-dark"
@@ -372,7 +371,7 @@ export default function ListView({
                                                 type="button"
                                                 onClick={() =>
                                                     onCancelAppointment(
-                                                        String(booking.id),
+                                                        booking.id,
                                                     )
                                                 }
                                                 className="flex items-center gap-1 rounded-lg bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 transition-colors hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-900/30"
@@ -386,9 +385,7 @@ export default function ListView({
                                         <button
                                             type="button"
                                             onClick={() =>
-                                                onCancelAppointment(
-                                                    String(booking.id),
-                                                )
+                                                onCancelAppointment(booking.id)
                                             }
                                             className="flex items-center gap-1 rounded-lg bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 transition-colors hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-900/30"
                                             title="Cancel this appointment"

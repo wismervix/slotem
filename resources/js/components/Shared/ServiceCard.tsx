@@ -25,7 +25,7 @@ function ServiceBadges({ badges }: { badges?: ServiceBadge[] }) {
     const [first, ...rest] = badges;
 
     return (
-        <div className="group absolute top-6 right-6 flex flex-col items-end gap-2">
+        <div className="absolute top-6 right-6 flex flex-col items-end gap-2">
             {/* Always visible badge */}
             <span
                 className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
@@ -57,7 +57,7 @@ function ServiceBadges({ badges }: { badges?: ServiceBadge[] }) {
 export function ServiceCard({ service, Icon }: any) {
     if (service.variant === 'featured') {
         return (
-            <div className="overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 transition hover:border-purple-500 md:col-span-2 dark:border-slate-700 dark:bg-slate-800">
+            <div className="group overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 transition hover:border-purple-500 md:col-span-2 dark:border-slate-700 dark:bg-slate-800">
                 <div className="flex h-full flex-col md:flex-row">
                     <div className="md:w-1/3">
                         <img
@@ -118,7 +118,7 @@ export function ServiceCard({ service, Icon }: any) {
     }
 
     return (
-        <div className="relative flex flex-col rounded-3xl border border-slate-200 bg-white p-8 transition hover:border-purple-500 dark:border-slate-700 dark:bg-slate-900">
+        <div className="group relative flex flex-col rounded-3xl border border-slate-200 bg-white p-8 transition hover:border-purple-500 dark:border-slate-700 dark:bg-slate-900">
             <ServiceBadges badges={service.badges} />
 
             <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-100 text-purple-600 dark:bg-purple-500/10">

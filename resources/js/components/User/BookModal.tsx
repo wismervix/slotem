@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Appointment } from '@/types';
+import { Booking } from '@/types';
 import {
     X,
     Calendar as CalendarIcon,
@@ -19,16 +19,7 @@ import { motion, AnimatePresence } from 'motion/react';
 interface BookModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (appt: {
-        title: string;
-        provider: string;
-        date: string;
-        time: string;
-        duration: number;
-        category: 'dental' | 'wellness' | 'consultation' | 'general';
-        notes: string;
-        price: number;
-    }) => void;
+    onSave: (appt: {}) => void;
     preselectedDate?: string;
 }
 
@@ -105,16 +96,17 @@ export default function BookModal({
         } else {
             // Confirm booking
             const preset = PRESETS[selectedPreset];
-            onSave({
-                title: preset.title,
-                provider: preset.provider,
-                date,
-                time,
-                duration: preset.duration,
-                category: preset.category,
-                notes,
-                price: preset.price,
-            });
+            onSave({});
+            // onSave({
+            //     title: preset.title,
+            //     provider: preset.provider,
+            //     date,
+            //     time,
+            //     duration: preset.duration,
+            //     category: preset.category,
+            //     notes,
+            //     price: preset.price,
+            // });
             setShowSuccess(true);
         }
     };

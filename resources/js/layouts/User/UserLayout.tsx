@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { Appointment, NotificationItem } from '@/types/calendar-view-types';
 import { Booking, ServiceIcon } from '@/types';
-import { getServiceTheme, serviceIcons } from '@/lib/service-icons';
+import { getServiceIcon, getServiceTheme, serviceIcons } from '@/lib/service-icons';
 import { formatTime } from '@/lib/calendar-utils';
 
 interface Props {
@@ -31,18 +31,9 @@ interface Props {
     searchQuery?: string;
     setSearchQuery?: (query: string) => void;
     onSelectDate?: (date: string) => void;
-    handleRescheduleAppointment?: (id: string) => void;
-    handleCancelAppointment?: (id: string) => void;
-    handleAddNewAppointment?: (newAppt: {
-        title: string;
-        provider: string;
-        date: string;
-        time: string;
-        duration: number;
-        category: 'dental' | 'wellness' | 'consultation' | 'general';
-        notes: string;
-        price: number;
-    }) => void;
+    handleRescheduleAppointment?: (id: number) => void;
+    handleCancelAppointment?: (id: number) => void;
+    handleAddNewAppointment?: (newAppt: {}) => void;
     headerActions?: ReactNode;
 }
 
@@ -106,10 +97,6 @@ export default function UserLayout({
     const unreadNotificationsCount = notifications.filter(
         (n) => !n.read,
     ).length;
-
-    const getServiceIcon = (iconKey?: ServiceIcon) => {
-        return iconKey ? serviceIcons[iconKey] : Smile;
-    };
 
     return (
         <div className="flex min-h-screen flex-col bg-[#fef7ff] font-sans text-gray-900 antialiased transition-colors duration-200 md:flex-row dark:bg-neutral-950 dark:text-neutral-100">
@@ -268,7 +255,7 @@ export default function UserLayout({
                                                     type="button"
                                                     onClick={() =>
                                                         handleCancelAppointment(
-                                                            String(booking.id),
+                                                            booking.id,
                                                         )
                                                     }
                                                     className="flex w-full items-center justify-center gap-1 rounded-lg border border-red-200/40 bg-red-50 py-1.5 text-[10px] font-bold text-red-600 transition-colors hover:bg-red-100 dark:border-transparent dark:bg-red-950/20 dark:hover:bg-red-900/30"
@@ -299,9 +286,10 @@ export default function UserLayout({
                                         upcomingBookings
                                             .slice(0, 3)
                                             .map((booking) => {
-                                        const IconComponent = getServiceIcon(
-                                            booking.service?.icon,
-                                        );
+                                                const IconComponent =
+                                                    getServiceIcon(
+                                                        booking.service?.icon,
+                                                    );
 
                                                 return (
                                                     <div

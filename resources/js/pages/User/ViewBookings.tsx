@@ -1,9 +1,8 @@
-import { DEFAULT_APPOINTMENTS } from '@/data/appointments';
+import { router } from '@inertiajs/react';
 import CalendarView from '@/components/User/CalendarView';
 import ListView from '@/components/User/ListView';
 import UserLayout from '@/layouts/User/UserLayout';
 import type {
-    Appointment,
     Booking,
     NotificationItem,
     Availability,
@@ -14,14 +13,10 @@ import { CalendarDays, List } from 'lucide-react';
 
 type ViewBookingsProps = {
     bookings: Booking[];
-        availabilities: Availability[];
+    availabilities: Availability[];
 };
 
 const ViewBookings = ({ bookings, availabilities }: ViewBookingsProps) => {
-    const [appointments, setAppointments] = useState<Appointment[]>(() => {
-        return DEFAULT_APPOINTMENTS;
-    });
-
     const [notifications, setNotifications] = useState<NotificationItem[]>(
         () => {
             return DEFAULT_NOTIFICATIONS;
@@ -36,77 +31,72 @@ const ViewBookings = ({ bookings, availabilities }: ViewBookingsProps) => {
 
     const [isBookModalOpen, setIsBookModalOpen] = useState(false);
 
-    const handleRescheduleAppointment = (id: string) => {
-        setAppointments((prev) =>
-            prev.map((a) =>
-                a.id === id ? { ...a, status: 'Confirmed' as const } : a,
-            ),
-        );
+    const handleRescheduleAppointment = (id: number) => {
+        router.patch(
+            route('', id),
+            {},
+            {
+                preserveScroll: true,
 
-        const confirmed = appointments.find((a) => a.id === id);
-        if (confirmed) {
-            const alert: NotificationItem = {
-                id: `notif-${Date.now()}`,
-                title: `Confirmed: ${confirmed.title}`,
-                message: `Your appointment for ${confirmed.title} on ${confirmed.date} has been successfully cancelled. Co-payments will be refunded.`,
-                timestamp: 'Just now',
-                read: false,
-                type: 'reminder',
-                category: 'Reminders',
-                dateGroup: 'Today',
-            };
-            setNotifications((prev) => [alert, ...prev]);
-        }
+                onSuccess: () => {
+                    const confirmed = bookings.find((a) => a.id === id);
+
+                    if (confirmed) {
+                        const alert: NotificationItem = {
+                            id: Date.now(),
+                            title: `Confirmed: ${confirmed.service?.name}`,
+                            message: `Your appointment for ${confirmed.service?.name} on ${confirmed.date} has been successfully cancelled. Co-payments will be refunded.`,
+                            timestamp: 'Just now',
+                            read: false,
+                            type: 'reminder',
+                            category: 'Reminders',
+                            dateGroup: 'Today',
+                        };
+
+                        setNotifications((prev) => [alert, ...prev]);
+                    }
+                },
+            },
+        );
     };
 
-    const handleCancelAppointment = (id: string) => {
-        setAppointments((prev) =>
-            prev.map((a) =>
-                a.id === id ? { ...a, status: 'Cancelled' as const } : a,
-            ),
-        );
+    const handleCancelAppointment = (id: number) => {
+        router.patch(
+            route('', id),
+            {},
+            {
+                preserveScroll: true,
 
-        const cancelled = appointments.find((a) => a.id === id);
-        if (cancelled) {
-            const alert: NotificationItem = {
-                id: `notif-${Date.now()}`,
-                title: `Cancelled: ${cancelled.title}`,
-                message: `Your appointment for ${cancelled.title} on ${cancelled.date} has been successfully cancelled. Co-payments will be refunded.`,
-                timestamp: 'Just now',
-                read: false,
-                type: 'reminder',
-                category: 'Reminders',
-                dateGroup: 'Today',
-            };
-            setNotifications((prev) => [alert, ...prev]);
-        }
+                onSuccess: () => {
+                    const cancelled = bookings.find((a) => a.id === id);
+
+                    if (cancelled) {
+                        const alert: NotificationItem = {
+                            id: Date.now(),
+                            title: `Cancelled: ${cancelled.service?.name}`,
+                            message: `Your appointment for ${cancelled.service?.name} on ${cancelled.date} has been successfully cancelled.`,
+                            timestamp: 'Just now',
+                            read: false,
+                            type: 'reminder',
+                            category: 'Reminders',
+                            dateGroup: 'Today',
+                        };
+
+                        setNotifications((prev) => [alert, ...prev]);
+                    }
+                },
+            },
+        );
     };
 
-    // Handler functions
-    const handleAddNewAppointment = (newAppt: {
-        title: string;
-        provider: string;
-        date: string;
-        time: string;
-        duration: number;
-        category: 'dental' | 'wellness' | 'consultation' | 'general';
-        notes: string;
-        price: number;
-    }) => {
-        const id = `appt-${Date.now()}`;
-        const added: Appointment = {
-            ...newAppt,
-            id,
-            status: 'Confirmed',
-        };
-
-        setAppointments((prev) => [added, ...prev]);
-
-        // Push interactive notification
+    const handleAddNewAppointment = (newBooking: {}) => {
+        // Push notification only
         const alert: NotificationItem = {
-            id: `notif-${Date.now()}`,
-            title: `Scheduled: ${added.title}`,
-            message: `Your booking for ${added.title} with ${added.provider} on ${added.date} at ${added.time} was scheduled successfully.`,
+            id: Date.now(),
+            // title: `Scheduled: ${newBooking.service?.name}`,
+            // message: `Your booking for ${newBooking.service?.name} on ${newBooking.date} was scheduled successfully.`,
+            title: `Scheduled: ServiceName`,
+            message: `Your booking for ServiceName on BookingDate was scheduled successfully.`,
             timestamp: 'Just now',
             category: 'Bookings',
             read: false,
@@ -115,7 +105,7 @@ const ViewBookings = ({ bookings, availabilities }: ViewBookingsProps) => {
         };
 
         setNotifications((prev) => [alert, ...prev]);
-    };
+    };;
 
     return (
         <UserLayout
