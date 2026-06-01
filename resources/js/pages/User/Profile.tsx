@@ -408,7 +408,7 @@ export default function App() {
                             </div>
         
                             <div>
-                                <p className="text-xl font-bold text-on-surface dark:text-on-surface-dark">
+                                <p className="text-xl font-bold text-on-surface dark:text-surface">
                                     Slotem Premium Subscriber
                                 </p>
         

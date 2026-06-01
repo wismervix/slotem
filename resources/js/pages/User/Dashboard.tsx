@@ -349,6 +349,26 @@ export default function UserDashboard({
         }
     };
 
+    const getEngagementIcon = (status: Booking['status']) => {
+        switch (status) {
+            case 'completed':
+                return <CheckCircle className="h-4 w-4 text-white" />;
+
+            case 'approved':
+                return <Clock className="h-4 w-4 text-white" />;
+
+            case 'pending':
+                return <Eye className="h-4 w-4 text-white" />;
+
+            case 'cancelled':
+            case 'rejected':
+                return <XCircle className="h-4 w-4 text-white" />;
+
+            default:
+                return <CheckCircle className="h-4 w-4 text-white" />;
+        }
+    };
+
     return (
         <UserLayout
             notifications={notifications}
@@ -660,7 +680,7 @@ export default function UserDashboard({
                                                   : 'border-amber-500 bg-amber-500 text-white'
                                         }`}
                                     >
-                                        <CheckCircle className="h-4 w-4" />
+                                        {getEngagementIcon(booking.status)}
                                     </div>
 
                                     <div className="min-w-0">

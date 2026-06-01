@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use App\Models\Booking;
+use App\Models\UserSetting;
 // use Illuminate\Database\Eloquent\Attributes\Fillable;
 // use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -22,6 +23,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'phone',
+        'avatar_url',
     ];
 
     protected $hidden = [
@@ -45,5 +48,10 @@ class User extends Authenticatable
     public function bookings()
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function settings()
+    {
+        return $this->hasOne(UserSetting::class);
     }
 }

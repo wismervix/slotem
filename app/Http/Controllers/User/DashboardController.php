@@ -60,6 +60,28 @@ class DashboardController extends Controller
 
     public function profile()
     {
+        /** @var User $user */
+        $user = Auth::user();
+
+        $user->load('settings');
+
+        return inertia('User/Profile', [
+            'profile' => [
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'avatar' => $user->avatar_url,
+                'memberSince' => $user->created_at->format('F Y'),
+                'marketingConsent' =>
+                $user->settings?->marketing_consent ?? true,
+                'productUpdates' =>
+                $user->settings?->product_updates ?? true,
+                'smsReminders' =>
+                $user->settings?->sms_reminders ?? true,
+                'soundEnabled' =>
+                $user->settings?->sound_enabled ?? true,
+            ],
+        ]);
         return inertia('User/Profile');
     }
 

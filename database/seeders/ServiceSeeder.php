@@ -36,7 +36,7 @@ class ServiceSeeder extends Seeder
                 'duration' => 20,
                 'variant' => 'standard',
                 'active' => true,
-                'badges' => null,
+                'badges' => ['recommended'],
                 'image' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
