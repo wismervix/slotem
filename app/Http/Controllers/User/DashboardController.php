@@ -82,7 +82,6 @@ class DashboardController extends Controller
                 $user->settings?->sound_enabled ?? true,
             ],
         ]);
-        return inertia('User/Profile');
     }
 
     public function notifications()
