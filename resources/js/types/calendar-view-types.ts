@@ -31,10 +31,11 @@ export interface UserProfile {
     name: string;
     email: string;
     phone?: string;
-    preferredClinic: string;
+    password: string;
+    avatar_url: string;
     memberSince: string;
-    marketingConsent: boolean;
-    productUpdates: boolean;
-    smsReminders: boolean;
-    soundEnabled: boolean;
+    marketing_consent: boolean;
+    product_updates: boolean;
+    sms_reminders: boolean;
+    sound_enabled: boolean;
 }

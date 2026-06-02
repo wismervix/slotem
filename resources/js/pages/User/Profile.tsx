@@ -1,23 +1,21 @@
-import { DEFAULT_PROFILE } from '@/data/profile';
+import { useForm, usePage } from '@inertiajs/react';
 import UserLayout from '@/layouts/User/UserLayout';
-import { UserProfile } from '@/types/calendar-view-types';
-import { useState } from 'react';
+import { UserProfile } from '@/types';
+import { useEffect, useState } from 'react';
 import {
     User,
     Mail,
     Phone,
-    Hospital,
     BadgeCheck,
     Save,
-    BellRing,
     ShieldAlert,
     CheckCircle,
-    Eye,
-    EyeOff,
     Moon,
     Sun,
     Activity,
     Camera,
+    Lock,
+    Loader2,
 } from 'lucide-react';
 
 type ProfileProps = {
@@ -25,51 +23,78 @@ type ProfileProps = {
 };
 
 export default function Profile({ profile: initialProfile }: ProfileProps) {
-    const [profile, setProfile] = useState<UserProfile>(() => {
-        const saved = localStorage.getItem('slotem_profile');
-        return saved ? JSON.parse(saved) : DEFAULT_PROFILE;
+    const { data, setData, post, processing, errors, reset } = useForm({
+        name: initialProfile.name ?? '',
+        email: initialProfile.email ?? '',
+        phone: initialProfile.phone ?? '',
+        password: '',
+        marketing_consent: initialProfile.marketing_consent ?? false,
+        product_updates: initialProfile.product_updates ?? false,
+        sms_reminders: initialProfile.sms_reminders ?? false,
+        sound_enabled: initialProfile.sound_enabled ?? false,
+        avatar_url: null as File | null,
+        _method: 'put',
     });
 
-    const handleSaveProfile = (updated: UserProfile) => {
-        setProfile(updated);
-    };
-    const [name, setName] = useState(profile.name);
-    const [email, setEmail] = useState(profile.email);
-    const [phone, setPhone] = useState(profile.phone);
-    const [preferredClinic, setPreferredClinic] = useState(
-        profile.preferredClinic,
-    );
-    const [marketingConsent, setMarketingConsent] = useState(
-        profile.marketingConsent,
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(
+        initialProfile.avatar_url ?? null,
     );
 
-    // Extra settings for richness
-    const [productUpdates, setProductUpdates] = useState(true);
-    const [smsReminders, setSmsReminders] = useState(true);
-    const [soundEnabled, setSoundEnabled] = useState(true);
     const [isDarkMode, setIsDarkMode] = useState(() =>
         document.documentElement.classList.contains('dark'),
     );
-    const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+    const props = usePage().props as unknown as {
+        flash?: {
+            success?: string;
+        };
+    };
+
+    const [showToast, setShowToast] = useState(!!props.flash?.success);
+
+    // Auto-hide toast after 4 seconds
+    useEffect(() => {
+        if (props.flash?.success) {
+            setShowToast(true);
+            const timer = setTimeout(() => {
+                setShowToast(false);
+            }, 4000);
+            return () => clearTimeout(timer);
+        }
+    }, [props.flash?.success]); // Re-run when flash.success changes
+
+    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+
+        if (!file) return;
+
+        setData('avatar_url', file);
+
+        const preview = URL.createObjectURL(file);
+
+        setAvatarPreview(preview);
+    };
+
+    useEffect(() => {
+        return () => {
+            if (avatarPreview && avatarPreview.startsWith('blob:')) {
+                URL.revokeObjectURL(avatarPreview);
+            }
+        };
+    }, [avatarPreview]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        handleSaveProfile({
-            name,
-            email,
-            phone,
-            preferredClinic,
-            memberSince: profile.memberSince,
-            marketingConsent,
-            productUpdates,
-            smsReminders,
-            soundEnabled,
-        });
 
-        setToastMessage('Profile settings updated successfully!');
-        setTimeout(() => {
-            setToastMessage(null);
-        }, 4000);
+        // console.log('Form data: ', data);
+        
+        post(route('user.profile.update'), {
+            forceFormData: true,
+
+            onSuccess: () => {
+                reset('password');
+            },
+        });
     };
 
     const handleToggleDarkMode = () => {
@@ -82,24 +107,41 @@ export default function Profile({ profile: initialProfile }: ProfileProps) {
         }
     };
 
-    console.log('Profile: ', initialProfile);
 
     return (
         <UserLayout>
             <div className="max-w-4xl space-y-6 pb-10">
                 {/* Toast Feedback */}
-                {toastMessage && (
+                {props.flash?.success && showToast && (
                     <div className="animate-slide-in fixed right-6 bottom-6 z-50 flex items-center gap-3 rounded-xl border border-emerald-500/30 bg-emerald-600 px-5 py-3 text-white shadow-2xl">
                         <CheckCircle className="h-5 w-5 shrink-0" />
-                        <p className="text-xs font-bold">{toastMessage}</p>
+                        <p className="text-xs font-bold">
+                            {props.flash?.success}
+                        </p>
                     </div>
                 )}
+
+                <div className="absolute right-0 bottom-0 rounded-full bg-primary p-2 text-white shadow-lg">
+                    {processing ? (
+                        <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                        <Camera size={16} />
+                    )}
+                </div>
 
                 {/* Profile summary banner */}
                 <div className="flex flex-col items-center gap-6 rounded-2xl border border-outline-variant bg-white p-6 shadow-xs md:flex-row dark:bg-neutral-900">
                     <div className="relative">
                         <div className="flex h-20 w-20 items-center justify-center rounded-full border border-primary/20 bg-primary-fixed text-2xl font-extrabold text-primary">
-                            {name ? name.charAt(0).toUpperCase() : 'U'}
+                            {avatarPreview ? (
+                                <img
+                                    alt="Profile Avatar"
+                                    src={avatarPreview}
+                                    className="h-full w-full rounded-full object-cover"
+                                />
+                            ) : (
+                                data.name.charAt(0).toUpperCase()
+                            )}
                         </div>
                         <div className="absolute -right-1 -bottom-1 rounded-full border border-white bg-emerald-500 p-1.5 text-white dark:border-neutral-900">
                             <BadgeCheck className="h-4 w-4" />
@@ -109,18 +151,18 @@ export default function Profile({ profile: initialProfile }: ProfileProps) {
                     <div className="flex-grow space-y-1.5 text-center md:text-left">
                         <div className="flex flex-col items-center gap-2 sm:flex-row">
                             <h2 className="text-xl font-extrabold text-gray-900 dark:text-white">
-                                {name || 'Unnamed Slotem User'}
+                                {data.name || 'Unnamed Slotem User'}
                             </h2>
                             <span className="rounded-full bg-primary-container/10 px-2.5 py-0.5 text-[10px] font-extrabold text-primary uppercase">
                                 Loyal Subscriber
                             </span>
                         </div>
                         <p className="text-xs font-medium text-secondary">
-                            Preferred facility: {preferredClinic}
+                            Preferred facility: No preference b
                         </p>
                         <p className="text-[11px] text-gray-400">
-                            Owner of {email} · Member since{' '}
-                            {profile.memberSince}
+                            Owner of {data.email} · Member since{' '}
+                            {initialProfile.memberSince}
                         </p>
                     </div>
 
@@ -145,12 +187,12 @@ export default function Profile({ profile: initialProfile }: ProfileProps) {
                     <div className="rounded-2xl border border-outline-variant bg-white p-6 shadow-xs md:col-span-2 dark:bg-neutral-900">
                         <h3 className="mb-5 flex items-center gap-1.5 text-base font-extrabold text-gray-900 dark:text-white">
                             <User className="h-5 w-5 text-primary" />
-                            Personal Demographics
+                            Account Information
                         </h3>
 
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="mb-8 flex">
-                                <div className="relative">
+                                {/* <div className="relative">
                                     <img
                                         alt="Profile Avatar"
                                         className="h-32 w-32 rounded-full border-4 border-primary-container object-cover shadow-md"
@@ -159,7 +201,41 @@ export default function Profile({ profile: initialProfile }: ProfileProps) {
                                     <button className="absolute right-0 bottom-0 rounded-full bg-primary p-2 text-white shadow-lg transition-transform hover:scale-110 active:scale-95">
                                         <Camera size={16} />
                                     </button>
+                                </div> */}
+
+                                <div className="relative">
+                                    <label
+                                        htmlFor="avatar-upload"
+                                        className="cursor-pointer"
+                                    >
+                                        <img
+                                            alt="Profile Avatar"
+                                            src={
+                                                avatarPreview ??
+                                                'https://lh3.googleusercontent.com/aida-public/AB6AXuAtVMphqG2HwCuaIrB4haHvMou6Onk-SPAyRxnDFm8WRuq5ME7KiRi3ytevgPfpkRRZxe3mLlpXSqnh9oU4L5XJ5RMFEEpCKN3lEgkhwQWqWkkKdMVdVL3Uf_r9PlEFISYU42RXZcT5Lr6mtqWSigRmtKqX02fCAUKnvCKti8ZhZcxgwbiiM1PTSM4mWNlfir_Otm85KpkRTyM9DVdxSvd--rCJ6wupTHptzEDMQXTMx_2wzbxGFT4-RPZ0GD8QrUSBc9vhh62tHE8'
+                                            }
+                                            className="h-32 w-32 rounded-full border-4 border-primary-container object-cover shadow-md"
+                                        />
+
+                                        <div className="absolute right-0 bottom-0 rounded-full bg-primary p-2 text-white shadow-lg">
+                                            <Camera size={16} />
+                                        </div>
+                                    </label>
+
+                                    <input
+                                        id="avatar-upload"
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={handleAvatarChange}
+                                    />
                                 </div>
+
+                                {errors.avatar_url && (
+                                    <p className="mt-2 text-xs text-red-500">
+                                        {errors.avatar_url}
+                                    </p>
+                                )}
                             </div>
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div className="space-y-1.5">
@@ -170,14 +246,19 @@ export default function Profile({ profile: initialProfile }: ProfileProps) {
                                         <User className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-gray-400" />
                                         <input
                                             type="text"
-                                            required
-                                            value={name}
+                                            value={data.name}
                                             onChange={(e) =>
-                                                setName(e.target.value)
+                                                setData('name', e.target.value)
                                             }
                                             className="w-full rounded-xl border border-outline-variant bg-white py-3 pr-4 pl-10 text-xs font-medium focus:border-transparent focus:ring-2 focus:ring-primary focus:outline-none dark:bg-neutral-900"
                                         />
                                     </div>
+
+                                    {errors.name && (
+                                        <p className="mt-1 text-xs text-red-500">
+                                            {errors.name}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="space-y-1.5">
@@ -188,14 +269,19 @@ export default function Profile({ profile: initialProfile }: ProfileProps) {
                                         <Mail className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-gray-400" />
                                         <input
                                             type="email"
-                                            required
-                                            value={email}
+                                            value={data.email}
                                             onChange={(e) =>
-                                                setEmail(e.target.value)
+                                                setData('email', e.target.value)
                                             }
                                             className="w-full rounded-xl border border-outline-variant bg-white py-3 pr-4 pl-10 text-xs font-medium focus:border-transparent focus:ring-2 focus:ring-primary focus:outline-none dark:bg-neutral-900"
                                         />
                                     </div>
+
+                                    {errors.email && (
+                                        <p className="mt-1 text-xs text-red-500">
+                                            {errors.email}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="space-y-1.5">
@@ -206,17 +292,49 @@ export default function Profile({ profile: initialProfile }: ProfileProps) {
                                         <Phone className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-gray-400" />
                                         <input
                                             type="text"
-                                            required
-                                            value={phone}
+                                            value={data.phone}
                                             onChange={(e) =>
-                                                setPhone(e.target.value)
+                                                setData('phone', e.target.value)
                                             }
                                             className="w-full rounded-xl border border-outline-variant bg-white py-3 pr-4 pl-10 text-xs font-medium focus:border-transparent focus:ring-2 focus:ring-primary focus:outline-none dark:bg-neutral-900"
                                         />
                                     </div>
+
+                                    {errors.phone && (
+                                        <p className="mt-1 text-xs text-red-500">
+                                            {errors.phone}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="space-y-1.5">
+                                    <label className="flex items-center gap-1 text-xs font-bold text-gray-500 uppercase">
+                                        Password
+                                    </label>
+                                    <div className="relative">
+                                        <Lock className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                                        <input
+                                            type="password"
+                                            value={data.password}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'password',
+                                                    e.target.value,
+                                                )
+                                            }
+                                            placeholder="Leave blank to keep current password"
+                                            className="w-full rounded-xl border border-outline-variant bg-white py-3 pr-4 pl-10 text-xs font-medium focus:border-transparent focus:ring-2 focus:ring-primary focus:outline-none dark:bg-neutral-900"
+                                        />
+                                    </div>
+
+                                    {errors.password && (
+                                        <p className="mt-1 text-xs text-red-500">
+                                            {errors.password}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* <div className="space-y-1.5">
                                     <label className="flex items-center gap-1 text-xs font-bold text-gray-500 uppercase">
                                         Preferred Clinic
                                     </label>
@@ -245,7 +363,7 @@ export default function Profile({ profile: initialProfile }: ProfileProps) {
                                             </option>
                                         </select>
                                     </div>
-                                </div>
+                                </div> */}
                             </div>
 
                             <div className="my-4 h-px bg-outline-variant" />
@@ -258,9 +376,12 @@ export default function Profile({ profile: initialProfile }: ProfileProps) {
                                 <label className="group flex cursor-pointer items-start gap-3">
                                     <input
                                         type="checkbox"
-                                        checked={smsReminders}
+                                        checked={data.sms_reminders}
                                         onChange={(e) =>
-                                            setSmsReminders(e.target.checked)
+                                            setData(
+                                                'sms_reminders',
+                                                e.target.checked,
+                                            )
                                         }
                                         className="mt-0.5 rounded border-gray-300 text-primary focus:ring-primary"
                                     />
@@ -279,9 +400,12 @@ export default function Profile({ profile: initialProfile }: ProfileProps) {
                                 <label className="group flex cursor-pointer items-start gap-3">
                                     <input
                                         type="checkbox"
-                                        checked={soundEnabled}
+                                        checked={data.sound_enabled}
                                         onChange={(e) =>
-                                            setSoundEnabled(e.target.checked)
+                                            setData(
+                                                'sound_enabled',
+                                                e.target.checked,
+                                            )
                                         }
                                         className="mt-0.5 rounded border-gray-300 text-primary focus:ring-primary"
                                     />
@@ -299,9 +423,10 @@ export default function Profile({ profile: initialProfile }: ProfileProps) {
                                 <label className="group flex cursor-pointer items-start gap-3">
                                     <input
                                         type="checkbox"
-                                        checked={marketingConsent}
+                                        checked={data.marketing_consent}
                                         onChange={(e) =>
-                                            setMarketingConsent(
+                                            setData(
+                                                'marketing_consent',
                                                 e.target.checked,
                                             )
                                         }
@@ -323,9 +448,12 @@ export default function Profile({ profile: initialProfile }: ProfileProps) {
                                 <label className="group flex cursor-pointer items-start gap-3">
                                     <input
                                         type="checkbox"
-                                        checked={productUpdates}
+                                        checked={data.product_updates}
                                         onChange={(e) =>
-                                            setProductUpdates(e.target.checked)
+                                            setData(
+                                                'product_updates',
+                                                e.target.checked,
+                                            )
                                         }
                                         className="mt-0.5 rounded border-gray-300 text-primary focus:ring-primary"
                                     />
@@ -343,10 +471,11 @@ export default function Profile({ profile: initialProfile }: ProfileProps) {
 
                             <button
                                 type="submit"
+                                disabled={processing}
                                 className="mt-6 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-bold text-white transition-all hover:shadow-lg active:scale-98"
                             >
-                                <Save className="h-4 w-4" />
-                                Save Demographic Profile
+                                {!processing && <Save className="h-4 w-4" />}
+                                {processing ? 'Saving...' : 'Save Profile'}
                             </button>
                         </form>
                     </div>

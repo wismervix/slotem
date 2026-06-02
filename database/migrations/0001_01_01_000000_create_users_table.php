@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('password')->nullable();
             $table->string('phone')->nullable();
             $table->string('avatar_url')->nullable();
+            $table->string('avatar_public_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

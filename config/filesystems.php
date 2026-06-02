@@ -60,6 +60,15 @@ return [
             'report' => false,
         ],
 
+        'cloudinary' => [
+            'driver' => 'cloudinary',
+            'url' => env('CLOUDINARY_URL'),
+            'secure' => true,
+            'prefix' => env('CLOUDINARY_UPLOAD_PREFIX', null),
+            'throw' => false,
+            'report' => false,
+        ],
+
     ],
 
     /*

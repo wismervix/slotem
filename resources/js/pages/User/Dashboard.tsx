@@ -13,21 +13,16 @@ import {
 import { useState } from 'react';
 import {
     Calendar,
-    Users,
     Clock,
     ShieldCheck,
     ArrowUpRight,
     Sparkles,
-    Scissors,
-    Smile,
     TrendingUp,
     CheckCircle,
     XCircle,
     Eye,
-    Settings,
     Flame,
     ChevronRight,
-    Bookmark,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Link } from '@inertiajs/react';
