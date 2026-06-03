@@ -23,7 +23,7 @@ export default function UserNotifications() {
         },
     );
 
-    const handleToggleReadNotification = (id: string) => {
+    const handleToggleReadNotification = (id: number) => {
         setNotifications((prev) =>
             prev.map((n) => (n.id === id ? { ...n, read: !n.read } : n)),
         );
@@ -37,13 +37,15 @@ export default function UserNotifications() {
         setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     };
 
-    const markNotificationAsRead = (id: string) => {
-        setNotifications((prev) =>
-            prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
+    const markNotificationAsRead = (id: number) => {
+        setNotifications(
+            (prev) =>
+                prev.map((n) => (n.id === id ? { ...n, read: !n.read } : n)),
+            // prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
         );
     };
 
-    const deleteNotification = (id: string) => {
+    const deleteNotification = (id: number) => {
         setNotifications((prev) => prev.filter((n) => n.id !== id));
     };
 
@@ -246,7 +248,7 @@ export default function UserNotifications() {
                                                         item.id,
                                                     )
                                                 }
-                                                className="flex items-center gap-1.5 text-sm font-semibold text-brand-primary active:scale-95"
+                                                className="flex items-center gap-1.5 text-sm font-semibold cursor-pointer text-brand-primary active:scale-95"
                                             >
                                                 <CheckCircle2 size={14} />
                                                 Mark as read

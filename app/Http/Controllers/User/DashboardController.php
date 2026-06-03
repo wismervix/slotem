@@ -28,12 +28,16 @@ class DashboardController extends Controller
         $availabilities = Availability::with('timeSlots')
             ->whereDate('date', '>=', now()->toDateString())
             ->get();
+
         $services = Service::all();
+
+        $user->load('settings');
 
         return inertia('User/Dashboard', [
             'bookings' => $bookings,
             'services' => $services,
             'availabilities' => $availabilities,
+            'name' => $user->name,
         ]);
     }
 

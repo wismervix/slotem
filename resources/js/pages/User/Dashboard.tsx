@@ -1,14 +1,12 @@
 import { router } from '@inertiajs/react';
 import UserLayout from '@/layouts/User/UserLayout';
 import { DEFAULT_NOTIFICATIONS } from '@/data/notifications';
-import { DEFAULT_PROFILE } from '@/data/profile';
 import {
     Availability,
     Booking,
     NotificationItem,
     Service,
     ServiceBadge,
-    UserProfile,
 } from '@/types';
 import { useState } from 'react';
 import {
@@ -33,6 +31,7 @@ interface UserDashboardProps {
     bookings: Booking[];
     services: Service[];
     availabilities: Availability[];
+    name: String;
 }
 
 export function ServiceBadges({ badges }: { badges?: ServiceBadge[] }) {
@@ -91,16 +90,13 @@ export default function UserDashboard({
     bookings,
     services,
     availabilities,
+    name,
 }: UserDashboardProps) {
     const [notifications, setNotifications] = useState<NotificationItem[]>(
         () => {
             return DEFAULT_NOTIFICATIONS;
         },
     );
-
-    const [profile, setProfile] = useState<UserProfile>(() => {
-        return DEFAULT_PROFILE;
-    });
 
     const [selectedDate, setSelectedDate] = useState<string>('2023-10-26');
 
@@ -245,7 +241,6 @@ export default function UserDashboard({
             .join(' L ') +
         ` L ${chartWidth},${chartHeight} L 0,${chartHeight} Z`;
 
-
     const recentActivity = bookings
         .sort(
             (a, b) =>
@@ -253,7 +248,6 @@ export default function UserDashboard({
                 new Date(a.created_at).getTime(),
         )
         .slice(0, 3);
-
 
     const completedBookings = bookings.filter((a) => a.status === 'completed');
     const activeBookings = bookings.filter((a) => a.status === 'approved');
@@ -386,7 +380,7 @@ export default function UserDashboard({
                         <p className="text-sm leading-relaxed text-primary-fixed opacity-90">
                             Hey{' '}
                             <span className="font-semibold text-white">
-                                {profile.name.split(' ')[0]}
+                                {name.split(' ')[0]} {name.split(' ')[1]}
                             </span>
                             , you currently have{' '}
                             <strong className="text-white underline">
