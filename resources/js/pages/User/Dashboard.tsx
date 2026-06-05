@@ -1,4 +1,4 @@
-import { router } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import UserLayout from '@/layouts/User/UserLayout';
 import {
     Availability,
@@ -28,71 +28,21 @@ import { formatTime } from '@/lib/calendar-utils';
 
 interface UserDashboardProps {
     bookings: Booking[];
-    services: Service[];
     availabilities: Availability[];
     name: String;
     unreadNotificationsCount: number;
 }
 
-export function ServiceBadges({ badges }: { badges?: ServiceBadge[] }) {
-    if (!badges?.length) {
-        return null;
-    }
-
-    const styles = {
-        popular:
-            'bg-purple-100 text-purple-700 dark:bg-purple-500/10 dark:text-purple-300',
-        recommended:
-            'bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300',
-        'best-value':
-            'bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-300',
-    };
-
-    const labels = {
-        popular: 'Popular',
-        recommended: 'Recommended',
-        'best-value': 'Best Value',
-    };
-
-    const [first, ...rest] = badges;
-
-    return (
-        <div className="inline-flex flex-col items-start">
-            {/* Always visible badge */}
-            <span
-                className={`z-10 rounded-full px-2.5 py-0.5 text-[10px] font-extrabold transition ${
-                    styles[first]
-                }`}
-            >
-                {labels[first]}
-            </span>
-
-            {/* Hidden badges (shown on hover) */}
-            {rest.length > 0 && (
-                <div className="pointer-events-none absolute top-[1%] right-[2%] z-20 mt-2 flex translate-y-1 flex-col gap-2 opacity-0 transition-all duration-200 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
-                    {rest.map((badge) => (
-                        <span
-                            key={badge}
-                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold tracking-wide ${
-                                styles[badge]
-                            }`}
-                        >
-                            {labels[badge]}
-                        </span>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-}
-
 export default function UserDashboard({
     bookings,
-    services,
     availabilities,
     name,
     unreadNotificationsCount,
 }: UserDashboardProps) {
+    const { services } = usePage<{ services: Service[] }>().props;
+
+    console.log('General Services: ', services);
+
     const [selectedDate, setSelectedDate] = useState<string>('2023-10-26');
 
     const [isBookModalOpen, setIsBookModalOpen] = useState(false);
@@ -699,7 +649,7 @@ export default function UserDashboard({
                         </h3>
 
                         <Link
-                            href={route('user.bookings')}
+                            href={route('services')}
                             className="flex items-center gap-0.5 text-xs font-bold text-primary hover:underline"
                         >
                             All Availability
@@ -1003,5 +953,58 @@ export default function UserDashboard({
                 </div>
             </div>
         </UserLayout>
+    );
+}
+
+
+export function ServiceBadges({ badges }: { badges?: ServiceBadge[] }) {
+    if (!badges?.length) {
+        return null;
+    }
+
+    const styles = {
+        popular:
+            'bg-purple-100 text-purple-700 dark:bg-purple-500/10 dark:text-purple-300',
+        recommended:
+            'bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300',
+        'best-value':
+            'bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-300',
+    };
+
+    const labels = {
+        popular: 'Popular',
+        recommended: 'Recommended',
+        'best-value': 'Best Value',
+    };
+
+    const [first, ...rest] = badges;
+
+    return (
+        <div className="inline-flex flex-col items-start">
+            {/* Always visible badge */}
+            <span
+                className={`z-10 rounded-full px-2.5 py-0.5 text-[10px] font-extrabold transition ${
+                    styles[first]
+                }`}
+            >
+                {labels[first]}
+            </span>
+
+            {/* Hidden badges (shown on hover) */}
+            {rest.length > 0 && (
+                <div className="pointer-events-none absolute top-[1%] right-[2%] z-20 mt-2 flex translate-y-1 flex-col gap-2 opacity-0 transition-all duration-200 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
+                    {rest.map((badge) => (
+                        <span
+                            key={badge}
+                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold tracking-wide ${
+                                styles[badge]
+                            }`}
+                        >
+                            {labels[badge]}
+                        </span>
+                    ))}
+                </div>
+            )}
+        </div>
     );
 }

@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\Availability;
 use App\Models\NotificationState;
-use App\Models\Service;
 use App\Models\User;
 use App\Services\NotificationService;
 use Illuminate\Support\Facades\Auth;
@@ -31,13 +30,10 @@ class DashboardController extends Controller
             ->whereDate('date', '>=', now()->toDateString())
             ->get();
 
-        $services = Service::all();
-
         $user->load('settings');
 
         return inertia('User/Dashboard', [
             'bookings' => $bookings,
-            'services' => $services,
             'availabilities' => $availabilities,
             'name' => $user->name,
 

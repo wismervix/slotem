@@ -1,19 +1,15 @@
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { CheckCircle2, Calendar, Bell } from 'lucide-react';
 import { motion } from 'motion/react';
 import { ServiceCard } from '@/components/Shared/ServiceCard';
 import { Stepper } from '@/components/Shared/Stepper';
-// import { services } from '@/data/services';
 import GuestLayout from '@/layouts/Guest/GuestLayout';
 import { serviceIcons } from '@/lib/service-icons';
 import type { Service } from '@/types/service';
 
 
-interface ServicesProps {
-    services: Service[];
-}
-
-const Services = ({ services }: ServicesProps) => {
+const Services = () => {
+    const { services } = usePage<{ services: Service[] }>().props;
     // console.log('Services from backend:', services);
 
     return (
