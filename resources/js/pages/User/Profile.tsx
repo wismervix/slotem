@@ -20,9 +20,10 @@ import {
 
 type ProfileProps = {
     profile: UserProfile;
+    unreadNotificationsCount: number;
 };
 
-export default function Profile({ profile: initialProfile }: ProfileProps) {
+export default function Profile({ profile: initialProfile, unreadNotificationsCount }: ProfileProps) {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: initialProfile.name ?? '',
         email: initialProfile.email ?? '',
@@ -109,7 +110,7 @@ export default function Profile({ profile: initialProfile }: ProfileProps) {
 
 
     return (
-        <UserLayout>
+        <UserLayout unreadNotificationsCount={unreadNotificationsCount}>
             <div className="max-w-4xl space-y-6 pb-10">
                 {/* Toast Feedback */}
                 {props.flash?.success && showToast && (

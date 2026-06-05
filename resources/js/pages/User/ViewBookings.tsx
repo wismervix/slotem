@@ -2,26 +2,21 @@ import { router } from '@inertiajs/react';
 import CalendarView from '@/components/User/CalendarView';
 import ListView from '@/components/User/ListView';
 import UserLayout from '@/layouts/User/UserLayout';
-import type {
-    Booking,
-    NotificationItem,
-    Availability,
-} from '@/types';
+import type { Booking, Availability, MappedNotification } from '@/types';
 import { useState } from 'react';
-import { DEFAULT_NOTIFICATIONS } from '@/data/notifications';
 import { CalendarDays, List } from 'lucide-react';
 
 type ViewBookingsProps = {
     bookings: Booking[];
     availabilities: Availability[];
+    unreadNotificationsCount: number;
 };
 
-const ViewBookings = ({ bookings, availabilities }: ViewBookingsProps) => {
-    const [notifications, setNotifications] = useState<NotificationItem[]>(
-        () => {
-            return DEFAULT_NOTIFICATIONS;
-        },
-    );
+const ViewBookings = ({
+    bookings,
+    availabilities,
+    unreadNotificationsCount,
+}: ViewBookingsProps) => {
 
     const [subView, setSubView] = useState<'calendar' | 'list'>('calendar');
 
@@ -42,18 +37,18 @@ const ViewBookings = ({ bookings, availabilities }: ViewBookingsProps) => {
                     const confirmed = bookings.find((a) => a.id === id);
 
                     if (confirmed) {
-                        const alert: NotificationItem = {
-                            id: Date.now(),
-                            title: `Confirmed: ${confirmed.service?.name}`,
-                            message: `Your appointment for ${confirmed.service?.name} on ${confirmed.date} has been successfully cancelled. Co-payments will be refunded.`,
-                            timestamp: 'Just now',
+                        const alert: MappedNotification = {
+                            id: `notif-${Date.now()}`,
+                            // title: `Scheduled: ${newBooking.service?.name}`,
+                            // message: `Your booking for ${newBooking.service?.name} on ${newBooking.date} was scheduled successfully.`,
+                            title: `Scheduled: ServiceName`,
+                            message: `Your booking for ServiceName on BookingDate was scheduled successfully.`,
+                            url: '',
                             read: false,
-                            type: 'reminder',
-                            category: 'Reminders',
-                            dateGroup: 'Today',
+                            category: 'Bookings',
+                            timestamp: 'Just now',
                         };
 
-                        setNotifications((prev) => [alert, ...prev]);
                     }
                 },
             },
@@ -71,18 +66,18 @@ const ViewBookings = ({ bookings, availabilities }: ViewBookingsProps) => {
                     const cancelled = bookings.find((a) => a.id === id);
 
                     if (cancelled) {
-                        const alert: NotificationItem = {
-                            id: Date.now(),
-                            title: `Cancelled: ${cancelled.service?.name}`,
-                            message: `Your appointment for ${cancelled.service?.name} on ${cancelled.date} has been successfully cancelled.`,
-                            timestamp: 'Just now',
+                        const alert: MappedNotification = {
+                            id: `notif-${Date.now()}`,
+                            // title: `Scheduled: ${newBooking.service?.name}`,
+                            // message: `Your booking for ${newBooking.service?.name} on ${newBooking.date} was scheduled successfully.`,
+                            title: `Scheduled: ServiceName`,
+                            message: `Your booking for ServiceName on BookingDate was scheduled successfully.`,
+                            url: '',
                             read: false,
-                            type: 'reminder',
-                            category: 'Reminders',
-                            dateGroup: 'Today',
+                            category: 'Bookings',
+                            timestamp: 'Just now',
                         };
 
-                        setNotifications((prev) => [alert, ...prev]);
                     }
                 },
             },
@@ -91,26 +86,24 @@ const ViewBookings = ({ bookings, availabilities }: ViewBookingsProps) => {
 
     const handleAddNewAppointment = (newBooking: {}) => {
         // Push notification only
-        const alert: NotificationItem = {
-            id: Date.now(),
+        const alert: MappedNotification = {
+            id: `notif-${Date.now()}`,
             // title: `Scheduled: ${newBooking.service?.name}`,
             // message: `Your booking for ${newBooking.service?.name} on ${newBooking.date} was scheduled successfully.`,
             title: `Scheduled: ServiceName`,
             message: `Your booking for ServiceName on BookingDate was scheduled successfully.`,
-            timestamp: 'Just now',
-            category: 'Bookings',
+            url: '',
             read: false,
-            type: 'success',
-            dateGroup: 'Today',
+            category: 'Bookings',
+            timestamp: 'Just now',
         };
 
-        setNotifications((prev) => [alert, ...prev]);
-    };;
+    };
 
     return (
         <UserLayout
             bookings={bookings}
-            notifications={notifications}
+            unreadNotificationsCount={unreadNotificationsCount}
             selectedDate={selectedDate}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}

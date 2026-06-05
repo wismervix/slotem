@@ -1,12 +1,11 @@
 import { router } from '@inertiajs/react';
 import UserLayout from '@/layouts/User/UserLayout';
-import { DEFAULT_NOTIFICATIONS } from '@/data/notifications';
 import {
     Availability,
     Booking,
-    NotificationItem,
     Service,
     ServiceBadge,
+    MappedNotification,
 } from '@/types';
 import { useState } from 'react';
 import {
@@ -32,6 +31,7 @@ interface UserDashboardProps {
     services: Service[];
     availabilities: Availability[];
     name: String;
+    unreadNotificationsCount: number;
 }
 
 export function ServiceBadges({ badges }: { badges?: ServiceBadge[] }) {
@@ -91,13 +91,8 @@ export default function UserDashboard({
     services,
     availabilities,
     name,
+    unreadNotificationsCount,
 }: UserDashboardProps) {
-    const [notifications, setNotifications] = useState<NotificationItem[]>(
-        () => {
-            return DEFAULT_NOTIFICATIONS;
-        },
-    );
-
     const [selectedDate, setSelectedDate] = useState<string>('2023-10-26');
 
     const [isBookModalOpen, setIsBookModalOpen] = useState(false);
@@ -113,18 +108,17 @@ export default function UserDashboard({
                     const confirmed = bookings.find((a) => a.id === id);
 
                     if (confirmed) {
-                        const alert: NotificationItem = {
-                            id: Date.now(),
-                            title: `Confirmed: ${confirmed.service?.name}`,
-                            message: `Your appointment for ${confirmed.service?.name} on ${confirmed.date} has been successfully cancelled. Co-payments will be refunded.`,
-                            timestamp: 'Just now',
+                        const alert: MappedNotification = {
+                            id: `notif-${Date.now()}`,
+                            // title: `Scheduled: ${newBooking.service?.name}`,
+                            // message: `Your booking for ${newBooking.service?.name} on ${newBooking.date} was scheduled successfully.`,
+                            title: `Scheduled: ServiceName`,
+                            message: `Your booking for ServiceName on BookingDate was scheduled successfully.`,
+                            url: '',
                             read: false,
-                            type: 'reminder',
-                            category: 'Reminders',
-                            dateGroup: 'Today',
+                            category: 'Bookings',
+                            timestamp: 'Just now',
                         };
-
-                        setNotifications((prev) => [alert, ...prev]);
                     }
                 },
             },
@@ -142,18 +136,17 @@ export default function UserDashboard({
                     const cancelled = bookings.find((a) => a.id === id);
 
                     if (cancelled) {
-                        const alert: NotificationItem = {
-                            id: Date.now(),
-                            title: `Cancelled: ${cancelled.service?.name}`,
-                            message: `Your appointment for ${cancelled.service?.name} on ${cancelled.date} has been successfully cancelled.`,
-                            timestamp: 'Just now',
+                        const alert: MappedNotification = {
+                            id: `notif-${Date.now()}`,
+                            // title: `Scheduled: ${newBooking.service?.name}`,
+                            // message: `Your booking for ${newBooking.service?.name} on ${newBooking.date} was scheduled successfully.`,
+                            title: `Scheduled: ServiceName`,
+                            message: `Your booking for ServiceName on BookingDate was scheduled successfully.`,
+                            url: '',
                             read: false,
-                            type: 'reminder',
-                            category: 'Reminders',
-                            dateGroup: 'Today',
+                            category: 'Bookings',
+                            timestamp: 'Just now',
                         };
-
-                        setNotifications((prev) => [alert, ...prev]);
                     }
                 },
             },
@@ -163,20 +156,17 @@ export default function UserDashboard({
     // Handler functions
     const handleAddNewAppointment = (newBooking: {}) => {
         // Push notification only
-        const alert: NotificationItem = {
-            id: Date.now(),
+        const alert: MappedNotification = {
+            id: `notif-${Date.now()}`,
             // title: `Scheduled: ${newBooking.service?.name}`,
             // message: `Your booking for ${newBooking.service?.name} on ${newBooking.date} was scheduled successfully.`,
             title: `Scheduled: ServiceName`,
             message: `Your booking for ServiceName on BookingDate was scheduled successfully.`,
-            timestamp: 'Just now',
-            category: 'Bookings',
+            url: '',
             read: false,
-            type: 'success',
-            dateGroup: 'Today',
+            category: 'Bookings',
+            timestamp: 'Just now',
         };
-
-        setNotifications((prev) => [alert, ...prev]);
     };
 
     // Direct quick schedule helper from Dashboard recommendations
@@ -360,7 +350,7 @@ export default function UserDashboard({
 
     return (
         <UserLayout
-            notifications={notifications}
+            unreadNotificationsCount={unreadNotificationsCount}
             selectedDate={selectedDate}
             onSelectDate={setSelectedDate}
             handleRescheduleAppointment={handleRescheduleAppointment}

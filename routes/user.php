@@ -21,5 +21,11 @@ Route::group(['prefix' => 'user'], function () {
         Route::get('/profile', 'profile')->name('user.profile');
         Route::put('/profile', 'updateProfile')->name('user.profile.update');
         Route::get('/notifications', 'notifications')->name('user.notifications');
+
+        // ✅ NOTIFICATIONS
+        Route::patch('/notifications/{notification}/read', 'markAsRead')->name('notifications.read');
+        Route::patch('/notifications/read-all', 'markAllAsRead')->name('notifications.read-all');
+        Route::delete('/notifications/{notification}', 'deleteNotification')->name('notifications.delete');
+        Route::delete('/notifications/clear-all', 'clearAllNotifications')->name('notifications.clear-all');
     });
 });

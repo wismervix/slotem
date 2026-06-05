@@ -7,6 +7,21 @@ export function formatDate(date: Date): string {
     return `${year}-${month}-${day}`;
 }
 
+export function formatDateAndTime(dateString: string) {
+    const date = new Date(dateString);
+
+    return date.toLocaleString('en-US', {
+        weekday: 'long',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+        timeZone: 'UTC', // 🔥 prevents timezone shifting
+    });
+}
+
 export const formatTime = (time: string) => {
     const [hours, minutes] = time.split(':');
 

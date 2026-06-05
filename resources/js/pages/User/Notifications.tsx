@@ -1,6 +1,6 @@
-import { DEFAULT_NOTIFICATIONS } from '@/data/notifications';
+import { router } from '@inertiajs/react';
 import UserLayout from '@/layouts/User/UserLayout';
-import { NotificationItem } from '@/types';
+import { Notification } from '@/types';
 import React, { useState } from 'react';
 import {
     Bell,
@@ -15,38 +15,101 @@ import {
     CheckCircle2,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { formatDateAndTime } from '@/lib/calendar-utils';
 
-export default function UserNotifications() {
-    const [notifications, setNotifications] = useState<NotificationItem[]>(
-        () => {
-            return DEFAULT_NOTIFICATIONS;
-        },
-    );
+interface NotificationsProps {
+    notifications: Notification[];
+    unreadNotificationsCount: number;
+}
 
-    const handleToggleReadNotification = (id: number) => {
-        setNotifications((prev) =>
-            prev.map((n) => (n.id === id ? { ...n, read: !n.read } : n)),
+export default function UserNotifications({
+    notifications: backendNotifications,
+    unreadNotificationsCount,
+}: NotificationsProps) {
+    const mappedNotifications = backendNotifications.map((notification) => ({
+        id: notification.id,
+
+        title: notification.data.title,
+
+        message: notification.data.message,
+
+        timestamp: notification.created_at,
+
+        read: notification.read_at !== null,
+
+        category: notification.data.category,
+
+        url: notification.data.url,
+    }));
+
+    const [notifications, setNotifications] = useState(mappedNotifications);
+
+    const [visibleCount, setVisibleCount] = useState(6);
+
+    const markNotificationAsRead = (id: string) => {
+        router.patch(
+            route('notifications.read', id),
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setNotifications((prev) =>
+                        prev.map((n) =>
+                            n.id === id ? { ...n, read: true } : n,
+                        ),
+                    );
+                },
+            },
         );
+    };
+
+    const handleOpenNotification = (notification: any) => {
+        router.patch(
+            route('notifications.read', notification.id),
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    router.visit(notification.url);
+                },
+            },
+        );
+    };
+
+    const deleteNotification = (id: string) => {
+        router.delete(route('notifications.delete', id), {
+            preserveScroll: true,
+            onSuccess: () => {
+                setNotifications((prev) => prev.filter((n) => n.id !== id));
+            },
+        });
     };
 
     const handleClearAllNotifications = () => {
-        setNotifications([]);
+        router.delete(route('notifications.clear-all'), {
+            preserveScroll: true,
+            onSuccess: () => {
+                setNotifications([]);
+            },
+        });
     };
 
     const handleMarkAllReadNotifications = () => {
-        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    };
-
-    const markNotificationAsRead = (id: number) => {
-        setNotifications(
-            (prev) =>
-                prev.map((n) => (n.id === id ? { ...n, read: !n.read } : n)),
-            // prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
+        router.patch(
+            route('notifications.read-all'),
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setNotifications((prev) =>
+                        prev.map((n) => ({
+                            ...n,
+                            read: true,
+                        })),
+                    );
+                },
+            },
         );
-    };
-
-    const deleteNotification = (id: number) => {
-        setNotifications((prev) => prev.filter((n) => n.id !== id));
     };
 
     const [filter, setFilter] = React.useState<
@@ -61,21 +124,28 @@ export default function UserNotifications() {
         return true;
     });
 
-    const getIcon = (type: string) => {
-        switch (type) {
-            case 'success':
+    const visibleNotifications = filtered.slice(0, visibleCount);
+
+    const getIcon = (category: string) => {
+        switch (category) {
+            case 'Bookings':
                 return (
                     <CheckCircle className="h-5 w-5 shrink-0 text-emerald-500" />
                 );
-            case 'reminder':
+
+            case 'Reminders':
                 return <Clock className="h-5 w-5 shrink-0 text-amber-500" />;
-            default:
+
+            case 'Updates':
                 return <Megaphone className="h-5 w-5 shrink-0 text-blue-500" />;
+
+            default:
+                return <Bell className="h-5 w-5 shrink-0 text-gray-500" />;
         }
     };
 
     return (
-        <UserLayout notifications={notifications}>
+        <UserLayout unreadNotificationsCount={unreadNotificationsCount}>
             <div className="max-w-4xl space-y-6 pb-10">
                 {/* Top action header for filters */}
                 <div className="flex flex-col items-start justify-between gap-4 rounded-2xl border border-outline-variant bg-white p-4 shadow-xs sm:flex-row sm:items-center dark:bg-neutral-900">
@@ -182,7 +252,7 @@ export default function UserNotifications() {
 
                 {/* Notifications stack */}
                 <div className="space-y-3">
-                    {filtered.length === 0 ? (
+                    {visibleNotifications.length === 0 ? (
                         <div className="flex flex-col items-center justify-center space-y-3 rounded-2xl border border-outline-variant bg-white p-12 text-center dark:bg-neutral-900">
                             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-50 text-gray-400 dark:bg-neutral-800">
                                 <Bell className="h-6 w-6" />
@@ -197,16 +267,14 @@ export default function UserNotifications() {
                             </p>
                         </div>
                     ) : (
-                        filtered.map((item) => (
+                        visibleNotifications.map((item) => (
                             <motion.div
                                 layout
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, x: 20 }}
                                 key={item.id}
-                                onClick={() =>
-                                    handleToggleReadNotification(item.id)
-                                }
+                                onClick={() => handleOpenNotification(item)}
                                 className={`group relative flex cursor-pointer gap-4 overflow-hidden rounded-xl border p-4 transition-all duration-300 ${
                                     item.read
                                         ? 'border-outline-variant bg-white opacity-75 dark:bg-neutral-900'
@@ -217,7 +285,7 @@ export default function UserNotifications() {
                                     <div className="absolute top-0 bottom-0 left-0 w-1 bg-brand-primary" />
                                 )}
                                 <div className="pt-0.5">
-                                    {getIcon(item.type)}
+                                    {getIcon(item.category)}
                                 </div>
 
                                 <div className="flex-grow space-y-1">
@@ -229,7 +297,7 @@ export default function UserNotifications() {
                                         </h4>
                                         <span className="flex shrink-0 items-center gap-1 text-[10px] font-medium text-gray-400">
                                             <Clock className="h-3 w-3" />
-                                            {item.timestamp}
+                                            {formatDateAndTime(item.timestamp)}
                                         </span>
                                     </div>
                                     <p className="text-xs leading-normal text-gray-500 dark:text-neutral-300">
@@ -243,22 +311,24 @@ export default function UserNotifications() {
                                     <div className="mt-4 flex gap-4 opacity-0 transition-opacity group-hover:opacity-100">
                                         {!item.read && (
                                             <button
-                                                onClick={() =>
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
                                                     markNotificationAsRead(
                                                         item.id,
-                                                    )
-                                                }
-                                                className="flex items-center gap-1.5 text-sm font-semibold cursor-pointer text-brand-primary active:scale-95"
+                                                    );
+                                                }}
+                                                className="flex cursor-pointer items-center gap-1.5 text-sm font-semibold text-brand-primary active:scale-95"
                                             >
                                                 <CheckCircle2 size={14} />
                                                 Mark as read
                                             </button>
                                         )}
                                         <button
-                                            onClick={() =>
-                                                deleteNotification(item.id)
-                                            }
-                                            className="flex items-center gap-1.5 text-sm font-semibold text-brand-error active:scale-95"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                deleteNotification(item.id);
+                                            }}
+                                            className="flex cursor-pointer items-center gap-1.5 text-sm font-semibold text-brand-error active:scale-95"
                                         >
                                             <Trash2 size={14} />
                                             Delete
@@ -270,10 +340,24 @@ export default function UserNotifications() {
                     )}
                 </div>
 
-                <div className="flex justify-center pt-4">
-                    <button className="rounded-xl px-6 py-3 font-medium text-brand-primary transition-colors hover:bg-brand-primary-container/20">
-                        Load older notifications
-                    </button>
+                <div className="flex justify-center gap-3 pt-4">
+                    {filtered.length > visibleCount && (
+                        <button
+                            onClick={() => setVisibleCount((prev) => prev + 6)}
+                            className="rounded-xl px-6 py-3 font-medium text-brand-primary transition-colors hover:bg-brand-primary-container/20"
+                        >
+                            Load older notifications
+                        </button>
+                    )}
+
+                    {visibleCount > 6 && (
+                        <button
+                            onClick={() => setVisibleCount(6)}
+                            className="rounded-xl px-6 py-3 font-medium text-gray-500 transition-colors hover:bg-gray-100"
+                        >
+                            Show Less
+                        </button>
+                    )}
                 </div>
 
                 <div className="flex">

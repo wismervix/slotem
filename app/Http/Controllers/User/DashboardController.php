@@ -5,8 +5,10 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\Availability;
+use App\Models\NotificationState;
 use App\Models\Service;
 use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -14,7 +16,7 @@ use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(NotificationService $notificationService)
     {
         /** @var User $user */
         $user = Auth::user();
@@ -38,10 +40,13 @@ class DashboardController extends Controller
             'services' => $services,
             'availabilities' => $availabilities,
             'name' => $user->name,
+
+            'unreadNotificationsCount' =>
+            $notificationService->getUnreadCount($user),
         ]);
     }
 
-    public function bookings()
+    public function bookings(NotificationService $notificationService)
     {
         /** @var User $user */
         $user = Auth::user();
@@ -59,10 +64,13 @@ class DashboardController extends Controller
         return inertia('User/ViewBookings', [
             'bookings' => $bookings,
             'availabilities' => $availabilities,
+
+            'unreadNotificationsCount' =>
+            $notificationService->getUnreadCount($user),
         ]);
     }
 
-    public function profile()
+    public function profile(NotificationService $notificationService)
     {
         /** @var User $user */
         $user = Auth::user();
@@ -81,6 +89,9 @@ class DashboardController extends Controller
                 'sms_reminders' => $user->settings?->sms_reminders ?? false,
                 'sound_enabled' => $user->settings?->sound_enabled ?? false,
             ],
+
+            'unreadNotificationsCount' =>
+            $notificationService->getUnreadCount($user),
         ]);
     }
 
@@ -165,8 +176,97 @@ class DashboardController extends Controller
         );
     }
 
-    public function notifications()
+    public function notifications(NotificationService $notificationService)
     {
-        return inertia('User/Notifications');
+        /** @var User $user */
+        $user = Auth::user();
+
+        $hiddenIds = NotificationState::query()
+            ->where('user_id', $user->id)
+            ->whereNotNull('hidden_at')
+            ->pluck('notification_id');
+
+        $notifications = $user
+            ->notifications()
+            ->whereNotIn('id', $hiddenIds)
+            ->latest()
+            ->get();
+
+
+        return inertia('User/Notifications', [
+            'notifications' => $notifications,
+
+            'unreadNotificationsCount' =>
+            $notificationService->getUnreadCount($user),
+        ]);
+    }
+
+    public function markAsRead(string $id)
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        $notification = $user
+            ->notifications()
+            ->findOrFail($id);
+
+        $notification->markAsRead();
+
+        return back();
+    }
+
+    public function markAllAsRead()
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        $user
+            ->unreadNotifications
+            ->markAsRead();
+
+        return back();
+    }
+
+    public function deleteNotification(string $id)
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        NotificationState::updateOrCreate(
+            [
+                'user_id' => $user->id,
+                'notification_id' => $id,
+            ],
+            [
+                'hidden_at' => now(),
+            ]
+        );
+
+        return back();
+    }
+
+    public function clearAllNotifications()
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        $notifications = $user
+            ->notifications()
+            ->pluck('id');
+
+        foreach ($notifications as $notificationId) {
+
+            NotificationState::updateOrCreate(
+                [
+                    'user_id' => $user->id,
+                    'notification_id' => $notificationId,
+                ],
+                [
+                    'hidden_at' => now(),
+                ]
+            );
+        }
+
+        return back();
     }
 }

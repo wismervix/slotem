@@ -18,7 +18,6 @@ import {
     Paintbrush,
     Calendar,
 } from 'lucide-react';
-import { Appointment, NotificationItem } from '@/types/calendar-view-types';
 import { Booking, ServiceIcon } from '@/types';
 import { getServiceIcon, getServiceTheme, serviceIcons } from '@/lib/service-icons';
 import { formatTime } from '@/lib/calendar-utils';
@@ -26,7 +25,7 @@ import { formatTime } from '@/lib/calendar-utils';
 interface Props {
     children: ReactNode;
     bookings?: Booking[];
-    notifications?: NotificationItem[];
+    unreadNotificationsCount?: number;
     selectedDate?: string; // YYYY-MM-DD
     searchQuery?: string;
     setSearchQuery?: (query: string) => void;
@@ -40,7 +39,7 @@ interface Props {
 export default function UserLayout({
     children,
     bookings = [],
-    notifications = [],
+    unreadNotificationsCount = 0,
     selectedDate = '',
     searchQuery = '',
     setSearchQuery = () => {},
@@ -94,9 +93,6 @@ export default function UserLayout({
         )
         .sort((a, b) => a.date.localeCompare(b.date));
 
-    const unreadNotificationsCount = notifications.filter(
-        (n) => !n.read,
-    ).length;
 
     return (
         <div className="flex min-h-screen flex-col bg-[#fef7ff] font-sans text-gray-900 antialiased transition-colors duration-200 md:flex-row dark:bg-neutral-950 dark:text-neutral-100">

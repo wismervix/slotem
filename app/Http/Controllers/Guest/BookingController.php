@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Availability;
 use App\Models\Service;
 use App\Models\TimeSlot;
+use App\Notifications\BookingConfirmed;
 use App\Services\BookingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -95,6 +96,10 @@ class BookingController extends Controller
 
         Auth::login($booking->user);
         $request->session()->regenerate();
+
+        $booking->user->notify(
+            new BookingConfirmed()
+        );
 
         // return response()->json([
         //     'success' => true,

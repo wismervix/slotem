@@ -1,31 +1,28 @@
-export interface Appointment {
+export interface Notification {
     id: string;
-    title: string;
-    provider: string;
-    date: string; // YYYY-MM-DD
-    time: string; // e.g. "09:30 AM"
-    duration: number; // in minutes
-    category: 'dental' | 'wellness' | 'consultation' | 'general';
-    status: 'Confirmed' | 'Pending' | 'Cancelled';
-    notes?: string;
-    price?: number;
+    type: string;
+    data: {
+        title: string;
+        message: string;
+        url: string;
+        category: NotificationCategory;
+    };
+    read_at: string | null;
+    created_at: string;
 }
 
-type NotificationCategory = 'All' | 'Bookings' | 'Reminders' | 'Updates';
-
-type NotificationType = 'booking' | 'update' | 'reminder' | 'tip' | 'success' | 'info' | 'reminder';
-
-export interface NotificationItem {
-    id: number;
+export interface MappedNotification {
+    id: string;
     title: string;
     message: string;
     timestamp: string;
-    category: NotificationCategory;
     read: boolean;
-    type: NotificationType;
-    image?: string;
-    dateGroup?: 'Today' | 'Yesterday';
-}
+    category: NotificationCategory;
+    url: string;
+};
+
+type NotificationCategory = 'All' | 'Bookings' | 'Reminders' | 'Updates';
+
 
 export interface UserProfile {
     name: string;
@@ -38,4 +35,18 @@ export interface UserProfile {
     product_updates: boolean;
     sms_reminders: boolean;
     sound_enabled: boolean;
+}
+
+
+export interface Appointment {
+    id: string;
+    title: string;
+    provider: string;
+    date: string; // YYYY-MM-DD
+    time: string; // e.g. "09:30 AM"
+    duration: number; // in minutes
+    category: 'dental' | 'wellness' | 'consultation' | 'general';
+    status: 'Confirmed' | 'Pending' | 'Cancelled';
+    notes?: string;
+    price?: number;
 }
