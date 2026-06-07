@@ -1,3 +1,4 @@
+import { useBookingModalContext } from '@/contexts/BookingModalContext';
 import { Link } from '@inertiajs/react';
 import {
     LayoutDashboard,
@@ -9,7 +10,6 @@ import {
     X,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { useState } from 'react';
 
 type NavItem = {
     name: string;
@@ -19,14 +19,12 @@ type NavItem = {
 
 interface SidebarProps {
     unreadNotificationsCount: number;
-    openBookingModal: (isOpen: boolean) => void;
     mobileSidebarOpen: boolean;
     setMobileSidebarOpen: (isOpen: boolean) => void;
 }
 
 export default function Sidebar({
     unreadNotificationsCount,
-    openBookingModal,
     mobileSidebarOpen,
     setMobileSidebarOpen,
 }: SidebarProps) {
@@ -58,6 +56,8 @@ export default function Sidebar({
     const isActiveRoute = (routeName: string): boolean => {
         return route().current(routeName);
     };
+
+    const { openModal } = useBookingModalContext();
 
     return (
         <>
@@ -172,7 +172,7 @@ export default function Sidebar({
                 {/* Action Button at bottom */}
                 <button
                     onClick={() => {
-                        openBookingModal(true);
+                        openModal();
                         setMobileSidebarOpen(false);
                     }}
                     className="mt-auto flex cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-xs font-bold text-white shadow-md shadow-primary/10 transition-all hover:shadow-lg active:scale-95"

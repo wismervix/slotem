@@ -24,8 +24,6 @@ const ViewBookings = ({
 
     const [selectedDate, setSelectedDate] = useState('2023-10-26');
 
-    const [isBookModalOpen, setIsBookModalOpen] = useState(false);
-
     const handleRescheduleAppointment = (id: number) => {
         router.patch(
             route('', id),
@@ -105,9 +103,9 @@ const ViewBookings = ({
             bookings={bookings}
             unreadNotificationsCount={unreadNotificationsCount}
             selectedDate={selectedDate}
+            onSelectDate={setSelectedDate}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
-            onSelectDate={setSelectedDate}
             handleRescheduleAppointment={handleRescheduleAppointment}
             handleCancelAppointment={handleCancelAppointment}
             handleAddNewAppointment={handleAddNewAppointment}
@@ -147,7 +145,6 @@ const ViewBookings = ({
                     selectedDate={selectedDate}
                     searchQuery={searchQuery}
                     onSelectDate={setSelectedDate}
-                    onOpenBookingModal={() => setIsBookModalOpen(true)}
                 />
             ) : (
                 <ListView

@@ -7,16 +7,11 @@ import {
     generateCalendarDays,
     isPastDate,
 } from '@/lib/calendar-utils';
+
 import { Booking, Availability } from '@/types';
-import {
-    Smile,
-    Sparkles,
-    Activity,
-    Clock,
-    ShieldAlert,
-    Heart,
-} from 'lucide-react';
+import { Clock } from 'lucide-react';
 import { getServiceTheme } from '@/lib/service-icons';
+import { useBookingModalContext } from '@/contexts/BookingModalContext';
 
 interface CalendarViewProps {
     bookings: Booking[];
@@ -24,7 +19,6 @@ interface CalendarViewProps {
     selectedDate: string; // YYYY-MM-DD
     onSelectDate: (date: string) => void;
     searchQuery: string;
-    onOpenBookingModal: () => void;
 }
 
 export default function CalendarView({
@@ -33,7 +27,6 @@ export default function CalendarView({
     selectedDate,
     searchQuery,
     onSelectDate,
-    onOpenBookingModal,
 }: CalendarViewProps) {
     const today = new Date();
 
@@ -82,7 +75,9 @@ export default function CalendarView({
             : text;
     }
 
-    console.log('Bookings: ', bookings);
+    const { openModal } = useBookingModalContext();
+
+    // console.log('Bookings: ', bookings);
 
     return (
         <>
@@ -170,7 +165,8 @@ export default function CalendarView({
                             const query = searchQuery.toLowerCase();
 
                             const name =
-                                booking.service?.name?.toLowerCase() ?? 'No name';
+                                booking.service?.name?.toLowerCase() ??
+                                'No name';
                             const description =
                                 booking.service?.description?.toLowerCase() ??
                                 'No description';
@@ -185,10 +181,6 @@ export default function CalendarView({
                             <div
                                 key={formattedDate}
                                 onClick={() => onSelectDate(formattedDate)}
-                                onDoubleClick={() => {
-                                    onSelectDate(formattedDate);
-                                    onOpenBookingModal();
-                                }}
                                 className={`group relative flex cursor-pointer flex-col justify-between border-r border-b border-outline-variant p-3.5 transition-all hover:bg-gray-50/50 dark:hover:bg-neutral-800/30 ${
                                     isToday
                                         ? 'z-10 bg-primary/5 ring-2 ring-primary ring-inset'
@@ -216,9 +208,15 @@ export default function CalendarView({
                                     )}
 
                                     {/* Micro Plus/Schedule trigger on hover for clean UX */}
-                                    <span className="shrink-0 text-[10px] font-extrabold text-primary uppercase opacity-0 transition-opacity group-hover:opacity-100">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            openModal(undefined, formattedDate);
+                                        }}
+                                        className="shrink-0 text-[10px] font-extrabold text-primary uppercase opacity-0 transition-opacity group-hover:opacity-100"
+                                    >
                                         + Book
-                                    </span>
+                                    </button>
                                 </div>
 
                                 {/* Day badges (appointments) */}
@@ -248,7 +246,7 @@ export default function CalendarView({
                                             <p className="mt-0.5 flex items-center gap-0.5 font-mono text-[9px] leading-none opacity-80">
                                                 <Clock className="inline h-2.5 w-2.5" />{' '}
                                                 {formatTime(booking.start_time)}{' '}
-                                                                                                — {formatTime(booking.end_time)}
+                                                — {formatTime(booking.end_time)}
                                             </p>
                                         </div>
                                     ))}

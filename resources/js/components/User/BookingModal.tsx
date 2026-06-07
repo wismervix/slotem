@@ -17,36 +17,28 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { usePage } from '@inertiajs/react';
 import { getServiceIcon } from '@/lib/service-icons';
+import { useBookingModalContext } from '@/contexts/BookingModalContext';
 
-interface BookModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    onSave: (appt: {}) => void;
-    preselectedDate?: string;
-}
-    const { services } = usePage<{ services: Service[] }>().props;
 
-export default function BookModal({
-    isOpen,
-    onClose,
-    onSave,
-    preselectedDate,
-}: BookModalProps) {
+export default function BookModal() {
+    const { isOpen, slotId, date, closeModal } = useBookingModalContext();
     const [step, setStep] = useState(1);
     const [selectedPreset, setSelectedPreset] = useState(0);
-    const [date, setDate] = useState(
-        preselectedDate || new Date().toISOString().split('T')[0],
+    const [selectedDate, setSelectedDate] = useState(
+        date || new Date().toISOString().split('T')[0],
     );
     const [time, setTime] = useState('09:30 AM');
     const [notes, setNotes] = useState('');
     const [showSuccess, setShowSuccess] = useState(false);
 
+    const { services } = usePage<{ services: Service[] }>().props;
+
     // When preselected date changes (e.g. user clicked a date on calendar), update local state
     React.useEffect(() => {
-        if (preselectedDate) {
-            setDate(preselectedDate);
+        if (date) {
+            setSelectedDate(date);
         }
-    }, [preselectedDate]);
+    }, [date]);
 
     if (!isOpen) return null;
 
@@ -56,7 +48,8 @@ export default function BookModal({
         } else {
             // Confirm booking
             const preset = services[selectedPreset];
-            onSave({});
+            // onSave logic
+            // onSave({});
             // onSave({
             //     title: preset.title,
             //     provider: preset.provider,
@@ -74,11 +67,11 @@ export default function BookModal({
     const handleClose = () => {
         setStep(1);
         setSelectedPreset(0);
-        setDate(preselectedDate || new Date().toISOString().split('T')[0]);
+        setSelectedDate(date || new Date().toISOString().split('T')[0]);
         setTime('09:30 AM');
         setNotes('');
         setShowSuccess(false);
-        onClose();
+        closeModal();
     };
 
     const currentPreset = services[selectedPreset];
@@ -154,7 +147,7 @@ export default function BookModal({
                                 <div className="flex justify-between">
                                     <span className="text-gray-500">Date:</span>
                                     <span className="font-semibold text-gray-900 dark:text-white">
-                                        {date}
+                                        {selectedDate}
                                     </span>
                                 </div>
                                 <div className="flex justify-between">
@@ -190,7 +183,8 @@ export default function BookModal({
                                     </label>
                                     <div className="grid gap-3">
                                         {services.map((preset, idx) => {
-                                            const IconComponent = getServiceIcon(preset.icon);
+                                            const IconComponent =
+                                                getServiceIcon(preset.icon);
                                             const isSelected =
                                                 selectedPreset === idx;
                                             return (
@@ -271,9 +265,9 @@ export default function BookModal({
                                         </label>
                                         <input
                                             type="date"
-                                            value={date}
+                                            value={selectedDate}
                                             onChange={(e) =>
-                                                setDate(e.target.value)
+                                                setSelectedDate(e.target.value)
                                             }
                                             className="w-full rounded-xl border border-outline-variant bg-white p-3 font-medium focus:border-transparent focus:ring-2 focus:ring-primary focus:outline-none dark:bg-neutral-900"
                                         />
@@ -366,7 +360,7 @@ export default function BookModal({
                                                     Scheduled Date:
                                                 </span>
                                                 <span className="text-right text-gray-900 dark:text-white">
-                                                    {date}
+                                                    {selectedDate}
                                                 </span>
 
                                                 <span className="text-gray-400">

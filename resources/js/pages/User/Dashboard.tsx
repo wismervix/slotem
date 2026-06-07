@@ -25,6 +25,7 @@ import { motion } from 'motion/react';
 import { Link } from '@inertiajs/react';
 import { getServiceIcon, getServiceIconTheme } from '@/lib/service-icons';
 import { formatTime } from '@/lib/calendar-utils';
+import { useBookingModalContext } from '@/contexts/BookingModalContext';
 
 interface UserDashboardProps {
     bookings: Booking[];
@@ -41,11 +42,11 @@ export default function UserDashboard({
 }: UserDashboardProps) {
     const { services } = usePage<{ services: Service[] }>().props;
 
-    console.log('General Services: ', services);
+    // console.log('General Services: ', services);
 
     const [selectedDate, setSelectedDate] = useState<string>('2023-10-26');
 
-    const [isBookModalOpen, setIsBookModalOpen] = useState(false);
+    const { openModal } = useBookingModalContext();
 
     const handleRescheduleAppointment = (id: number) => {
         router.patch(
@@ -119,10 +120,9 @@ export default function UserDashboard({
         };
     };
 
-    // Direct quick schedule helper from Dashboard recommendations
-    const handleScheduleQuickSlot = (presetIdx: number, forcedDate: string) => {
-        setSelectedDate(forcedDate);
-        setIsBookModalOpen(true);
+    // ✅ Add this function
+    const handleScheduleQuickSlot = (slotId: number, date: string) => {
+        openModal(slotId, date);
     };
 
     const [chartSource, setChartSource] = useState<'all' | Service['id']>(
@@ -700,10 +700,7 @@ export default function UserDashboard({
 
                                     <button
                                         onClick={() =>
-                                            handleScheduleQuickSlot(
-                                                slot.id,
-                                                slot.date,
-                                            )
+                                            openModal(slot.id, slot.date)
                                         }
                                         className="flex shrink-0 items-center gap-1 rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-[11px] font-extrabold text-gray-900 shadow-xs hover:bg-on-surface-variant dark:bg-neutral-900 dark:text-white dark:hover:bg-on-surface-variant-dark"
                                     >
@@ -955,7 +952,6 @@ export default function UserDashboard({
         </UserLayout>
     );
 }
-
 
 export function ServiceBadges({ badges }: { badges?: ServiceBadge[] }) {
     if (!badges?.length) {

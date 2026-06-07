@@ -2,7 +2,7 @@ import { router } from '@inertiajs/react';
 import { useState, type ReactNode } from 'react';
 import Footer from '@/components/User/Footer';
 import Sidebar from '@/components/User/Sidebar';
-import BookModal from '@/components/User/BookModal';
+import BookModal from '@/components/User/BookingModal';
 import {
     Plus,
     Search,
@@ -19,8 +19,13 @@ import {
     Calendar,
 } from 'lucide-react';
 import { Booking, ServiceIcon } from '@/types';
-import { getServiceIcon, getServiceTheme, serviceIcons } from '@/lib/service-icons';
+import {
+    getServiceIcon,
+    getServiceTheme,
+    serviceIcons,
+} from '@/lib/service-icons';
 import { formatTime } from '@/lib/calendar-utils';
+import { useBookingModalContext } from '@/contexts/BookingModalContext';
 
 interface Props {
     children: ReactNode;
@@ -53,7 +58,8 @@ export default function UserLayout({
     const isDashboardPage = route().current('user.dashboard');
     const isProfilePage = route().current('user.profile');
     // const isNotificationsPage = route().current('user.notifications');
-    const [isBookModalOpen, setIsBookModalOpen] = useState(false);
+    // const [isBookModalOpen, setIsBookModalOpen] = useState(false);
+
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
     // Handler functions
@@ -93,6 +99,8 @@ export default function UserLayout({
         )
         .sort((a, b) => a.date.localeCompare(b.date));
 
+    const { isOpen, slotId, serviceId, date, closeModal, openModal } =
+        useBookingModalContext();
 
     return (
         <div className="flex min-h-screen flex-col bg-[#fef7ff] font-sans text-gray-900 antialiased transition-colors duration-200 md:flex-row dark:bg-neutral-950 dark:text-neutral-100">
@@ -100,7 +108,6 @@ export default function UserLayout({
                 mobileSidebarOpen={mobileSidebarOpen}
                 setMobileSidebarOpen={setMobileSidebarOpen}
                 unreadNotificationsCount={unreadNotificationsCount}
-                openBookingModal={setIsBookModalOpen}
             />
 
             <main className="motion-safe:animate-in motion-safe:fade-in flex h-screen flex-grow flex-col overflow-hidden duration-500">
@@ -391,7 +398,10 @@ export default function UserLayout({
                                         <button
                                             onClick={() => {
                                                 onSelectDate('2023-10-27');
-                                                setIsBookModalOpen(true);
+                                                openModal(
+                                                    undefined,
+                                                    '2023-10-27',
+                                                );
                                             }}
                                             className="rounded-xl bg-white px-4 py-2 text-[10px] font-black text-primary shadow-sm transition-all hover:bg-neutral-100"
                                         >
@@ -408,7 +418,7 @@ export default function UserLayout({
 
             {/* Floating Action Button for mobile screens */}
             <button
-                onClick={() => setIsBookModalOpen(true)}
+                onClick={() => openModal()}
                 className="fixed right-6 bottom-6 z-50 flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-primary text-white shadow-2xl transition-all hover:scale-105 hover:bg-primary-container active:scale-95 md:hidden"
                 title="Schedule appointment popup"
             >
@@ -416,12 +426,7 @@ export default function UserLayout({
             </button>
 
             {/* Multi-step appointment wizard modal */}
-            <BookModal
-                isOpen={isBookModalOpen}
-                onClose={() => setIsBookModalOpen(false)}
-                onSave={handleAddNewAppointment}
-                preselectedDate={selectedDate}
-            />
+            <BookModal />
         </div>
     );
 }
