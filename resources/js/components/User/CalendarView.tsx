@@ -208,15 +208,20 @@ export default function CalendarView({
                                     )}
 
                                     {/* Micro Plus/Schedule trigger on hover for clean UX */}
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            openModal(undefined, formattedDate);
-                                        }}
-                                        className="shrink-0 text-[10px] font-extrabold text-primary uppercase opacity-0 transition-opacity group-hover:opacity-100"
-                                    >
-                                        + Book
-                                    </button>
+                                    {!disabled && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                openModal(
+                                                    undefined,
+                                                    formattedDate,
+                                                );
+                                            }}
+                                            className="cursor-pointer shrink-0 text-[10px] font-extrabold text-primary uppercase opacity-0 transition-opacity group-hover:opacity-100"
+                                        >
+                                            + Book
+                                        </button>
+                                    )}
                                 </div>
 
                                 {/* Day badges (appointments) */}

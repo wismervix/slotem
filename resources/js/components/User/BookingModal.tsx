@@ -21,7 +21,8 @@ import { useBookingModalContext } from '@/contexts/BookingModalContext';
 
 
 export default function BookModal() {
-    const { isOpen, slotId, date, closeModal } = useBookingModalContext();
+    const { isOpen, slotId, date, serviceId, closeModal } =
+        useBookingModalContext();
     const [step, setStep] = useState(1);
     const [selectedPreset, setSelectedPreset] = useState(0);
     const [selectedDate, setSelectedDate] = useState(
@@ -76,6 +77,16 @@ export default function BookModal() {
 
     const currentPreset = services[selectedPreset];
 
+const CurrentPresetIcon = currentPreset
+    ? getServiceIcon(currentPreset.icon)
+    : Heart;
+
+    console.log('Modal Props (Date): ', date);
+    
+    console.log('Modal Props (Slot ID): ', slotId);
+    
+    console.log('Modal Props (Service ID): ', serviceId);
+    
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             {/* Backdrop */}
@@ -168,7 +179,7 @@ export default function BookModal() {
 
                             <button
                                 onClick={handleClose}
-                                className="mt-6 w-full rounded-xl bg-primary py-3 text-sm font-bold text-white transition-all hover:shadow-lg hover:backdrop-brightness-95"
+                                className="cursor-pointer mt-6 w-full rounded-xl bg-primary py-3 text-sm font-bold text-white transition-all hover:shadow-lg hover:backdrop-brightness-95"
                             >
                                 Close and View Calendar
                             </button>
@@ -243,10 +254,7 @@ export default function BookModal() {
                                 <div className="space-y-5">
                                     <div className="mb-2 flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4">
                                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                                            {React.createElement(
-                                                currentPreset.icon,
-                                                { className: 'w-5 h-5' },
-                                            )}
+                                            <CurrentPresetIcon className="h-5 w-5" />
                                         </div>
                                         <div>
                                             <h5 className="text-sm font-bold text-gray-900 dark:text-white">
@@ -334,13 +342,7 @@ export default function BookModal() {
                                         <div className="space-y-3 p-4">
                                             <div className="flex gap-3">
                                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 font-bold text-primary">
-                                                    {React.createElement(
-                                                        currentPreset.icon,
-                                                        {
-                                                            className:
-                                                                'w-5 h-5',
-                                                        },
-                                                    )}
+                                                    <CurrentPresetIcon className="h-5 w-5" />
                                                 </div>
                                                 <div>
                                                     <h4 className="text-sm font-bold text-gray-900 dark:text-white">
@@ -391,10 +393,10 @@ export default function BookModal() {
                                     <div className="space-y-1.5">
                                         <label className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-gray-500 uppercase">
                                             <FileText className="h-4 w-4 text-primary" />
-                                            Add symptoms or notes (optional)
+                                            Add suggestions (optional)
                                         </label>
                                         <textarea
-                                            placeholder="e.g. routine scaling, slight toothache details, or requests for therapist."
+                                            placeholder="e.g. Low taper fade, beard trim included, natural products only, sensitive scalp, inspiration photo available."
                                             rows={3}
                                             value={notes}
                                             onChange={(e) =>
@@ -422,7 +424,7 @@ export default function BookModal() {
                                     <button
                                         type="button"
                                         onClick={() => setStep(step - 1)}
-                                        className="rounded-lg px-4 py-2 text-xs font-bold text-gray-600 transition-all hover:bg-gray-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                                        className="cursor-pointer rounded-lg px-4 py-2 text-xs font-bold text-gray-600 transition-all hover:bg-gray-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
                                     >
                                         Go Back
                                     </button>
@@ -433,7 +435,7 @@ export default function BookModal() {
                                 <button
                                     type="button"
                                     onClick={handleNextStep}
-                                    className="flex items-center gap-1 rounded-lg bg-primary px-6 py-2.5 text-xs font-bold text-white transition-all hover:shadow-md active:scale-98"
+                                    className="cursor-pointer flex items-center gap-1 rounded-lg bg-primary px-6 py-2.5 text-xs font-bold text-white transition-all hover:shadow-md active:scale-98"
                                 >
                                     {step === 3
                                         ? 'Schedule Appointment'
