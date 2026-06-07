@@ -36,31 +36,36 @@ export default function BookModal() {
     const [selectedPreset, setSelectedPreset] = useState(0);
 
     const [selectedDate, setSelectedDate] = useState(
-        date || new Date().toISOString().split('T')[0],
+        () => normalizeDate(date) ?? new Date().toISOString().split('T')[0],
     );
 
     const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
 
+    function normalizeDate(input?: string | null): string | null {
+        if (!input) return null;
+
+        const d = new Date(input);
+        if (isNaN(d.getTime())) return null;
+
+        return d.toISOString().split('T')[0]; // YYYY-MM-DD
+    }
+
     const availableSlots = useMemo(() => {
-        if (!selectedDate) {
-            return [];
-        }
+        const normalizedSelected = normalizeDate(selectedDate);
+        if (!normalizedSelected) return [];
 
         const availability = availabilities.find(
-            (a) => a.date === selectedDate,
+            (a) => normalizeDate(a.date) === normalizedSelected,
         );
 
-        if (!availability) {
-            return [];
-        }
-
-        // return availability.time_slots.filter((slot) => !slot.is_booked);
-        return availability.time_slots;
+        return availability?.time_slots ?? [];
     }, [selectedDate, availabilities]);
 
     const availableCount = availableSlots.filter((s) => !s.is_booked).length;
 
     const preselectedBooking = useMemo(() => {
+        const normalizedDate = normalizeDate(date);
+
         // validate service
         const serviceIndex = services.findIndex(
             (service) => service.id === serviceId,
@@ -70,11 +75,14 @@ export default function BookModal() {
 
         // validate date
         const dateValid =
-            !!date &&
-            new Date(date).getTime() > Date.now() + 24 * 60 * 60 * 1000;
+            !!normalizedDate &&
+            new Date(normalizedDate).getTime() >
+                Date.now() + 24 * 60 * 60 * 1000;
 
         // find availability
-        const availability = availabilities.find((a) => a.date === date);
+        const availability = availabilities.find(
+            (a) => normalizeDate(a.date) === normalizedDate,
+        );
 
         const slot = availability?.time_slots.find((s) => s.id === slotId);
 
@@ -86,6 +94,7 @@ export default function BookModal() {
             dateValid,
             slotValid,
             slot,
+            normalizedDate,
         };
     }, [serviceId, slotId, date, services, availabilities]);
 
@@ -110,8 +119,8 @@ export default function BookModal() {
             setSelectedPreset(preselectedBooking.serviceIndex);
         }
 
-        if (preselectedBooking.dateValid && date) {
-            setSelectedDate(date);
+        if (preselectedBooking.dateValid && preselectedBooking.normalizedDate) {
+            setSelectedDate(preselectedBooking.normalizedDate);
         }
 
         if (preselectedBooking.slotValid) {
@@ -123,7 +132,7 @@ export default function BookModal() {
 
     React.useEffect(() => {
         if (date) {
-            setSelectedDate(date);
+            setSelectedDate(normalizeDate(date) ?? '');
         }
     }, [date]);
 
@@ -169,7 +178,9 @@ export default function BookModal() {
     const handleClose = () => {
         setStep(1);
         setSelectedPreset(0);
-        setSelectedDate(date || new Date().toISOString().split('T')[0]);
+        setSelectedDate(
+            normalizeDate(date) || new Date().toISOString().split('T')[0],
+        );
         setSelectedSlot(null);
         setNotes('');
         setShowSuccess(false);
@@ -189,6 +200,9 @@ export default function BookModal() {
     console.log('Modal Props (Service ID): ', serviceId);
 
     if (!isOpen) return null;
+
+    console.log('selected date: ', selectedDate);
+    
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

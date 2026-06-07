@@ -49,34 +49,6 @@ export default function UserDashboard({
 
     const { openModal } = useBookingModalContext();
 
-    const handleRescheduleAppointment = (id: number) => {
-        router.patch(
-            route('', id),
-            {},
-            {
-                preserveScroll: true,
-
-                onSuccess: () => {
-                    const confirmed = bookings.find((a) => a.id === id);
-
-                    if (confirmed) {
-                        const alert: MappedNotification = {
-                            id: `notif-${Date.now()}`,
-                            // title: `Scheduled: ${newBooking.service?.name}`,
-                            // message: `Your booking for ${newBooking.service?.name} on ${newBooking.date} was scheduled successfully.`,
-                            title: `Scheduled: ServiceName`,
-                            message: `Your booking for ServiceName on BookingDate was scheduled successfully.`,
-                            url: '',
-                            read: false,
-                            category: 'Bookings',
-                            timestamp: 'Just now',
-                        };
-                    }
-                },
-            },
-        );
-    };
-
     const handleCancelAppointment = (id: number) => {
         router.patch(
             route('', id),
@@ -103,22 +75,6 @@ export default function UserDashboard({
                 },
             },
         );
-    };
-
-    // Handler functions
-    const handleAddNewAppointment = (newBooking: {}) => {
-        // Push notification only
-        const alert: MappedNotification = {
-            id: `notif-${Date.now()}`,
-            // title: `Scheduled: ${newBooking.service?.name}`,
-            // message: `Your booking for ${newBooking.service?.name} on ${newBooking.date} was scheduled successfully.`,
-            title: `Scheduled: ServiceName`,
-            message: `Your booking for ServiceName on BookingDate was scheduled successfully.`,
-            url: '',
-            read: false,
-            category: 'Bookings',
-            timestamp: 'Just now',
-        };
     };
 
     const [chartSource, setChartSource] = useState<'all' | Service['id']>(
@@ -309,9 +265,7 @@ export default function UserDashboard({
             unreadNotificationsCount={unreadNotificationsCount}
             selectedDate={selectedDate}
             onSelectDate={setSelectedDate}
-            handleRescheduleAppointment={handleRescheduleAppointment}
             handleCancelAppointment={handleCancelAppointment}
-            handleAddNewAppointment={handleAddNewAppointment}
         >
             <div className="space-y-6 pr-1 pb-10">
                 {/* Banner Card */}

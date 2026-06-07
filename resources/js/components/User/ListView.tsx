@@ -22,12 +22,12 @@ import {
 } from 'lucide-react';
 import { Link } from '@inertiajs/react';
 import { formatTime } from '@/lib/calendar-utils';
+import { useBookingModalContext } from '@/contexts/BookingModalContext';
 
 interface ListViewProps {
     bookings: Booking[];
     searchQuery: string;
     onCancelAppointment: (id: number) => void;
-    onRescheduleAppointment: (id: number) => void;
 }
 
 type BookingStatusGroup = 'all' | 'pending' | 'confirmed' | 'failed';
@@ -36,11 +36,9 @@ export default function ListView({
     bookings,
     searchQuery,
     onCancelAppointment,
-    onRescheduleAppointment,
 }: ListViewProps) {
-    // const [statusFilter, setStatusFilter] = useState<
-    //     'all' | 'pending' | 'cancelled' | 'approved' | 'completed' | 'rejected'
-    // >('all');
+    const { openModal } = useBookingModalContext();
+
     const [statusFilter, setStatusFilter] = useState<
         'all' | 'pending' | 'failed' | 'confirmed'
     >('all');
@@ -73,9 +71,6 @@ export default function ListView({
                 .toLowerCase()
                 .includes(searchQuery.toLowerCase());
 
-        // Status match
-        // const matchesStatus =
-        //     statusFilter === 'all' || booking.status === statusFilter;
         const matchesStatus =
             statusFilter === 'all' ||
             getStatusGroup(booking.status) === statusFilter;
@@ -114,41 +109,6 @@ export default function ListView({
         }
     };
 
-    // const getStatusPill = (status: string) => {
-    //     switch (status) {
-    //         case 'completed':
-    //             return (
-    //                 <span className="shrink-0 rounded-full border border-emerald-200/50 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 uppercase dark:bg-emerald-950/20 dark:text-emerald-400">
-    //                     Completed
-    //                 </span>
-    //             );
-    //         case 'approved':
-    //             return (
-    //                 <span className="shrink-0 rounded-full border border-emerald-200/50 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 uppercase dark:bg-emerald-950/20 dark:text-emerald-400">
-    //                     Approved
-    //                 </span>
-    //             );
-    //         case 'rejected':
-    //             return (
-    //                 <span className="shrink-0 rounded-full border border-red-200/50 bg-red-50 px-2.5 py-0.5 text-[10px] font-bold text-red-700 uppercase dark:bg-red-950/20 dark:text-red-400">
-    //                     Rejected
-    //                 </span>
-    //             );
-    //         case 'cancelled':
-    //             return (
-    //                 <span className="shrink-0 rounded-full border border-red-200/50 bg-red-50 px-2.5 py-0.5 text-[10px] font-bold text-red-700 uppercase dark:bg-red-950/20 dark:text-red-400">
-    //                     Cancelled
-    //                 </span>
-    //             );
-    //         default:
-    //             return (
-    //                 <span className="shrink-0 rounded-full border border-amber-200/50 bg-amber-50 px-2.5 py-0.5 text-[10px] font-bold text-amber-700 uppercase dark:bg-amber-950/20 dark:text-amber-400">
-    //                     Pending
-    //                 </span>
-    //             );
-    //     }
-    // };
-
     const getStatusPill = (status: Booking['status']) => {
         const group = getStatusGroup(status);
 
@@ -175,7 +135,7 @@ export default function ListView({
         );
     };
 
-    // console.log('Appointments: ', appointments);
+    // console.log('Appointments: ', bookings);
 
     return (
         <div className="space-y-4 pb-10">
@@ -357,11 +317,13 @@ export default function ListView({
                                             <button
                                                 type="button"
                                                 onClick={() =>
-                                                    onRescheduleAppointment(
-                                                        booking.id,
+                                                    openModal(
+                                                        booking.date,
+                                                        booking.time_slot_id,
+                                                        booking.service?.id,
                                                     )
                                                 }
-                                                className="flex items-center gap-1 rounded-lg border border-outline-variant px-3 py-1.5 text-xs font-bold text-on-surface transition-colors hover:bg-surface-container-dark dark:text-on-surface-dark"
+                                                className="flex cursor-pointer items-center gap-1 rounded-lg border border-outline-variant px-3 py-1.5 text-xs font-bold text-on-surface transition-colors hover:bg-surface-container-dark dark:text-on-surface-dark"
                                                 title="Reschedule this appointment"
                                             >
                                                 <CalendarClock className="h-3.5 w-3.5" />
@@ -374,7 +336,7 @@ export default function ListView({
                                                         booking.id,
                                                     )
                                                 }
-                                                className="flex items-center gap-1 rounded-lg bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 transition-colors hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-900/30"
+                                                className="flex cursor-pointer items-center gap-1 rounded-lg bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 transition-colors hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-900/30"
                                                 title="Cancel this appointment"
                                             >
                                                 <Ban className="h-3.5 w-3.5" />
@@ -387,7 +349,7 @@ export default function ListView({
                                             onClick={() =>
                                                 onCancelAppointment(booking.id)
                                             }
-                                            className="flex items-center gap-1 rounded-lg bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 transition-colors hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-900/30"
+                                            className="flex cursor-pointer items-center gap-1 rounded-lg bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 transition-colors hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-900/30"
                                             title="Cancel this appointment"
                                         >
                                             <Ban className="h-3.5 w-3.5" />

@@ -25,35 +25,6 @@ const ViewBookings = ({
 
     const [selectedDate, setSelectedDate] = useState('2023-10-26');
 
-    const handleRescheduleAppointment = (id: number) => {
-        router.patch(
-            route('', id),
-            {},
-            {
-                preserveScroll: true,
-
-                onSuccess: () => {
-                    const confirmed = bookings.find((a) => a.id === id);
-
-                    if (confirmed) {
-                        const alert: MappedNotification = {
-                            id: `notif-${Date.now()}`,
-                            // title: `Scheduled: ${newBooking.service?.name}`,
-                            // message: `Your booking for ${newBooking.service?.name} on ${newBooking.date} was scheduled successfully.`,
-                            title: `Scheduled: ServiceName`,
-                            message: `Your booking for ServiceName on BookingDate was scheduled successfully.`,
-                            url: '',
-                            read: false,
-                            category: 'Bookings',
-                            timestamp: 'Just now',
-                        };
-
-                    }
-                },
-            },
-        );
-    };
-
     const handleCancelAppointment = (id: number) => {
         router.patch(
             route('', id),
@@ -83,22 +54,6 @@ const ViewBookings = ({
         );
     };
 
-    const handleAddNewAppointment = (newBooking: {}) => {
-        // Push notification only
-        const alert: MappedNotification = {
-            id: `notif-${Date.now()}`,
-            // title: `Scheduled: ${newBooking.service?.name}`,
-            // message: `Your booking for ${newBooking.service?.name} on ${newBooking.date} was scheduled successfully.`,
-            title: `Scheduled: ServiceName`,
-            message: `Your booking for ServiceName on BookingDate was scheduled successfully.`,
-            url: '',
-            read: false,
-            category: 'Bookings',
-            timestamp: 'Just now',
-        };
-
-    };
-
     return (
         <UserLayout
             bookings={bookings}
@@ -107,9 +62,7 @@ const ViewBookings = ({
             onSelectDate={setSelectedDate}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
-            handleRescheduleAppointment={handleRescheduleAppointment}
             handleCancelAppointment={handleCancelAppointment}
-            handleAddNewAppointment={handleAddNewAppointment}
             headerActions={
                 <div className="flex shrink-0 rounded-xl bg-gray-100 p-1 text-xs font-semibold dark:bg-neutral-800">
                     <button
@@ -152,7 +105,6 @@ const ViewBookings = ({
                     bookings={bookings}
                     searchQuery={searchQuery}
                     onCancelAppointment={handleCancelAppointment}
-                    onRescheduleAppointment={handleRescheduleAppointment}
                 />
             )}
         </UserLayout>

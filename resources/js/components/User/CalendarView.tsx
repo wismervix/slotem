@@ -213,8 +213,7 @@ export default function CalendarView({
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 openModal(
-                                                    undefined,
-                                                    formattedDate,
+                                                    formattedDate
                                                 );
                                             }}
                                             className="cursor-pointer shrink-0 text-[10px] font-extrabold text-primary uppercase opacity-0 transition-opacity group-hover:opacity-100"

@@ -397,8 +397,8 @@ export default function UserLayout({
                                         </p>
                                         <button
                                             onClick={() => {
-                                                onSelectDate('2023-10-27');
-                                                openModal('2023-10-27');
+                                                onSelectDate(selectedDate ?? '2026-10-27');
+                                                openModal(selectedDate ?? '2026-10-27');
                                             }}
                                             className="rounded-xl bg-white px-4 py-2 text-[10px] font-black text-primary shadow-sm transition-all hover:bg-neutral-100"
                                         >
