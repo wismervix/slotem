@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Guest;
 
 use App\Http\Controllers\Controller;
-// use App\Models\Availability;
 use App\Models\Service;
 use App\Models\TimeSlot;
 use App\Notifications\BookingConfirmed;
@@ -22,13 +21,9 @@ class BookingController extends Controller
 
         $service = Service::findOrFail($validated['service']);
 
-        // $availabilities = Availability::with('timeSlots')
-        //     ->whereDate('date', '>=', now()->toDateString())
-        //     ->get();
 
         return Inertia::render('Guest/Booking/DateAndTime', [
             'service' => $service,
-            // 'availabilities' => $availabilities,
         ]);
     }
     public function create(Request $request)

@@ -1,4 +1,4 @@
-import { router } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import CalendarView from '@/components/User/CalendarView';
 import ListView from '@/components/User/ListView';
 import UserLayout from '@/layouts/User/UserLayout';
@@ -8,15 +8,16 @@ import { CalendarDays, List } from 'lucide-react';
 
 type ViewBookingsProps = {
     bookings: Booking[];
-    availabilities: Availability[];
     unreadNotificationsCount: number;
 };
 
 const ViewBookings = ({
     bookings,
-    availabilities,
     unreadNotificationsCount,
 }: ViewBookingsProps) => {
+
+    const { availabilities } = usePage<{ availabilities: Availability[] }>()
+        .props;
 
     const [subView, setSubView] = useState<'calendar' | 'list'>('calendar');
 

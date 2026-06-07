@@ -23,8 +23,6 @@ export default function BookModal() {
     const { isOpen, slotId, date, serviceId, closeModal } =
         useBookingModalContext();
 
-    if (!isOpen) return null;
-
     const { services } = usePage<{ services: Service[] }>().props;
 
     const { availabilities } = usePage<{ availabilities: Availability[] }>()
@@ -62,7 +60,67 @@ export default function BookModal() {
 
     const availableCount = availableSlots.filter((s) => !s.is_booked).length;
 
-    // When preselected date changes (e.g. user clicked a date on calendar), update local state
+    const preselectedBooking = useMemo(() => {
+        // validate service
+        const serviceIndex = services.findIndex(
+            (service) => service.id === serviceId,
+        );
+
+        const serviceValid = serviceIndex !== -1;
+
+        // validate date
+        const dateValid =
+            !!date &&
+            new Date(date).getTime() > Date.now() + 24 * 60 * 60 * 1000;
+
+        // find availability
+        const availability = availabilities.find((a) => a.date === date);
+
+        const slot = availability?.time_slots.find((s) => s.id === slotId);
+
+        const slotValid = !!slot && !slot.is_booked;
+
+        return {
+            serviceValid,
+            serviceIndex,
+            dateValid,
+            slotValid,
+            slot,
+        };
+    }, [serviceId, slotId, date, services, availabilities]);
+
+    function determineInitialStep() {
+        if (!preselectedBooking.serviceValid) {
+            return 1;
+        }
+
+        if (!preselectedBooking.dateValid || !preselectedBooking.slotValid) {
+            return 2;
+        }
+
+        return 3;
+    }
+
+    React.useEffect(() => {
+        if (!isOpen) {
+            return;
+        }
+
+        if (preselectedBooking.serviceValid) {
+            setSelectedPreset(preselectedBooking.serviceIndex);
+        }
+
+        if (preselectedBooking.dateValid && date) {
+            setSelectedDate(date);
+        }
+
+        if (preselectedBooking.slotValid) {
+            setSelectedSlot(preselectedBooking.slot!);
+        }
+
+        setStep(determineInitialStep());
+    }, [isOpen, preselectedBooking, date]);
+
     React.useEffect(() => {
         if (date) {
             setSelectedDate(date);
@@ -111,8 +169,8 @@ export default function BookModal() {
     const handleClose = () => {
         setStep(1);
         setSelectedPreset(0);
-        setSelectedDate(selectedDate || new Date().toISOString().split('T')[0]);
-        setSelectedSlot(selectedSlot);
+        setSelectedDate(date || new Date().toISOString().split('T')[0]);
+        setSelectedSlot(null);
         setNotes('');
         setShowSuccess(false);
         closeModal();
@@ -129,6 +187,8 @@ export default function BookModal() {
     console.log('Modal Props (Slot ID): ', slotId);
 
     console.log('Modal Props (Service ID): ', serviceId);
+
+    if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

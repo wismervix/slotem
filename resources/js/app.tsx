@@ -14,7 +14,7 @@ globalThis.route = ziggyRoute;
 const appName = import.meta.env.VITE_APP_NAME || 'Slotem';
 
 const pages = import.meta.glob<{ default: ComponentType<any> }>(
-    './Pages/**/*.tsx',
+    './pages/**/*.tsx',
     { eager: false },
 );
 
@@ -22,7 +22,7 @@ createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
 
     resolve: async (name) => {
-        const path = `./Pages/${name}.tsx`;
+        const path = `./pages/${name}.tsx`;
 
         const importer = pages[path];
 

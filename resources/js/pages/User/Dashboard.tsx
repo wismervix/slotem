@@ -24,23 +24,24 @@ import {
 import { motion } from 'motion/react';
 import { Link } from '@inertiajs/react';
 import { getServiceIcon, getServiceIconTheme } from '@/lib/service-icons';
-import { formatTime } from '@/lib/calendar-utils';
+import { formatDateAndTime, formatTime } from '@/lib/calendar-utils';
 import { useBookingModalContext } from '@/contexts/BookingModalContext';
 
 interface UserDashboardProps {
-    bookings: Booking[];
-    availabilities: Availability[];
     name: String;
+    bookings: Booking[];
     unreadNotificationsCount: number;
 }
 
 export default function UserDashboard({
-    bookings,
-    availabilities,
     name,
+    bookings,
     unreadNotificationsCount,
 }: UserDashboardProps) {
     const { services } = usePage<{ services: Service[] }>().props;
+
+    const { availabilities } = usePage<{ availabilities: Availability[] }>()
+        .props;
 
     // console.log('General Services: ', services);
 
@@ -118,11 +119,6 @@ export default function UserDashboard({
             category: 'Bookings',
             timestamp: 'Just now',
         };
-    };
-
-    // ✅ Add this function
-    const handleScheduleQuickSlot = (slotId: number, date: string) => {
-        openModal(slotId, date);
     };
 
     const [chartSource, setChartSource] = useState<'all' | Service['id']>(
@@ -209,10 +205,20 @@ export default function UserDashboard({
         .sort(() => Math.random() - 0.5)
         .slice(0, 3);
 
+    const nowPlus24Hours = Date.now() + 24 * 60 * 60 * 1000;
+
     const hotSlots = availabilities
         .flatMap((a) =>
             a.time_slots
-                .filter((slot) => !slot.is_booked)
+                .filter((slot) => {
+                    if (slot.is_booked) return false;
+
+                    const slotTime = new Date(
+                        `${a.date}T${slot.start_time}`,
+                    ).getTime();
+
+                    return slotTime >= nowPlus24Hours;
+                })
                 .map((slot) => ({
                     id: slot.id,
                     date: a.date,
@@ -307,7 +313,7 @@ export default function UserDashboard({
             handleCancelAppointment={handleCancelAppointment}
             handleAddNewAppointment={handleAddNewAppointment}
         >
-            <div className="h-full space-y-6 overflow-y-auto pr-1 pb-10">
+            <div className="space-y-6 pr-1 pb-10">
                 {/* Banner Card */}
                 <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary to-primary-container p-6 text-white shadow-md md:p-8">
                     <div className="relative z-10 max-w-xl space-y-2">
@@ -618,7 +624,7 @@ export default function UserDashboard({
                                         </h4>
 
                                         <p className="mt-0.5 text-[10px] font-medium text-gray-500">
-                                            {booking.date} · {booking.status}
+                                            {formatDateAndTime(booking.date)} · {booking.status}
                                         </p>
                                     </div>
                                 </div>
@@ -703,7 +709,11 @@ export default function UserDashboard({
 
                                     <button
                                         onClick={() =>
-                                            openModal(slot.id, slot.date)
+                                            openModal(
+                                                slot.date,
+                                                slot.id,
+                                                slot.service?.id,
+                                            )
                                         }
                                         className="flex shrink-0 items-center gap-1 rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-[11px] font-extrabold text-gray-900 shadow-xs hover:bg-on-surface-variant dark:bg-neutral-900 dark:text-white dark:hover:bg-on-surface-variant-dark"
                                     >

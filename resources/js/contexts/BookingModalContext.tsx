@@ -6,7 +6,7 @@ interface BookingModalContextType {
     slotId?: number;
     serviceId?: number;
     date?: string;
-    openModal: (slotId?: number, date?: string, serviceId?: number) => void;
+    openModal: (date?: string, slotId?: number, serviceId?: number) => void;
     closeModal: () => void;
 }
 
@@ -20,7 +20,7 @@ export function BookingModalProvider({ children }: { children: React.ReactNode }
     const [serviceId, setServiceId] = useState<number>();
     const [date, setDate] = useState<string>();
 
-    const openModal = (slotId?: number, date?: string, serviceId?: number) => {
+    const openModal = (date?: string, slotId?: number, serviceId?: number) => {
         setSlotId(slotId);
         setServiceId(serviceId);
         setDate(date);

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProfileUpdateRequest;
-use App\Models\Availability;
 use App\Models\NotificationState;
 use App\Models\User;
 use App\Services\NotificationService;
@@ -26,15 +25,11 @@ class DashboardController extends Controller
             ->latest()
             ->get();
 
-        $availabilities = Availability::with('timeSlots')
-            ->whereDate('date', '>=', now()->toDateString())
-            ->get();
 
         $user->load('settings');
 
         return inertia('User/Dashboard', [
             'bookings' => $bookings,
-            'availabilities' => $availabilities,
             'name' => $user->name,
 
             'unreadNotificationsCount' =>
@@ -53,13 +48,12 @@ class DashboardController extends Controller
             ->latest()
             ->get();
 
-        $availabilities = Availability::with('timeSlots')
-            ->whereDate('date', '>=', now()->toDateString())
-            ->get();
+        // $availabilities = Availability::with('timeSlots')
+        //     ->whereDate('date', '>=', now()->toDateString())
+        //     ->get();
 
         return inertia('User/ViewBookings', [
             'bookings' => $bookings,
-            'availabilities' => $availabilities,
 
             'unreadNotificationsCount' =>
             $notificationService->getUnreadCount($user),

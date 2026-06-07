@@ -93,7 +93,7 @@ export default function Sidebar({
 
                     <button
                         onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
-                        className="rounded-lg bg-gray-100 p-1.5 text-gray-700 hover:bg-gray-200 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                        className="cursor-pointer rounded-lg bg-gray-100 p-1.5 text-gray-700 hover:bg-gray-200 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
                     >
                         <Menu className="h-5 w-5" />
                     </button>
@@ -118,7 +118,7 @@ export default function Sidebar({
 
                     <button
                         onClick={() => setMobileSidebarOpen(false)}
-                        className="rounded-lg bg-gray-100 p-1 md:hidden dark:bg-neutral-800"
+                        className="cursor-pointer rounded-lg bg-gray-100 p-1 md:hidden dark:bg-neutral-800"
                     >
                         <X className="h-5 w-5 text-gray-500" />
                     </button>
