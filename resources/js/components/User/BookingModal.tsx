@@ -193,15 +193,15 @@ export default function BookModal() {
         ? getServiceIcon(currentPreset.icon)
         : Heart;
 
-    console.log('Modal Props (Date): ', date);
+    // console.log('Modal Props (Date): ', date);
 
-    console.log('Modal Props (Slot ID): ', slotId);
+    // console.log('Modal Props (Slot ID): ', slotId);
 
-    console.log('Modal Props (Service ID): ', serviceId);
+    // console.log('Modal Props (Service ID): ', serviceId);
 
     if (!isOpen) return null;
 
-    console.log('selected date: ', selectedDate);
+    // console.log('selected date: ', selectedDate);
     
 
     return (

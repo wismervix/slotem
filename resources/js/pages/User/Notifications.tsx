@@ -230,7 +230,7 @@ export default function UserNotifications({
                                 notifications.filter((n) => !n.read).length ===
                                 0
                             }
-                            className="flex items-center gap-1 text-primary hover:underline disabled:no-underline disabled:opacity-50"
+                            className="flex cursor-pointer items-center gap-1 text-primary hover:underline disabled:no-underline disabled:opacity-50"
                         >
                             <Check className="h-4 w-4" />
                             Mark all read
@@ -242,7 +242,7 @@ export default function UserNotifications({
                             type="button"
                             onClick={handleClearAllNotifications}
                             disabled={notifications.length === 0}
-                            className="flex items-center gap-1 text-red-600 hover:underline disabled:no-underline disabled:opacity-50"
+                            className="flex cursor-pointer items-center gap-1 text-red-600 hover:underline disabled:no-underline disabled:opacity-50"
                         >
                             <Trash2 className="h-4 w-4" />
                             Clear all

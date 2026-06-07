@@ -1,4 +1,4 @@
-import { router } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import { useState, type ReactNode } from 'react';
 import Footer from '@/components/User/Footer';
 import Sidebar from '@/components/User/Sidebar';
@@ -18,12 +18,8 @@ import {
     Paintbrush,
     Calendar,
 } from 'lucide-react';
-import { Booking, ServiceIcon } from '@/types';
-import {
-    getServiceIcon,
-    getServiceTheme,
-    serviceIcons,
-} from '@/lib/service-icons';
+import { Booking, Service, Availability } from '@/types';
+import { getServiceIcon, getServiceTheme } from '@/lib/service-icons';
 import { formatTime } from '@/lib/calendar-utils';
 import { useBookingModalContext } from '@/contexts/BookingModalContext';
 
@@ -35,9 +31,7 @@ interface Props {
     searchQuery?: string;
     setSearchQuery?: (query: string) => void;
     onSelectDate?: (date: string) => void;
-    handleRescheduleAppointment?: (id: number) => void;
     handleCancelAppointment?: (id: number) => void;
-    handleAddNewAppointment?: (newAppt: {}) => void;
     headerActions?: ReactNode;
 }
 
@@ -49,11 +43,48 @@ export default function UserLayout({
     searchQuery = '',
     setSearchQuery = () => {},
     onSelectDate = () => {},
-    handleRescheduleAppointment = () => {},
     handleCancelAppointment = () => {},
-    handleAddNewAppointment = () => {},
     headerActions = null,
 }: Props) {
+    const { openModal } = useBookingModalContext();
+
+    const { services } = usePage<{ services: Service[] }>().props;
+
+    const { availabilities } = usePage<{ availabilities: Availability[] }>()
+        .props;
+
+    const mostPopularService =
+        services.find((s) => s.badges?.includes('popular')) ?? services[0];
+
+    const nowPlus24h = new Date();
+    nowPlus24h.setHours(nowPlus24h.getHours() + 24);
+
+    const getClosestAvailableSlot = () => {
+        const sorted = [...availabilities].sort((a, b) =>
+            a.date.localeCompare(b.date),
+        );
+
+        for (const day of sorted) {
+            const dayDate = new Date(day.date);
+
+            // must be at least 24h ahead
+            if (dayDate < nowPlus24h) continue;
+
+            const availableSlot = day.time_slots.find(
+                (slot) => !slot.is_booked,
+            );
+
+            if (availableSlot) {
+                return {
+                    date: day.date,
+                    slot: availableSlot,
+                };
+            }
+        }
+
+        return null;
+    };
+
     const isBookingsPage = route().current('user.bookings');
     const isDashboardPage = route().current('user.dashboard');
     const isProfilePage = route().current('user.profile');
@@ -98,9 +129,6 @@ export default function UserLayout({
                 booking.date >= new Date().toISOString().split('T')[0],
         )
         .sort((a, b) => a.date.localeCompare(b.date));
-
-    const { isOpen, slotId, serviceId, date, closeModal, openModal } =
-        useBookingModalContext();
 
     return (
         <div className="flex min-h-screen flex-col bg-[#fef7ff] font-sans text-gray-900 antialiased transition-colors duration-200 md:flex-row dark:bg-neutral-950 dark:text-neutral-100">
@@ -389,7 +417,7 @@ export default function UserLayout({
                                 <div className="relative flex h-32 w-full items-center justify-center overflow-hidden rounded-2xl bg-primary-container p-4 text-on-primary-container">
                                     <div className="relative z-10 space-y-1.5 text-center">
                                         <p className="text-xs font-extrabold text-white">
-                                            Need a dynamic checkup?
+                                            Need a dynamic appointment?
                                         </p>
                                         <p className="text-[9px] text-indigo-200">
                                             Instant slots available for this
@@ -397,10 +425,27 @@ export default function UserLayout({
                                         </p>
                                         <button
                                             onClick={() => {
-                                                onSelectDate(selectedDate ?? '2026-10-27');
-                                                openModal(selectedDate ?? '2026-10-27');
+                                                onSelectDate(
+                                                    selectedDate ??
+                                                        '2026-10-27',
+                                                );
+                                                const result =
+                                                    getClosestAvailableSlot();
+
+                                                if (!result) return;
+
+                                                const serviceId =
+                                                    mostPopularService.id;
+
+                                                onSelectDate(result.date);
+
+                                                openModal(
+                                                    result.date,
+                                                    result.slot.id,
+                                                    serviceId,
+                                                );
                                             }}
-                                            className="rounded-xl bg-white px-4 py-2 text-[10px] font-black text-primary shadow-sm transition-all hover:bg-neutral-100"
+                                            className="cursor-pointer rounded-xl bg-white px-4 py-2 text-[10px] font-black text-primary shadow-sm transition-all hover:bg-neutral-100"
                                         >
                                             View Availability
                                         </button>
