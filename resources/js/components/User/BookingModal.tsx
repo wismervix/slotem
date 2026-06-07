@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Service } from '@/types';
+import React, { useState, useMemo } from 'react';
+import { Service, TimeSlot, Availability } from '@/types';
 import {
     X,
     Calendar as CalendarIcon,
@@ -19,20 +19,48 @@ import { usePage } from '@inertiajs/react';
 import { getServiceIcon } from '@/lib/service-icons';
 import { useBookingModalContext } from '@/contexts/BookingModalContext';
 
-
 export default function BookModal() {
     const { isOpen, slotId, date, serviceId, closeModal } =
         useBookingModalContext();
+
+    if (!isOpen) return null;
+
+    const { services } = usePage<{ services: Service[] }>().props;
+
+    const { availabilities } = usePage<{ availabilities: Availability[] }>()
+        .props;
+
     const [step, setStep] = useState(1);
-    const [selectedPreset, setSelectedPreset] = useState(0);
-    const [selectedDate, setSelectedDate] = useState(
-        date || new Date().toISOString().split('T')[0],
-    );
-    const [time, setTime] = useState('09:30 AM');
+
     const [notes, setNotes] = useState('');
     const [showSuccess, setShowSuccess] = useState(false);
 
-    const { services } = usePage<{ services: Service[] }>().props;
+    const [selectedPreset, setSelectedPreset] = useState(0);
+
+    const [selectedDate, setSelectedDate] = useState(
+        date || new Date().toISOString().split('T')[0],
+    );
+
+    const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
+
+    const availableSlots = useMemo(() => {
+        if (!selectedDate) {
+            return [];
+        }
+
+        const availability = availabilities.find(
+            (a) => a.date === selectedDate,
+        );
+
+        if (!availability) {
+            return [];
+        }
+
+        // return availability.time_slots.filter((slot) => !slot.is_booked);
+        return availability.time_slots;
+    }, [selectedDate, availabilities]);
+
+    const availableCount = availableSlots.filter((s) => !s.is_booked).length;
 
     // When preselected date changes (e.g. user clicked a date on calendar), update local state
     React.useEffect(() => {
@@ -41,7 +69,22 @@ export default function BookModal() {
         }
     }, [date]);
 
-    if (!isOpen) return null;
+    function formatTime(time: string) {
+        return new Date(`2026-01-01T${time}`).toLocaleTimeString([], {
+            hour: 'numeric',
+            minute: '2-digit',
+        });
+    }
+
+    function formatSelectedDate(date: string) {
+        const [year, month, day] = date.split('-').map(Number);
+
+        return new Date(year, month - 1, day).toLocaleDateString('en-GB', {
+            weekday: 'long',
+            month: 'long',
+            day: 'numeric',
+        });
+    }
 
     const handleNextStep = () => {
         if (step < 3) {
@@ -68,8 +111,8 @@ export default function BookModal() {
     const handleClose = () => {
         setStep(1);
         setSelectedPreset(0);
-        setSelectedDate(date || new Date().toISOString().split('T')[0]);
-        setTime('09:30 AM');
+        setSelectedDate(selectedDate || new Date().toISOString().split('T')[0]);
+        setSelectedSlot(selectedSlot);
         setNotes('');
         setShowSuccess(false);
         closeModal();
@@ -77,16 +120,16 @@ export default function BookModal() {
 
     const currentPreset = services[selectedPreset];
 
-const CurrentPresetIcon = currentPreset
-    ? getServiceIcon(currentPreset.icon)
-    : Heart;
+    const CurrentPresetIcon = currentPreset
+        ? getServiceIcon(currentPreset.icon)
+        : Heart;
 
     console.log('Modal Props (Date): ', date);
-    
+
     console.log('Modal Props (Slot ID): ', slotId);
-    
+
     console.log('Modal Props (Service ID): ', serviceId);
-    
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             {/* Backdrop */}
@@ -157,15 +200,25 @@ const CurrentPresetIcon = currentPreset
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-500">Date:</span>
-                                    <span className="font-semibold text-gray-900 dark:text-white">
-                                        {selectedDate}
-                                    </span>
+                                    {selectedSlot && (
+                                        <span className="font-semibold text-gray-900 dark:text-white">
+                                            {formatSelectedDate(
+                                                selectedDate,
+                                            )}{' '}
+                                        </span>
+                                    )}
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-500">Time:</span>
-                                    <span className="text-gray-900 dark:text-white">
-                                        {time}
-                                    </span>
+                                    {selectedSlot && (
+                                        <span className="text-gray-900 dark:text-white">
+                                            {formatTime(
+                                                selectedSlot.start_time,
+                                            )}{' '}
+                                            -{' '}
+                                            {formatTime(selectedSlot.end_time)}
+                                        </span>
+                                    )}
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-500">
@@ -179,7 +232,7 @@ const CurrentPresetIcon = currentPreset
 
                             <button
                                 onClick={handleClose}
-                                className="cursor-pointer mt-6 w-full rounded-xl bg-primary py-3 text-sm font-bold text-white transition-all hover:shadow-lg hover:backdrop-brightness-95"
+                                className="mt-6 w-full cursor-pointer rounded-xl bg-primary py-3 text-sm font-bold text-white transition-all hover:shadow-lg hover:backdrop-brightness-95"
                             >
                                 Close and View Calendar
                             </button>
@@ -288,39 +341,59 @@ const CurrentPresetIcon = currentPreset
                                     <div className="space-y-2">
                                         <label className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-gray-500 uppercase">
                                             <Clock className="h-4 w-4 text-primary" />
-                                            Select Available Time Slot
+                                            Select Available Time Slot (
+                                            {availableCount} slots available)
                                         </label>
                                         <div className="grid grid-cols-3 gap-2">
-                                            {[
-                                                '08:30 AM',
-                                                '09:30 AM',
-                                                '10:15 AM',
-                                                '11:00 AM',
-                                                '01:30 PM',
-                                                '02:00 PM',
-                                                '03:15 PM',
-                                                '04:00 PM',
-                                                '05:00 PM',
-                                            ].map((slot) => {
-                                                const isSelected =
-                                                    time === slot;
-                                                return (
-                                                    <button
-                                                        key={slot}
-                                                        type="button"
-                                                        onClick={() =>
-                                                            setTime(slot)
-                                                        }
-                                                        className={`rounded-lg border p-2.5 text-center text-xs font-semibold transition-all ${
-                                                            isSelected
-                                                                ? 'border-primary bg-primary text-white shadow-sm'
-                                                                : 'border-outline-variant bg-white text-gray-700 hover:bg-gray-50 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800'
-                                                        }`}
-                                                    >
-                                                        {slot}
-                                                    </button>
-                                                );
-                                            })}
+                                            {availableSlots.length === 0 ? (
+                                                <p className="col-span-2 text-center text-sm text-gray-400">
+                                                    No available slots for this
+                                                    date. Please select another
+                                                    date.
+                                                </p>
+                                            ) : (
+                                                availableSlots.map((slot) => {
+                                                    const selected =
+                                                        selectedSlot?.start_time ===
+                                                        slot.start_time;
+
+                                                    const isBooked =
+                                                        slot.is_booked;
+                                                    return (
+                                                        <button
+                                                            key={
+                                                                slot.start_time
+                                                            }
+                                                            disabled={isBooked}
+                                                            onClick={() =>
+                                                                setSelectedSlot(
+                                                                    slot,
+                                                                )
+                                                            }
+                                                            className={`rounded-lg border p-2.5 text-center text-xs font-semibold transition-all duration-200 ${
+                                                                isBooked
+                                                                    ? 'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400 line-through opacity-60 dark:bg-gray-800'
+                                                                    : selected
+                                                                      ? 'border-purple-600 bg-purple-600 text-white shadow-md ring-2 ring-purple-600/10'
+                                                                      : 'border-gray-200 bg-white text-gray-700 shadow-sm hover:border-purple-600 hover:text-purple-600 dark:border-purple-300'
+                                                            }`}
+                                                        >
+                                                            {formatTime(
+                                                                slot.start_time,
+                                                            )}{' '}
+                                                            -{' '}
+                                                            {formatTime(
+                                                                slot.end_time,
+                                                            )}
+                                                            {isBooked && (
+                                                                <span className="ml-2 text-xs">
+                                                                    (Booked)
+                                                                </span>
+                                                            )}
+                                                        </button>
+                                                    );
+                                                })
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -362,14 +435,30 @@ const CurrentPresetIcon = currentPreset
                                                     Scheduled Date:
                                                 </span>
                                                 <span className="text-right text-gray-900 dark:text-white">
-                                                    {selectedDate}
+                                                    {selectedSlot && (
+                                                        <span className="font-semibold text-gray-900 dark:text-white">
+                                                            {formatSelectedDate(
+                                                                selectedDate,
+                                                            )}{' '}
+                                                        </span>
+                                                    )}
                                                 </span>
 
                                                 <span className="text-gray-400">
                                                     Scheduled Time:
                                                 </span>
                                                 <span className="text-right text-gray-900 dark:text-white">
-                                                    {time}
+                                                    {selectedSlot && (
+                                                        <span className="text-gray-900 dark:text-white">
+                                                            {formatTime(
+                                                                selectedSlot.start_time,
+                                                            )}{' '}
+                                                            -{' '}
+                                                            {formatTime(
+                                                                selectedSlot.end_time,
+                                                            )}
+                                                        </span>
+                                                    )}
                                                 </span>
 
                                                 <span className="text-gray-400">
@@ -435,7 +524,7 @@ const CurrentPresetIcon = currentPreset
                                 <button
                                     type="button"
                                     onClick={handleNextStep}
-                                    className="cursor-pointer flex items-center gap-1 rounded-lg bg-primary px-6 py-2.5 text-xs font-bold text-white transition-all hover:shadow-md active:scale-98"
+                                    className="flex cursor-pointer items-center gap-1 rounded-lg bg-primary px-6 py-2.5 text-xs font-bold text-white transition-all hover:shadow-md active:scale-98"
                                 >
                                     {step === 3
                                         ? 'Schedule Appointment'

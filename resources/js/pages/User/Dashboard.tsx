@@ -691,10 +691,13 @@ export default function UserDashboard({
                                         <p className="opacity-60">
                                             DATE & TIME
                                         </p>
-                                        <p className="text-gray-800 dark:text-white">
-                                            {slot.date} ·{' '}
-                                            {formatTime(slot.start_time)} -{' '}
-                                            {formatTime(slot.end_time)}
+                                        <p className="flex flex-wrap items-center gap-2 text-gray-800 dark:text-white">
+                                            <span>{slot.date}</span>
+                                            <span aria-hidden="true">·</span>
+                                            <span>
+                                                {formatTime(slot.start_time)} -{' '}
+                                                {formatTime(slot.end_time)}
+                                            </span>
                                         </p>
                                     </div>
 

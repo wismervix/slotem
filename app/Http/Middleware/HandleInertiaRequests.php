@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Models\Service;
 use Inertia\Middleware;
+use App\Models\Availability;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -50,6 +51,14 @@ class HandleInertiaRequests extends Middleware
                 'services',
                 now()->addHour(),
                 fn() =>  Service::all()->toArray()
+            ),
+
+            'availabilities' => Cache::remember(
+                'availabilities',
+                now()->addHour(),
+                fn() =>  Availability::with('timeSlots')
+                    ->whereDate('date', '>=', now()->toDateString())
+                    ->get()->toArray()
             ),
             // 'genServices' => Service::all()->toArray(),
         ];

@@ -7,13 +7,16 @@ import { Stepper } from '@/components/Shared/Stepper';
 import { TimeSlotPicker } from '@/components/Shared/TimeSlotPicker';
 import GuestLayout from '@/layouts/Guest/GuestLayout';
 import type { Availability, Service, TimeSlot } from '@/types';
+import { usePage } from '@inertiajs/react';
 
 interface DateAndTimeProps {
-    availabilities: Availability[];
     service: Service;
 }
 
-export default function DateAndTime({ availabilities, service }: DateAndTimeProps) {
+export default function DateAndTime({ service }: DateAndTimeProps) {
+    const { availabilities } = usePage<{ availabilities: Availability[] }>()
+        .props;
+
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
     const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
@@ -40,6 +43,8 @@ export default function DateAndTime({ availabilities, service }: DateAndTimeProp
         setSelectedSlot(null);
     }
 
+    console.log('General Availabilities: ', availabilities);
+
     return (
         <GuestLayout>
             <main className="mx-auto w-full max-w-7xl flex-grow px-4 py-24 sm:px-6 lg:px-8">
@@ -61,8 +66,7 @@ export default function DateAndTime({ availabilities, service }: DateAndTimeProp
                         <p className="text-sm font-medium text-gray-500 dark:text-slate-200">
                             Selected Service:{' '}
                             <span className="font-bold text-purple-600">
-                                {service.name}{' '}
-                                ({service.duration}m)
+                                {service.name} ({service.duration}m)
                                 {/* Strategic Consulting Session (60m) */}
                             </span>
                         </p>
