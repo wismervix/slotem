@@ -48,7 +48,7 @@ const ViewBookings = ({
                     <button
                         type="button"
                         onClick={() => setSubView('list')}
-                        className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs transition-all ${
+                        className={`cursor-pointer flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs transition-all ${
                             subView === 'list'
                                 ? 'bg-white text-primary shadow-xs dark:bg-neutral-900'
                                 : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
@@ -60,7 +60,7 @@ const ViewBookings = ({
                     <button
                         type="button"
                         onClick={() => setSubView('calendar')}
-                        className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs transition-all ${
+                        className={`cursor-pointer flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs transition-all ${
                             subView === 'calendar'
                                 ? 'bg-white text-primary shadow-xs dark:bg-neutral-900'
                                 : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'

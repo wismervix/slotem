@@ -284,12 +284,18 @@ export default function UserLayout({
 
                                                 <button
                                                     type="button"
-                                                    onClick={() =>
-                                                        handleCancelAppointment(
-                                                            booking.id,
-                                                        )
-                                                    }
-                                                    className="flex w-full items-center justify-center gap-1 rounded-lg border border-red-200/40 bg-red-50 py-1.5 text-[10px] font-bold text-red-600 transition-colors hover:bg-red-100 dark:border-transparent dark:bg-red-950/20 dark:hover:bg-red-900/30"
+                                                    onClick={() => {
+                                                        if (
+                                                            confirm(
+                                                                'Are you sure you want to cancel this appointment? This action cannot be undone.',
+                                                            )
+                                                        ) {
+                                                            handleCancelAppointment(
+                                                                booking.id,
+                                                            );
+                                                        }
+                                                    }}
+                                                    className="cursor-pointer flex w-full items-center justify-center gap-1 rounded-lg border border-red-200/40 bg-red-50 py-1.5 text-[10px] font-bold text-red-600 transition-colors hover:bg-red-100 dark:border-transparent dark:bg-red-950/20 dark:hover:bg-red-900/30"
                                                 >
                                                     <Ban className="h-3 w-3" />
                                                     Cancel Booking

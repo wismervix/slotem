@@ -51,28 +51,10 @@ export default function UserDashboard({
 
     const handleCancelAppointment = (id: number) => {
         router.patch(
-            route('', id),
+            route('booking.cancel', id),
             {},
             {
                 preserveScroll: true,
-
-                onSuccess: () => {
-                    const cancelled = bookings.find((a) => a.id === id);
-
-                    if (cancelled) {
-                        const alert: MappedNotification = {
-                            id: `notif-${Date.now()}`,
-                            // title: `Scheduled: ${newBooking.service?.name}`,
-                            // message: `Your booking for ${newBooking.service?.name} on ${newBooking.date} was scheduled successfully.`,
-                            title: `Scheduled: ServiceName`,
-                            message: `Your booking for ServiceName on BookingDate was scheduled successfully.`,
-                            url: '',
-                            read: false,
-                            category: 'Bookings',
-                            timestamp: 'Just now',
-                        };
-                    }
-                },
             },
         );
     };
@@ -204,6 +186,8 @@ export default function UserDashboard({
         )
         .sort((a, b) => a.date.localeCompare(b.date))
         .slice(0, 3);
+
+    // console.log('Upcoming Bookings', upcomingBookings);
 
     const bookingHistory = bookings
         .filter(
@@ -578,7 +562,8 @@ export default function UserDashboard({
                                         </h4>
 
                                         <p className="mt-0.5 text-[10px] font-medium text-gray-500">
-                                            {formatDateAndTime(booking.date)} · {booking.status}
+                                            {formatDateAndTime(booking.date)} ·{' '}
+                                            {booking.status}
                                         </p>
                                     </div>
                                 </div>
@@ -669,7 +654,7 @@ export default function UserDashboard({
                                                 slot.service?.id,
                                             )
                                         }
-                                        className="flex shrink-0 items-center gap-1 rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-[11px] font-extrabold text-gray-900 shadow-xs hover:bg-on-surface-variant dark:bg-neutral-900 dark:text-white dark:hover:bg-on-surface-variant-dark"
+                                        className="flex shrink-0 cursor-pointer items-center gap-1 rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-[11px] font-extrabold text-gray-900 shadow-xs hover:bg-on-surface-variant dark:bg-neutral-900 dark:text-white dark:hover:bg-on-surface-variant-dark"
                                     >
                                         Book
                                         <ArrowUpRight className="h-3.5 w-3.5 text-primary" />
@@ -801,11 +786,33 @@ export default function UserDashboard({
 
                                             {/* ACTIONS */}
                                             <div className="flex gap-2 opacity-80 transition group-hover:opacity-100">
-                                                <button className="rounded-xl border border-zinc-200 bg-white p-2 text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10 dark:hover:text-white">
+                                                <button
+                                                    onClick={() =>
+                                                        openModal(
+                                                            booking.date,
+                                                            booking.time_slot_id,
+                                                            booking.service?.id,
+                                                        )
+                                                    }
+                                                    className="cursor-pointer rounded-xl border border-zinc-200 bg-white p-2 text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10 dark:hover:text-white"
+                                                >
                                                     <Clock size={18} />
                                                 </button>
 
-                                                <button className="rounded-xl border border-red-500/20 bg-transparent p-2 text-red-500 transition hover:bg-red-500/10 dark:border-red-400/20 dark:text-red-400 dark:hover:bg-red-500/10">
+                                                <button
+                                                    onClick={() => {
+                                                        if (
+                                                            confirm(
+                                                                'Are you sure you want to cancel this appointment? This action cannot be undone.',
+                                                            )
+                                                        ) {
+                                                            handleCancelAppointment(
+                                                                booking.id,
+                                                            );
+                                                        }
+                                                    }}
+                                                    className="cursor-pointer rounded-xl border border-red-500/20 bg-transparent p-2 text-red-500 transition hover:bg-red-500/10 dark:border-red-400/20 dark:text-red-400 dark:hover:bg-red-500/10"
+                                                >
                                                     <XCircle size={18} />
                                                 </button>
                                             </div>

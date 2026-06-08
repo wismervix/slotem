@@ -352,9 +352,17 @@ export default function ListView({
                                     ) : booking.status !== 'cancelled' ? (
                                         <button
                                             type="button"
-                                            onClick={() =>
-                                                onCancelAppointment(booking.id)
-                                            }
+                                            onClick={() => {
+                                                if (
+                                                    confirm(
+                                                        'Are you sure you want to cancel this appointment? This action cannot be undone.',
+                                                    )
+                                                ) {
+                                                    onCancelAppointment(
+                                                        booking.id,
+                                                    );
+                                                }
+                                            }}
                                             className="flex cursor-pointer items-center gap-1 rounded-lg bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 transition-colors hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-900/30"
                                             title="Cancel this appointment"
                                         >

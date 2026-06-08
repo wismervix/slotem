@@ -13,6 +13,7 @@ use App\Services\BookingService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use App\Notifications\BookingCancelled;
 use App\Notifications\BookingConfirmed;
 
 class BookingController extends Controller
@@ -86,7 +87,7 @@ class BookingController extends Controller
         }
 
         $booking = $bookingService->createBooking($validated);
-        
+
         if ($booking->user->name !== $validated['client_name']) {
             $booking->user->update([
                 'name' => $validated['client_name']
@@ -109,10 +110,8 @@ class BookingController extends Controller
             ->route('user.bookings')
             ->with('success', true);
     }
-    public function storeAuthenticated(
-        Request $request,
-        BookingService $bookingService
-    ) {
+    public function storeAuthenticated(Request $request, BookingService $bookingService)
+    {
         $validated = $request->validate([
             'service_id' => ['required', 'exists:services,id'],
             'time_slot_id' => ['required', 'exists:time_slots,id'],
@@ -176,9 +175,8 @@ class BookingController extends Controller
             ]);
         }
 
-        $appointmentDateTime = Carbon::parse(
-            "{$booking->date} {$booking->start_time}"
-        );
+        $appointmentDateTime = Carbon::parse($booking->date)
+            ->setTimeFromTimeString($booking->start_time);
 
         if ($appointmentDateTime->isBefore(now()->addHours(24))) {
             return back()->withErrors([
@@ -197,6 +195,10 @@ class BookingController extends Controller
                 'is_booked' => false,
             ]);
         });
+
+        $user->notify(
+            new BookingCancelled()
+        );
 
         return back()->with(
             'success',
