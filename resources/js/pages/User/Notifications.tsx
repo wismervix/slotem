@@ -148,8 +148,8 @@ export default function UserNotifications({
         <UserLayout unreadNotificationsCount={unreadNotificationsCount}>
             <div className="max-w-4xl space-y-6 pb-10">
                 {/* Top action header for filters */}
-                <div className="flex flex-col items-start justify-between gap-4 rounded-2xl border border-outline-variant bg-white p-4 shadow-xs sm:flex-row sm:items-center dark:bg-neutral-900">
-                    <div className="flex rounded-xl bg-gray-100 p-1 text-xs font-semibold dark:bg-neutral-800">
+                <div className="flex flex-col flex-wrap items-start justify-between gap-4 rounded-2xl border border-outline-variant bg-white p-4 shadow-xs sm:flex-row sm:items-center dark:bg-neutral-900">
+                    <div className="flex flex-wrap rounded-xl bg-gray-100 p-1 text-xs font-semibold dark:bg-neutral-800">
                         <button
                             onClick={() => setFilter('all')}
                             className={`rounded-lg px-3 py-1.5 transition-all ${

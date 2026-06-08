@@ -140,8 +140,8 @@ export default function ListView({
     return (
         <div className="space-y-4 pb-10">
             {/* Search and filter toolbar */}
-            <div className="flex flex-col items-start justify-between gap-4 rounded-2xl border border-outline-variant bg-white p-4 shadow-xs sm:flex-row sm:items-center dark:bg-neutral-900">
-                <div className="flex rounded-xl bg-gray-100 p-1 text-xs font-semibold dark:bg-neutral-800">
+            <div className="flex flex-col flex-wrap items-start justify-between gap-4 rounded-2xl border border-outline-variant bg-white p-4 shadow-xs sm:flex-row sm:items-center dark:bg-neutral-900">
+                <div className="flex flex-wrap rounded-xl bg-gray-100 p-1 text-xs font-semibold dark:bg-neutral-800">
                     <button
                         onClick={() => setStatusFilter('all')}
                         className={`rounded-lg px-3 py-1.5 transition-all ${
@@ -331,11 +331,17 @@ export default function ListView({
                                             </button>
                                             <button
                                                 type="button"
-                                                onClick={() =>
-                                                    onCancelAppointment(
-                                                        booking.id,
-                                                    )
-                                                }
+                                                onClick={() => {
+                                                    if (
+                                                        confirm(
+                                                            'Are you sure you want to cancel this appointment? This action cannot be undone.',
+                                                        )
+                                                    ) {
+                                                        onCancelAppointment(
+                                                            booking.id,
+                                                        );
+                                                    }
+                                                }}
                                                 className="flex cursor-pointer items-center gap-1 rounded-lg bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 transition-colors hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-900/30"
                                                 title="Cancel this appointment"
                                             >

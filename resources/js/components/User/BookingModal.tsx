@@ -1,14 +1,11 @@
+import { router } from '@inertiajs/react';
 import React, { useState, useMemo } from 'react';
 import { Service, TimeSlot, Availability } from '@/types';
 import {
     X,
     Calendar as CalendarIcon,
     Clock,
-    Smile,
-    Activity,
     Heart,
-    Sparkles,
-    User,
     FileText,
     MapPin,
     CheckCircle,
@@ -32,6 +29,7 @@ export default function BookModal() {
 
     const [notes, setNotes] = useState('');
     const [showSuccess, setShowSuccess] = useState(false);
+    const [processing, setProcessing] = useState(false);
 
     const [selectedPreset, setSelectedPreset] = useState(0);
 
@@ -158,24 +156,32 @@ export default function BookModal() {
             setStep(step + 1);
         } else {
             // Confirm booking
-            const preset = services[selectedPreset];
-            // onSave logic
-            // onSave({});
-            // onSave({
-            //     title: preset.title,
-            //     provider: preset.provider,
-            //     date,
-            //     time,
-            //     duration: preset.duration,
-            //     category: preset.category,
-            //     notes,
-            //     price: preset.price,
-            // });
-            setShowSuccess(true);
+            if (!selectedSlot) return;
+
+            router.post(
+                route('booking.modal.store'),
+                {
+                    service_id: currentPreset.id,
+                    time_slot_id: selectedSlot.id,
+                    date: selectedDate,
+                    notes,
+                },
+                {
+                    preserveScroll: true,
+
+                    onStart: () => setProcessing(true),
+
+                    onFinish: () => setProcessing(false),
+
+                    onSuccess: () => {
+                        setShowSuccess(true);
+                    },
+                },
+            );
         }
     };
 
-    const handleClose = () => {
+    const handleClose = (redirect = false) => {
         setStep(1);
         setSelectedPreset(0);
         setSelectedDate(
@@ -185,6 +191,14 @@ export default function BookModal() {
         setNotes('');
         setShowSuccess(false);
         closeModal();
+
+        if (redirect) {
+            router.visit(route('user.bookings'));
+        }
+
+        if (showSuccess) {
+            router.visit(route('user.bookings'));
+        }
     };
 
     const currentPreset = services[selectedPreset];
@@ -202,14 +216,13 @@ export default function BookModal() {
     if (!isOpen) return null;
 
     // console.log('selected date: ', selectedDate);
-    
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/40 backdrop-blur-xs transition-opacity duration-300"
-                onClick={handleClose}
+                onClick={() => handleClose(false)}
             />
 
             <div className="relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-neutral-900">
@@ -231,7 +244,7 @@ export default function BookModal() {
                         )}
                     </div>
                     <button
-                        onClick={handleClose}
+                        onClick={() => handleClose(false)}
                         className="rounded-lg p-1 px-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-neutral-700 dark:hover:text-gray-300"
                     >
                         <X className="h-5 w-5" />
@@ -305,7 +318,7 @@ export default function BookModal() {
                             </div>
 
                             <button
-                                onClick={handleClose}
+                                onClick={() => handleClose(true)}
                                 className="mt-6 w-full cursor-pointer rounded-xl bg-primary py-3 text-sm font-bold text-white transition-all hover:shadow-lg hover:backdrop-brightness-95"
                             >
                                 Close and View Calendar
@@ -597,12 +610,22 @@ export default function BookModal() {
 
                                 <button
                                     type="button"
+                                    disabled={processing}
                                     onClick={handleNextStep}
                                     className="flex cursor-pointer items-center gap-1 rounded-lg bg-primary px-6 py-2.5 text-xs font-bold text-white transition-all hover:shadow-md active:scale-98"
                                 >
-                                    {step === 3
+                                    {processing && (
+                                        <span className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                    )}
+
+                                    {processing
+                                        ? 'Processing...'
+                                        : step === 3
+                                          ? 'Schedule Appointment'
+                                          : 'Continue'}
+                                    {/* {step === 3
                                         ? 'Schedule Appointment'
-                                        : 'Continue'}
+                                        : 'Continue'} */}
                                 </button>
                             </div>
                         </div>

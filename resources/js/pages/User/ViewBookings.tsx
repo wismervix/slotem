@@ -15,7 +15,6 @@ const ViewBookings = ({
     bookings,
     unreadNotificationsCount,
 }: ViewBookingsProps) => {
-
     const { availabilities } = usePage<{ availabilities: Availability[] }>()
         .props;
 
@@ -27,29 +26,10 @@ const ViewBookings = ({
 
     const handleCancelAppointment = (id: number) => {
         router.patch(
-            route('', id),
+            route('booking.cancel', id),
             {},
             {
                 preserveScroll: true,
-
-                onSuccess: () => {
-                    const cancelled = bookings.find((a) => a.id === id);
-
-                    if (cancelled) {
-                        const alert: MappedNotification = {
-                            id: `notif-${Date.now()}`,
-                            // title: `Scheduled: ${newBooking.service?.name}`,
-                            // message: `Your booking for ${newBooking.service?.name} on ${newBooking.date} was scheduled successfully.`,
-                            title: `Scheduled: ServiceName`,
-                            message: `Your booking for ServiceName on BookingDate was scheduled successfully.`,
-                            url: '',
-                            read: false,
-                            category: 'Bookings',
-                            timestamp: 'Just now',
-                        };
-
-                    }
-                },
             },
         );
     };
