@@ -59,6 +59,26 @@ export default function UserDashboard({
         );
     };
 
+    const downloadReport = () => {
+        try {
+            const reportUrl = route('user.bookings.report');
+            const link = document.createElement('a');
+
+            link.href = reportUrl;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error('Unable to generate the booking report.', error);
+            window.alert(
+                'We could not start the report download right now. Please try again.',
+            );
+        }
+    };
+
     const [chartSource, setChartSource] = useState<'all' | Service['id']>(
         'all',
     );
@@ -794,6 +814,7 @@ export default function UserDashboard({
                                                             booking.service?.id,
                                                         )
                                                     }
+                                                    title="Reschedule Booking"
                                                     className="cursor-pointer rounded-xl border border-zinc-200 bg-white p-2 text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10 dark:hover:text-white"
                                                 >
                                                     <Clock size={18} />
@@ -811,6 +832,7 @@ export default function UserDashboard({
                                                             );
                                                         }
                                                     }}
+                                                    title="Cancel Booking"
                                                     className="cursor-pointer rounded-xl border border-red-500/20 bg-transparent p-2 text-red-500 transition hover:bg-red-500/10 dark:border-red-400/20 dark:text-red-400 dark:hover:bg-red-500/10"
                                                 >
                                                     <XCircle size={18} />
@@ -915,7 +937,10 @@ export default function UserDashboard({
                             </table>
 
                             <div className="border-t border-outline-variant/30 bg-surface-container-low/60 p-4 text-center dark:border-white/10 dark:bg-white/[0.02]">
-                                <button className="text-sm font-semibold text-primary transition-all hover:underline hover:opacity-80">
+                                <button
+                                    onClick={downloadReport}
+                                    className="cursor-pointer text-sm font-semibold text-primary transition-all hover:underline hover:opacity-80"
+                                >
                                     Download Report
                                 </button>
                             </div>

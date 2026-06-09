@@ -39,27 +39,45 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                             Contact Us
                         </Link>
 
-                        <Link
-                            // href={route('admin.dashboard')}
-                            href={route('admin.login')}
-                            className="text-slate-600 transition hover:text-purple-600 dark:text-slate-300"
-                        >
-                            Admin
-                        </Link>
+                        {auth?.admin ? (
+                                <Link
+                                    href={route('admin.dashboard')}
+                                    className="text-slate-600 transition hover:text-purple-600 dark:text-slate-300"
+                                >
+                                    View Admin Dashboard
+                                </Link>
+                        ) : (
+                            <Link
+                                href={route('admin.login')}
+                                className="text-slate-600 transition hover:text-purple-600 dark:text-slate-300"
+                            >
+                                Admin
+                            </Link>
+                        )}
                     </div>
 
                     <div className="flex items-center gap-4">
                         {auth.user ? (
                             <>
-                                <span className="hidden text-sm font-medium text-purple-600 transition hover:text-purple-500 sm:block">
-                                    Hi, {auth.user.name}
-                                </span>
-
                                 <Link
-                                    href={route('user.bookings')}
-                                    className="hidden text-sm font-medium text-purple-600 transition hover:text-purple-500 sm:block"
+                                    href={route('user.dashboard')}
+                                    // className="hidden text-sm font-medium text-purple-600 transition hover:text-purple-500 sm:block"
                                 >
-                                    View Bookings
+                                    <div className="flex h-14 w-14 items-center justify-center rounded-full border border-primary/20 bg-primary-fixed text-2xl font-extrabold text-primary">
+                                        {auth.user.name ? (
+                                            <img
+                                                alt="Profile Avatar"
+                                                src={auth.user.name}
+                                                title={`Hi, ${auth.user.name}`}
+                                                className="h-full w-full rounded-full object-cover"
+                                            />
+                                        ) : (
+                                            auth.user.name
+                                                .charAt(0)
+                                                .toUpperCase()
+                                        )}
+                                    </div>
+                                    {/* View Bookings */}
                                 </Link>
                             </>
                         ) : (

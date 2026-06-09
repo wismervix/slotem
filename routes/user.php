@@ -35,6 +35,8 @@ Route::group(['prefix' => 'user'], function () {
             Route::post('/booking/modal', 'storeAuthenticated')->name('booking.modal.store');
 
             Route::patch('/bookings/{booking}/cancel', 'cancel')->name('booking.cancel');
+
+            Route::get('/bookings/report', 'downloadReport')->name('user.bookings.report');
         });
     });
 });

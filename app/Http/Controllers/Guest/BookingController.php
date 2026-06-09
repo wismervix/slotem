@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Notifications\BookingCancelled;
 use App\Notifications\BookingConfirmed;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class BookingController extends Controller
 {
@@ -204,5 +205,28 @@ class BookingController extends Controller
             'success',
             'Booking cancelled successfully.'
         );
+    }
+
+    public function downloadReport()
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        $bookings = $user
+            ->bookings()
+            ->with('service')
+            ->latest()
+            ->get();
+
+        $pdf = Pdf::loadView('reports.bookings', [
+            'user' => $user,
+            'bookings' => $bookings,
+        ])
+            ->setPaper('a4', 'portrait')
+            ->setOption('isHtml5ParserEnabled', true)
+            ->setOption('isRemoteEnabled', true)
+            ->setOption('dpi', 150);
+
+        return $pdf->download('booking-history-report.pdf');
     }
 }

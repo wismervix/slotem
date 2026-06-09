@@ -16,6 +16,8 @@ import {
     Camera,
     Lock,
     Loader2,
+    Headset,
+    CircleHelp,
 } from 'lucide-react';
 
 type ProfileProps = {
@@ -23,7 +25,10 @@ type ProfileProps = {
     unreadNotificationsCount: number;
 };
 
-export default function Profile({ profile: initialProfile, unreadNotificationsCount }: ProfileProps) {
+export default function Profile({
+    profile: initialProfile,
+    unreadNotificationsCount,
+}: ProfileProps) {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: initialProfile.name ?? '',
         email: initialProfile.email ?? '',
@@ -88,7 +93,7 @@ export default function Profile({ profile: initialProfile, unreadNotificationsCo
         e.preventDefault();
 
         // console.log('Form data: ', data);
-        
+
         post(route('user.profile.update'), {
             forceFormData: true,
 
@@ -107,7 +112,6 @@ export default function Profile({ profile: initialProfile, unreadNotificationsCo
             document.documentElement.classList.remove('dark');
         }
     };
-
 
     return (
         <UserLayout unreadNotificationsCount={unreadNotificationsCount}>
@@ -159,7 +163,9 @@ export default function Profile({ profile: initialProfile, unreadNotificationsCo
                             </span>
                         </div>
                         <p className="text-xs font-medium text-secondary">
-                            Preferred facility: No preference b
+                            Preferred phone number:{' '}
+                            {initialProfile.phone ||
+                                'No phone number specified.'}
                         </p>
                         <p className="text-[11px] text-gray-400">
                             Owner of {data.email} · Member since{' '}
@@ -488,32 +494,34 @@ export default function Profile({ profile: initialProfile, unreadNotificationsCo
 
                             <h3 className="mb-4 flex items-center gap-1.5 border-b border-outline-variant pb-2 text-base font-extrabold text-gray-900 dark:text-white">
                                 <Activity className="h-5 w-5 text-indigo-500" />
-                                Insurance Status
+                                Account Status
                             </h3>
 
                             <div className="space-y-3 text-xs leading-relaxed">
                                 <div className="flex justify-between">
                                     <span className="text-gray-400">
-                                        Policy Provider:
+                                        Member Since:
                                     </span>
                                     <span className="text-right font-bold text-gray-800 dark:text-white">
-                                        Alliance Shield Med
+                                        {initialProfile.memberSince}
                                     </span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-400">
-                                        Group Number:
+                                        Email Verified:
                                     </span>
                                     <span className="text-right font-mono font-bold text-gray-800 dark:text-white">
-                                        ASM-92180A
+                                        {initialProfile.email && 'Yes'}
                                     </span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-400">
-                                        Co-Pay Rate:
+                                        Notifications:
                                     </span>
                                     <span className="text-right font-extrabold text-emerald-600">
-                                        $15.00 flat
+                                        {(initialProfile.sms_reminders &&
+                                            'Enabled') ||
+                                            'Disabled'}
                                     </span>
                                 </div>
                                 <div className="flex justify-between border-t border-dashed border-outline-variant pt-2">
@@ -527,16 +535,48 @@ export default function Profile({ profile: initialProfile, unreadNotificationsCo
                             </div>
                         </div>
 
-                        <div className="space-y-3 rounded-2xl border border-red-200 bg-red-50/50 p-6 dark:bg-red-950/10">
-                            <h4 className="flex items-center gap-1.5 text-xs font-extrabold text-red-800 dark:text-red-300">
-                                <ShieldAlert className="h-4 w-4 shrink-0 text-red-600" />
-                                Medical Alert notes
+                        <div className="space-y-3 rounded-2xl border border-amber-200 bg-amber-50/50 p-6 dark:bg-amber-950/10">
+                            <h4 className="flex items-center gap-1.5 text-xs font-extrabold text-amber-800 dark:text-amber-300">
+                                <Headset className="h-4 w-4 shrink-0 text-amber-600" />
+                                Need Assistance?
                             </h4>
                             <p className="text-[11px] leading-relaxed text-gray-600 dark:text-gray-300">
-                                Allergies recorded: Penicillin, Sulfites. Please
-                                inform the dental surgeon or therapeutic
-                                masseuse immediately upon reception.
+                                Having trouble with a booking? Contact support
+                                and we'll help you reschedule or resolve issues.
                             </p>
+                        </div>
+
+                        <div className="rounded-2xl border border-blue-200 bg-blue-50/50 p-6 dark:border-blue-900/30 dark:bg-blue-950/10">
+                            <h4 className="mb-3 flex items-center gap-2 text-sm font-extrabold text-blue-800 dark:text-blue-300">
+                                <CircleHelp className="h-4 w-4 shrink-0 text-blue-600" />
+                                Booking Tips
+                            </h4>
+
+                            <ul className="space-y-2 text-xs text-gray-600 dark:text-gray-300">
+                                <li className="flex items-start gap-2">
+                                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500" />
+                                    <span>
+                                        Arrive 10 minutes before your
+                                        appointment.
+                                    </span>
+                                </li>
+
+                                <li className="flex items-start gap-2">
+                                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500" />
+                                    <span>
+                                        Check notifications regularly for
+                                        booking updates.
+                                    </span>
+                                </li>
+
+                                <li className="flex items-start gap-2">
+                                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500" />
+                                    <span>
+                                        Cancel or reschedule at least 24 hours
+                                        in advance.
+                                    </span>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                 </div>

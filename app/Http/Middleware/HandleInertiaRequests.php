@@ -6,6 +6,7 @@ use App\Models\Service;
 use Inertia\Middleware;
 use App\Models\Availability;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
 class HandleInertiaRequests extends Middleware
@@ -44,7 +45,9 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
 
             'auth' => [
-                'user' => $request->user(),
+                // 'user' => $request->user(),
+                'user' => Auth::guard('web')->user(),
+                'admin' => Auth::guard('admin')->user(),
             ],
 
             'services' => Cache::remember(
