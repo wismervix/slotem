@@ -51,8 +51,9 @@ export default function App() {
   });
 
   const [bookings, setBookings] = useState<AdminBookingThree[]>(() => {
-      const saved = localStorage.getItem('slotem_bookings');
-      return saved ? JSON.parse(saved) : defaultBookings;
+      // const saved = localStorage.getItem('slotem_bookings');
+      // return saved ? JSON.parse(saved) : defaultBookings;
+      return defaultBookings;
   });
 
   const [availability, setAvailability] = useState<StaffAvailability[]>(() => {
@@ -73,9 +74,9 @@ export default function App() {
     localStorage.setItem('slotem_team', JSON.stringify(teamMembers));
   }, [teamMembers]);
 
-  useEffect(() => {
-    localStorage.setItem('slotem_bookings', JSON.stringify(bookings));
-  }, [bookings]);
+  // useEffect(() => {
+  //   localStorage.setItem('slotem_bookings', JSON.stringify(bookings));
+  // }, [bookings]);
 
   useEffect(() => {
     localStorage.setItem('slotem_availability', JSON.stringify(availability));
