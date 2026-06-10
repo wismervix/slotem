@@ -52,7 +52,7 @@ class DashboardController extends Controller
         //     ->whereDate('date', '>=', now()->toDateString())
         //     ->get();
 
-        return inertia('User/ViewBookings', [
+        return inertia('User/Bookings', [
             'bookings' => $bookings,
 
             'unreadNotificationsCount' =>
