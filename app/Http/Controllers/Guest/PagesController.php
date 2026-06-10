@@ -7,6 +7,18 @@ use App\Http\Controllers\Controller;
 
 class PagesController extends Controller
 {
+    public function adminOne()
+    {
+        return Inertia::render('Admin/AdminPages');
+    }
+    public function adminTwo()
+    {
+        return Inertia::render('Admin/AdminPagesTwo');
+    }
+    public function adminThree()
+    {
+        return Inertia::render('Admin/AdminPagesThree');
+    }
     public function home()
     {
         return Inertia::render('Guest/Home');

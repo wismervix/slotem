@@ -24,17 +24,17 @@ import {
 } from '@/data/initial-data';
 
 // Screens
-import DashboardScreen from '@/components/Admin/DashboardScreen';
-import BookingsScreen from '@/components/Admin/BookingsScreen';
-import AvailabilityScreen from '@/components/Admin/AvailabilityScreen';
-import SettingsScreen from '@/components/Admin/SettingsScreen';
+import DashboardScreen from '@/components/Admin/VersionOne/DashboardScreen';
+import BookingsScreen from '@/components/Admin/VersionOne/BookingsScreen';
+import AvailabilityScreen from '@/components/Admin/VersionOne/AvailabilityScreen';
+import SettingsScreen from '@/components/Admin/VersionOne/SettingsScreen';
 
 // Modals
-import NewBookingModal from '@/components/Admin/NewBookingModal';
-import BookingDetailsModal from '@/components/Admin/BookingDetailsModal';
-import NotificationPopover from '@/components/Admin/NotificationPopover';
+import NewBookingModal from '@/components/Admin/VersionOne/NewBookingModal';
+import BookingDetailsModal from '@/components/Admin/VersionOne/BookingDetailsModal';
+import NotificationPopover from '@/components/Admin/VersionOne/NotificationPopover';
 
-export default function App() {
+export default function AdminPages() {
     // Primary database state engines
     const [bookings, setBookings] = useState<AdminBooking[]>(() => {
         const local = localStorage.getItem('slotem_bookings');
