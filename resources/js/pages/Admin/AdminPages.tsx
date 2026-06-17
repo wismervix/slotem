@@ -1,520 +1,492 @@
 import React, { useState, useEffect } from 'react';
+import { ServiceTwo, BookingTwo, AdminProfile } from '@/types';
+import {
+    INITIAL_SERVICES,
+    INITIAL_BOOKINGS,
+    INITIAL_ADMIN_PROFILE,
+} from '@/data/initial-data-two';
+import ServicesView from '@/components/Admin/AdminOne/ServicesView';
+import BookingsView from '@/components/Admin/AdminOne/BookingsView';
+import DashboardView from '@/components/Admin/AdminOne/DashboardView';
+import SettingsView from '@/components/Admin/AdminOne/SettingsView';
+import NewBookingModal from '@/components/Admin/AdminOne/NewBookingModal';
 import {
     LayoutDashboard,
     Calendar,
-    Clock,
-    Settings as SettingsIcon,
+    CalendarCheck,
+    Settings,
     Plus,
     Search,
     Bell,
     HelpCircle,
     Menu,
     X,
-    Stethoscope,
-    Maximize2,
-    Minimize2,
-    CalendarCheck,
 } from 'lucide-react';
-import { AdminBooking, ClinicService, Staff, ActivityLog } from '@/types';
-import {
-    INITIAL_BOOKINGS,
-    INITIAL_SERVICES,
-    INITIAL_STAFF,
-    INITIAL_LOGS,
-} from '@/data/initial-data';
+import { motion, AnimatePresence } from 'motion/react';
 
-// Screens
-import DashboardScreen from '@/components/Admin/VersionOne/DashboardScreen';
-import BookingsScreen from '@/components/Admin/VersionOne/BookingsScreen';
-import AvailabilityScreen from '@/components/Admin/VersionOne/AvailabilityScreen';
-import SettingsScreen from '@/components/Admin/VersionOne/SettingsScreen';
-
-// Modals
-import NewBookingModal from '@/components/Admin/VersionOne/NewBookingModal';
-import BookingDetailsModal from '@/components/Admin/VersionOne/BookingDetailsModal';
-import NotificationPopover from '@/components/Admin/VersionOne/NotificationPopover';
-
-export default function AdminPages() {
-    // Primary database state engines
-    const [bookings, setBookings] = useState<AdminBooking[]>(() => {
-        const local = localStorage.getItem('slotem_bookings');
-        return local ? JSON.parse(local) : INITIAL_BOOKINGS;
-    });
-
-    const [services, setServices] = useState<ClinicService[]>(() => {
-        const local = localStorage.getItem('slotem_services');
-        return local ? JSON.parse(local) : INITIAL_SERVICES;
-    });
-
-    const [staff, setStaff] = useState<Staff[]>(() => {
-        const local = localStorage.getItem('slotem_staff');
-        return local ? JSON.parse(local) : INITIAL_STAFF;
-    });
-
-    const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(() => {
-        const local = localStorage.getItem('slotem_logs');
-        return local ? JSON.parse(local) : INITIAL_LOGS;
-    });
-
-    // Navigation and UI elements state
+export default function App() {
+    // Navigation active tab State ('dashboard', 'bookings', 'availability', 'settings')
     const [activeTab, setActiveTab] = useState<
         'dashboard' | 'bookings' | 'availability' | 'settings'
-    >('dashboard');
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    >('availability');
+
+    // Load from local storage or defaults
+    const [services, setServices] = useState<ServiceTwo[]>(() => {
+        const saved = localStorage.getItem('slotem_services');
+        return saved ? JSON.parse(saved) : INITIAL_SERVICES;
+    });
+
+    const [bookings, setBookings] = useState<BookingTwo[]>(() => {
+        const saved = localStorage.getItem('slotem_bookings');
+        return saved ? JSON.parse(saved) : INITIAL_BOOKINGS;
+    });
+
+    const [adminProfile, setAdminProfile] = useState<AdminProfile>(() => {
+        const saved = localStorage.getItem('slotem_profile');
+        return saved ? JSON.parse(saved) : INITIAL_ADMIN_PROFILE;
+    });
+
+    // Global adaptive search string
     const [searchQuery, setSearchQuery] = useState('');
 
-    // Modals view controllers
-    const [isNewBookingOpen, setIsNewBookingOpen] = useState(false);
-    const [selectedBooking, setSelectedBooking] = useState<AdminBooking | null>(
-        null,
-    );
-    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+    // Schedulers dialog state
+    const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
 
-    // Save database states persistently to LocalStorage
-    useEffect(() => {
-        localStorage.setItem('slotem_bookings', JSON.stringify(bookings));
-    }, [bookings]);
+    // Responsive sidebar toggle for smaller viewports
+    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
+    // Sync state with local storage
     useEffect(() => {
         localStorage.setItem('slotem_services', JSON.stringify(services));
     }, [services]);
 
     useEffect(() => {
-        localStorage.setItem('slotem_staff', JSON.stringify(staff));
-    }, [staff]);
+        localStorage.setItem('slotem_bookings', JSON.stringify(bookings));
+    }, [bookings]);
 
     useEffect(() => {
-        localStorage.setItem('slotem_logs', JSON.stringify(activityLogs));
-    }, [activityLogs]);
+        localStorage.setItem('slotem_profile', JSON.stringify(adminProfile));
+    }, [adminProfile]);
 
-    // Handle building new bookings from Wizard
-    const handleCreateBooking = (
-        fields: Omit<AdminBooking, 'id' | 'createdTime'>,
+    // Clean search on tab shift
+    useEffect(() => {
+        setSearchQuery('');
+    }, [activeTab]);
+
+    // Service Handlers
+    const handleAddService = (
+        newServiceData: Omit<ServiceTwo, 'id' | 'createdAt' | 'bookingsCount'>,
     ) => {
-        const srv = services.find((s) => s.id === fields.serviceId);
-        const newBk: AdminBooking = {
-            ...fields,
-            id: `bk_${Date.now()}`,
-            createdTime: Date.now(),
+        const freshService: ServiceTwo = {
+            ...newServiceData,
+            id: `s_${Date.now()}`,
+            bookingsCount: 0,
+            createdAt: new Date().toLocaleDateString('en-US', {
+                month: 'short',
+                day: '2-digit',
+                year: 'numeric',
+            }),
         };
-
-        // Prepend system activity logs
-        const newLog: ActivityLog = {
-            id: `log_${Date.now()}`,
-            type: 'booking_new',
-            title: 'New Booking',
-            description: `${fields.clientName} scheduled a ${srv?.name || 'Treatment'}.`,
-            timestamp: 'Just now',
-            createdTime: Date.now(),
-        };
-
-        setBookings((prev) => [newBk, ...prev]);
-        setActivityLogs((prev) => [newLog, ...prev]);
-        setIsNewBookingOpen(false);
+        setServices((prev) => [freshService, ...prev]);
     };
 
-    // Update status changes on individual books
+    const handleUpdateService = (updatedService: ServiceTwo) => {
+        setServices((prev) =>
+            prev.map((s) => (s.id === updatedService.id ? updatedService : s)),
+        );
+    };
+
+    const handleDeleteService = (id: string) => {
+        setServices((prev) => prev.filter((s) => s.id !== id));
+    };
+
+    // Booking Handlers
+    const handleAddBooking = (
+        newBookingData: Omit<BookingTwo, 'id' | 'createdAt'>,
+    ) => {
+        const freshBooking: BookingTwo = {
+            ...newBookingData,
+            id: `b_${Date.now()}`,
+            createdAt: new Date().toISOString().split('T')[0],
+        };
+        setBookings((prev) => [freshBooking, ...prev]);
+
+        // Automatically increment bookingsCount for the scheduled service!
+        setServices((prev) =>
+            prev.map((s) => {
+                if (s.id === newBookingData.serviceId) {
+                    return {
+                        ...s,
+                        bookingsCount: s.bookingsCount + 1,
+                    };
+                }
+                return s;
+            }),
+        );
+    };
+
     const handleUpdateBookingStatus = (
         id: string,
-        nextStatus: AdminBooking['status'],
+        status: BookingTwo['status'],
     ) => {
-        const target = bookings.find((b) => b.id === id);
-        if (!target) return;
-
-        const prevStatus = target.status;
-
         setBookings((prev) =>
-            prev.map((bk) => {
-                if (bk.id === id) {
-                    return { ...bk, status: nextStatus };
-                }
-                return bk;
-            }),
-        );
-
-        // Update active modal selected instance to keep state synced inside detail card
-        setSelectedBooking((prev) =>
-            prev && prev.id === id ? { ...prev, status: nextStatus } : prev,
-        );
-
-        // log event
-        let type: ActivityLog['type'] = 'system';
-        let titleStr = 'Status Changed';
-        let desc = `${target.clientName}'s appointment changed to ${nextStatus}.`;
-
-        if (nextStatus === 'Cancelled') {
-            type = 'booking_cancelled';
-            titleStr = 'Cancelled';
-            desc = `${target.clientName} cancelled their ${services.find((s) => s.id === target.serviceId)?.name || 'Treatment'}.`;
-        } else if (nextStatus === 'In Progress') {
-            titleStr = 'Checked-in';
-            desc = `${target.clientName} is now checked-in for treatment.`;
-        }
-
-        const newLog: ActivityLog = {
-            id: `log_${Date.now()}`,
-            type,
-            title: titleStr,
-            description: desc,
-            timestamp: 'Just now',
-            createdTime: Date.now(),
-        };
-
-        setActivityLogs((prev) => [newLog, ...prev]);
-    };
-
-    // Clinic treatment notes editor feedback
-    const handleUpdateBookingNotes = (id: string, nextNotes: string) => {
-        setBookings((prev) =>
-            prev.map((bk) => {
-                if (bk.id === id) {
-                    return { ...bk, notes: nextNotes };
-                }
-                return bk;
-            }),
-        );
-
-        setSelectedBooking((prev) =>
-            prev && prev.id === id ? { ...prev, notes: nextNotes } : prev,
+            prev.map((b) => (b.id === id ? { ...b, status } : b)),
         );
     };
 
-    // Clear notify histories
-    const handleClearLogs = () => {
-        setActivityLogs([]);
+    const handleDeleteBooking = (id: string) => {
+        setBookings((prev) => prev.filter((b) => b.id !== id));
     };
 
-    // Global simple search action triggers
-    const handleSearchTrigger = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (searchQuery.trim()) {
-            setActiveTab('bookings');
+    const handleUpdateProfile = (updatedProfile: AdminProfile) => {
+        setAdminProfile(updatedProfile);
+    };
+
+    // Determine header search input placeholder adaptively
+    const getSearchPlaceholder = () => {
+        switch (activeTab) {
+            case 'dashboard':
+                return 'Search global operations...';
+            case 'bookings':
+                return 'Search bookings client registry...';
+            case 'availability':
+                return 'Search services...';
+            case 'settings':
+                return 'Search system parameters...';
         }
     };
 
     return (
-        <div className="flex min-h-screen bg-[#fef7ff] font-sans text-[#1d1a24] selection:bg-[#cbd5e1]">
-            {/* 1. SIDEBAR NAVIGATION - DESKTOP VIEW */}
-            <aside className="fixed top-0 left-0 z-30 hidden h-screen w-64 flex-col border-r border-[#e8dfee] bg-white py-8 md:flex">
-                {/* Core Clinic brand logos */}
-                <div className="mb-8 flex items-center justify-between px-6">
-                    <div>
-                        <h1 className="text-2xl font-black tracking-tight text-[#630ed4]">
-                            Slotem
-                        </h1>
-                        <p className="text-[10px] font-bold tracking-wider text-gray-400 uppercase">
-                            Admin Suite
-                        </p>
-                    </div>
-                    <span
-                        className="h-2 w-2 animate-pulse rounded-full bg-emerald-500"
-                        title="Systems Active"
-                    />
+        <div className="flex h-screen overflow-hidden bg-background text-on-surface">
+            {/* 1. Desktop Sidebar */}
+            <aside className="z-40 hidden w-64 shrink-0 flex-col border-r border-outline-variant bg-surface py-8 md:flex">
+                {/* Title Brand Header */}
+                <div className="mb-8 px-6">
+                    <h1 className="font-sans text-2xl font-bold text-primary">
+                        Slotem
+                    </h1>
+                    <p className="mt-0.5 text-[11px] font-bold tracking-wider text-on-surface-variant uppercase">
+                        Admin Suite
+                    </p>
                 </div>
 
-                {/* Tab Switch list */}
+                {/* Navigation list */}
                 <nav className="flex-1 space-y-1">
                     <button
-                        onClick={() => {
-                            setActiveTab('dashboard');
-                            setMobileMenuOpen(false);
-                        }}
-                        className={`flex w-full cursor-pointer items-center border-r-4 px-6 py-3 text-left text-sm font-bold transition-all ${
+                        onClick={() => setActiveTab('dashboard')}
+                        className={`flex w-full cursor-pointer items-center px-6 py-3.5 text-sm font-medium transition-all ${
                             activeTab === 'dashboard'
-                                ? 'border-[#630ed4] bg-[#f9f1ff] text-[#630ed4]'
-                                : 'border-transparent text-gray-500 hover:bg-gray-50 hover:text-[#630ed4]'
+                                ? 'border-r-4 border-primary bg-surface-container-low font-bold text-primary'
+                                : 'text-on-surface-variant hover:bg-surface-container'
                         }`}
                     >
-                        <LayoutDashboard className="mr-3 h-5 w-5" />
+                        <LayoutDashboard className="mr-3" size={18} />
                         <span>Dashboard</span>
                     </button>
 
                     <button
-                        onClick={() => {
-                            setActiveTab('bookings');
-                            setMobileMenuOpen(false);
-                        }}
-                        className={`flex w-full cursor-pointer items-center border-r-4 px-6 py-3 text-left text-sm font-bold transition-all ${
+                        onClick={() => setActiveTab('bookings')}
+                        className={`flex w-full cursor-pointer items-center px-6 py-3.5 text-sm font-medium transition-all ${
                             activeTab === 'bookings'
-                                ? 'border-[#630ed4] bg-[#f9f1ff] text-[#630ed4]'
-                                : 'border-transparent text-gray-500 hover:bg-gray-50 hover:text-[#630ed4]'
+                                ? 'border-r-4 border-primary bg-surface-container-low font-bold text-primary'
+                                : 'text-on-surface-variant hover:bg-surface-container'
                         }`}
                     >
-                        <Calendar className="mr-3 h-5 w-5" />
+                        <Calendar className="mr-3" size={18} />
                         <span>Bookings</span>
                     </button>
 
                     <button
-                        onClick={() => {
-                            setActiveTab('availability');
-                            setMobileMenuOpen(false);
-                        }}
-                        className={`flex w-full cursor-pointer items-center border-r-4 px-6 py-3 text-left text-sm font-bold transition-all ${
+                        onClick={() => setActiveTab('availability')}
+                        className={`flex w-full cursor-pointer items-center px-6 py-3.5 text-sm font-medium transition-all ${
                             activeTab === 'availability'
-                                ? 'border-[#630ed4] bg-[#f9f1ff] text-[#630ed4]'
-                                : 'border-transparent text-gray-500 hover:bg-gray-50 hover:text-[#630ed4]'
+                                ? 'border-r-4 border-primary bg-surface-container-low font-bold text-primary'
+                                : 'text-on-surface-variant hover:bg-surface-container'
                         }`}
                     >
-                        <Clock className="mr-3 h-5 w-5" />
+                        <CalendarCheck className="mr-3" size={18} />
                         <span>Availability</span>
                     </button>
 
                     <button
-                        onClick={() => {
-                            setActiveTab('settings');
-                            setMobileMenuOpen(false);
-                        }}
-                        className={`flex w-full cursor-pointer items-center border-r-4 px-6 py-3 text-left text-sm font-bold transition-all ${
+                        onClick={() => setActiveTab('settings')}
+                        className={`flex w-full cursor-pointer items-center px-6 py-3.5 text-sm font-medium transition-all ${
                             activeTab === 'settings'
-                                ? 'border-[#630ed4] bg-[#f9f1ff] text-[#630ed4]'
-                                : 'border-transparent text-gray-500 hover:bg-gray-50 hover:text-[#630ed4]'
+                                ? 'border-r-4 border-primary bg-surface-container-low font-bold text-primary'
+                                : 'text-on-surface-variant hover:bg-surface-container'
                         }`}
                     >
-                        <SettingsIcon className="mr-3 h-5 w-5" />
+                        <Settings className="mr-3" size={18} />
                         <span>Settings</span>
                     </button>
                 </nav>
 
-                {/* Bottom Booking Button */}
+                {/* + NEW BOOKING Action Button */}
                 <div className="mt-auto px-6">
                     <button
-                        onClick={() => setIsNewBookingOpen(true)}
-                        className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#630ed4] px-4 py-3 font-bold text-white shadow-sm transition-all hover:bg-[#7c3aed] active:scale-95"
+                        onClick={() => setIsBookingModalOpen(true)}
+                        className="hover:bg-opacity-95 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 font-semibold text-on-primary shadow-lg transition-all active:scale-95"
                     >
-                        <Plus className="h-4 w-4" />
-                        New Booking
+                        <Plus size={16} strokeWidth={3} />
+                        <span className="text-[11px] tracking-wider uppercase">
+                            New Booking
+                        </span>
                     </button>
                 </div>
             </aside>
 
-            {/* MOBILE HEADER & DRAWER NAV */}
-            <div className="fixed top-0 left-0 z-40 flex h-16 w-full items-center justify-between border-b border-[#e8dfee] bg-white px-4 md:hidden">
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        className="rounded-lg p-1.5 text-gray-600 hover:bg-gray-100"
-                    >
-                        <Menu className="h-6 w-6" />
-                    </button>
-                    <div>
-                        <h1 className="text-lg leading-none font-black text-[#630ed4]">
-                            Slotem
-                        </h1>
-                        <p className="text-[9px] font-bold tracking-wider text-gray-400 uppercase">
-                            Admin Suite
-                        </p>
-                    </div>
-                </div>
-
-                <button
-                    onClick={() => setIsNewBookingOpen(true)}
-                    className="rounded-lg bg-[#630ed4] p-2 text-white"
-                >
-                    <Plus className="h-4 w-4" />
-                </button>
-            </div>
-
-            {/* MOBILE DRAWER */}
-            {mobileMenuOpen && (
-                <div className="fixed inset-0 z-50 flex justify-start bg-black/40 md:hidden">
-                    <div className="animate-fade-in relative flex h-full w-64 flex-col bg-white p-6">
-                        <button
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="absolute top-4 right-4 p-1 text-gray-400"
-                        >
-                            <X className="h-5 w-5" />
-                        </button>
-
-                        <div className="mb-8">
-                            <h1 className="text-xl font-black tracking-tight text-[#630ed4]">
-                                Slotem
-                            </h1>
-                            <p className="tracking-wild text-[10px] font-bold text-gray-400 uppercase">
-                                Dental Clinic Suite
-                            </p>
-                        </div>
-
-                        <nav className="flex-1 space-y-2">
-                            <button
-                                onClick={() => {
-                                    setActiveTab('dashboard');
-                                    setMobileMenuOpen(false);
-                                }}
-                                className={`flex w-full items-center rounded-lg p-3 text-left text-sm font-bold ${activeTab === 'dashboard' ? 'bg-[#f9f1ff] text-[#630ed4]' : 'text-gray-500'}`}
-                            >
-                                <LayoutDashboard className="mr-3 h-5 w-5" />{' '}
-                                Dashboard
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setActiveTab('bookings');
-                                    setMobileMenuOpen(false);
-                                }}
-                                className={`flex w-full items-center rounded-lg p-3 text-left text-sm font-bold ${activeTab === 'bookings' ? 'bg-[#f9f1ff] text-[#630ed4]' : 'text-gray-500'}`}
-                            >
-                                <Calendar className="mr-3 h-5 w-5" /> Bookings
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setActiveTab('availability');
-                                    setMobileMenuOpen(false);
-                                }}
-                                className={`flex w-full items-center rounded-lg p-3 text-left text-sm font-bold ${activeTab === 'availability' ? 'bg-[#f9f1ff] text-[#630ed4]' : 'text-gray-500'}`}
-                            >
-                                <Clock className="mr-3 h-5 w-5" /> Availability
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setActiveTab('settings');
-                                    setMobileMenuOpen(false);
-                                }}
-                                className={`flex w-full items-center rounded-lg p-3 text-left text-sm font-bold ${activeTab === 'settings' ? 'bg-[#f9f1ff] text-[#630ed4]' : 'text-gray-500'}`}
-                            >
-                                <SettingsIcon className="mr-3 h-5 w-5" />{' '}
-                                Settings
-                            </button>
-                        </nav>
-                    </div>
-                </div>
-            )}
-
-            {/* 2. MAIN CENTER CANVAS CONTENT */}
-            <div className="flex min-h-screen flex-1 flex-col pt-16 md:ml-64 md:pt-0">
-                {/* Core Top navigation and action bar */}
-                <header className="sticky top-16 z-20 flex h-16 items-center justify-between border-b border-[#e8dfee] bg-white px-6 md:top-0">
-                    {/* Quick clinical Search option */}
-                    <form
-                        onSubmit={handleSearchTrigger}
-                        className="relative max-w-lg flex-1"
-                    >
-                        <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400">
-                            <Search className="h-4 w-4" />
-                        </span>
-                        <input
-                            type="text"
-                            placeholder="Search appointments, patients, rooms..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full rounded-lg border border-transparent bg-gray-50 py-2 pr-4 pl-9 text-xs font-medium text-gray-800 transition-all outline-none placeholder:text-gray-400 focus:border-[#630ed4] focus:bg-white"
+            {/* 2. Mobile Responsive Sidebar drawer */}
+            <AnimatePresence>
+                {isMobileSidebarOpen && (
+                    <>
+                        {/* Dark overlay */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsMobileSidebarOpen(false)}
+                            className="fixed inset-0 z-50 bg-on-background/40 backdrop-blur-[2px] md:hidden"
                         />
-                    </form>
-
-                    {/* Widgets bar */}
-                    <div className="ml-4 flex items-center gap-5">
-                        {/* Bell trigger displaying logs */}
-                        <div className="relative">
-                            <button
-                                onClick={() =>
-                                    setIsNotificationsOpen(!isNotificationsOpen)
-                                }
-                                className="relative cursor-pointer rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-50 hover:text-[#630ed4]"
-                            >
-                                <Bell className="h-4 w-4" />
-                                {activityLogs.length > 0 && (
-                                    <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-[#630ed4]" />
-                                )}
-                            </button>
-
-                            {/* Dynamic Notification lists drop down */}
-                            <NotificationPopover
-                                isOpen={isNotificationsOpen}
-                                onClose={() => setIsNotificationsOpen(false)}
-                                logs={activityLogs}
-                                onClear={handleClearLogs}
-                            />
-                        </div>
-
-                        {/* Support documentation block shortcut */}
-                        <button
-                            onClick={() =>
-                                alert(
-                                    'Slotem Help & Support Center:\n1. Use Bookings to view patients lists.\n2. Click Availability blocks to configure clinic rest times.',
-                                )
-                            }
-                            className="cursor-pointer rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-50 hover:text-[#630ed4]"
+                        {/* Sidebar flyout */}
+                        <motion.aside
+                            initial={{ x: '-100%' }}
+                            animate={{ x: 0 }}
+                            exit={{ x: '-100%' }}
+                            transition={{
+                                type: 'spring',
+                                damping: 25,
+                                stiffness: 220,
+                            }}
+                            className="fixed top-0 left-0 z-50 flex h-full w-64 flex-col bg-surface py-8 shadow-2xl md:hidden"
                         >
-                            <HelpCircle className="h-4 w-4" />
+                            <div className="mb-8 flex items-center justify-between px-6">
+                                <div>
+                                    <h1 className="font-sans text-2xl font-bold text-primary">
+                                        Slotem
+                                    </h1>
+                                    <p className="text-[10px] font-bold tracking-wider text-on-surface-variant uppercase">
+                                        Admin Suite
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() =>
+                                        setIsMobileSidebarOpen(false)
+                                    }
+                                    className="rounded-full p-1.5 text-outline hover:bg-surface-container"
+                                >
+                                    <X size={18} />
+                                </button>
+                            </div>
+
+                            <nav className="flex-1 space-y-1">
+                                {(
+                                    [
+                                        'dashboard',
+                                        'bookings',
+                                        'availability',
+                                        'settings',
+                                    ] as const
+                                ).map((tab) => (
+                                    <button
+                                        key={tab}
+                                        onClick={() => {
+                                            setActiveTab(tab);
+                                            setIsMobileSidebarOpen(false);
+                                        }}
+                                        className={`flex w-full items-center px-6 py-3 text-sm font-medium transition-all ${
+                                            activeTab === tab
+                                                ? 'border-r-4 border-primary bg-surface-container-low font-bold text-primary'
+                                                : 'text-on-surface-variant hover:bg-surface-container'
+                                        }`}
+                                    >
+                                        {tab === 'dashboard' && (
+                                            <LayoutDashboard
+                                                className="mr-3"
+                                                size={18}
+                                            />
+                                        )}
+                                        {tab === 'bookings' && (
+                                            <Calendar
+                                                className="mr-3"
+                                                size={18}
+                                            />
+                                        )}
+                                        {tab === 'availability' && (
+                                            <CalendarCheck
+                                                className="mr-3"
+                                                size={18}
+                                            />
+                                        )}
+                                        {tab === 'settings' && (
+                                            <Settings
+                                                className="mr-3"
+                                                size={18}
+                                            />
+                                        )}
+                                        <span className="capitalize">
+                                            {tab === 'availability'
+                                                ? 'Availability'
+                                                : tab}
+                                        </span>
+                                    </button>
+                                ))}
+                            </nav>
+
+                            <div className="mt-auto px-6">
+                                <button
+                                    onClick={() => {
+                                        setIsMobileSidebarOpen(false);
+                                        setIsBookingModalOpen(true);
+                                    }}
+                                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 font-semibold text-on-primary"
+                                >
+                                    <Plus size={16} strokeWidth={3} />
+                                    <span className="text-xs tracking-wider uppercase">
+                                        New Booking
+                                    </span>
+                                </button>
+                            </div>
+                        </motion.aside>
+                    </>
+                )}
+            </AnimatePresence>
+
+            {/* Main Content Scaffold Container */}
+            <main className="flex h-screen flex-1 flex-col overflow-hidden">
+                {/* Top Header Bar */}
+                <header className="z-10 flex h-16 shrink-0 items-center justify-between border-b border-outline-variant bg-surface px-6 select-none">
+                    {/* Logo toggle on mobile */}
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setIsMobileSidebarOpen(true)}
+                            className="cursor-pointer rounded-lg p-2 text-on-surface-variant hover:bg-surface-container md:hidden"
+                        >
+                            <Menu size={20} />
                         </button>
 
-                        {/* Admin User Header Metadata */}
-                        <div className="flex items-center gap-3 border-l border-gray-100 pl-4">
-                            <img
-                                alt="Lead Admin Alex Rivera Avatar"
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA8bsT9yYeaulCPefDEgepD_1aIBrnscFsgKYQ_qbg1mppLuieWuRE8FY0FMLDutmlFBhM1GX1Vwbz-GEUHS_iDxmZ-koPuGFxtzsSUD_iQRfV8Y2zYzVdQq_i957kXghe1UciItei55IbjXa9EzM2eir96nrgbZ-CYidyDg12ubYIlfSDSiMxiO-I9wGYzxCNsYHt5ugRO4PshnXHzAiMaVRITuyEHDN4ULAh0jxJXf0kR2BuENOTLmI6c2nicgXww-aEKHTbQG0M"
-                                className="h-9 w-9 rounded-full border border-[#e8dfee] object-cover"
+                        {/* Active search bar */}
+                        <div className="flex w-44 items-center rounded-full border border-outline-variant bg-surface-container-low px-4 py-1.5 sm:w-80 md:w-96">
+                            <Search
+                                className="shrink-0 animate-pulse text-outline"
+                                size={16}
                             />
-                            <div className="hidden text-left text-xs leading-none lg:block">
-                                <p className="font-extrabold text-gray-800">
-                                    Alex Rivera
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="ml-2 w-full border-none bg-transparent text-xs font-medium text-on-surface outline-none placeholder:text-outline focus:ring-0"
+                                placeholder={getSearchPlaceholder()}
+                            />
+                            {searchQuery && (
+                                <button
+                                    onClick={() => setSearchQuery('')}
+                                    className="text-outline hover:text-on-surface"
+                                >
+                                    <X size={12} />
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Right Header Navigation Panel tools */}
+                    <div className="flex items-center gap-4">
+                        <button className="relative cursor-pointer rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary">
+                            <Bell size={18} />
+                            <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-error" />
+                        </button>
+
+                        <button className="hidden cursor-pointer rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary sm:inline-block">
+                            <HelpCircle size={18} />
+                        </button>
+
+                        {/* Avatar block */}
+                        <div className="flex items-center gap-3 border-l border-outline-variant pl-4 select-none">
+                            <div className="hidden text-right sm:block">
+                                <p className="text-xs font-bold text-on-surface">
+                                    {adminProfile.name}
                                 </p>
-                                <p className="mt-0.5 text-[10px] font-bold text-gray-400">
-                                    Lead Admin
+                                <p className="mt-0.5 text-[9px] leading-none tracking-tighter text-outline uppercase">
+                                    {adminProfile.title}
                                 </p>
+                            </div>
+                            <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-outline-variant bg-surface-container-highest">
+                                <img
+                                    className="h-full w-full object-cover"
+                                    src={adminProfile.avatarUrl}
+                                    alt={adminProfile.name}
+                                    referrerPolicy="no-referrer"
+                                />
                             </div>
                         </div>
                     </div>
                 </header>
 
-                {/* Outer content area component switcher */}
-                <main className="mx-auto w-full max-w-7xl flex-1 p-6 md:p-8">
-                    {activeTab === 'dashboard' && (
-                        <DashboardScreen
-                            bookings={bookings}
-                            services={services}
-                            staff={staff}
-                            activityLogs={activityLogs}
-                            onNavigate={setActiveTab}
-                            onSelectBooking={setSelectedBooking}
-                            onOpenNewBooking={() => setIsNewBookingOpen(true)}
-                        />
-                    )}
+                {/* Core Screen Display Scrollable Page Body */}
+                <div className="custom-scrollbar flex-1 overflow-y-auto bg-background p-4 md:p-8">
+                    <div className="mx-auto max-w-7xl">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={activeTab}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                transition={{ duration: 0.15 }}
+                            >
+                                {activeTab === 'dashboard' && (
+                                    <DashboardView
+                                        services={services}
+                                        bookings={bookings}
+                                        onCreateBookingClick={() =>
+                                            setIsBookingModalOpen(true)
+                                        }
+                                        onCreateServiceClick={() => {
+                                            setActiveTab('availability');
+                                        }}
+                                        onNavigateToTab={(tab) =>
+                                            setActiveTab(tab)
+                                        }
+                                    />
+                                )}
 
-                    {activeTab === 'bookings' && (
-                        <BookingsScreen
-                            bookings={bookings}
-                            services={services}
-                            staff={staff}
-                            onOpenNewBooking={() => setIsNewBookingOpen(true)}
-                            onSelectBooking={setSelectedBooking}
-                        />
-                    )}
+                                {activeTab === 'bookings' && (
+                                    <BookingsView
+                                        bookings={bookings}
+                                        onUpdateBookingStatus={
+                                            handleUpdateBookingStatus
+                                        }
+                                        onDeleteBooking={handleDeleteBooking}
+                                        searchQuery={searchQuery}
+                                    />
+                                )}
 
-                    {activeTab === 'availability' && (
-                        <AvailabilityScreen bookings={bookings} staff={staff} />
-                    )}
+                                {activeTab === 'availability' && (
+                                    <ServicesView
+                                        services={services}
+                                        onAddService={handleAddService}
+                                        onUpdateService={handleUpdateService}
+                                        onDeleteService={handleDeleteService}
+                                        searchQuery={searchQuery}
+                                    />
+                                )}
 
-                    {activeTab === 'settings' && (
-                        <SettingsScreen
-                            services={services}
-                            staff={staff}
-                            onUpdateServices={setServices}
-                            onUpdateStaff={setStaff}
-                        />
-                    )}
-                </main>
-            </div>
+                                {activeTab === 'settings' && (
+                                    <SettingsView
+                                        adminProfile={adminProfile}
+                                        onUpdateProfile={handleUpdateProfile}
+                                    />
+                                )}
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
+                </div>
+            </main>
 
-            {/* 3. MODALS BLOCK ENGINES */}
-
-            {/* Dynamic scheduler wizard modal */}
+            {/* New Booking Dialog Modal */}
             <NewBookingModal
-                isOpen={isNewBookingOpen}
-                onClose={() => setIsNewBookingOpen(false)}
-                onSubmit={handleCreateBooking}
+                isOpen={isBookingModalOpen}
+                onClose={() => setIsBookingModalOpen(false)}
                 services={services}
-                staff={staff}
-                bookings={bookings}
-            />
-
-            {/* Medical ledger detail check status wizard modal */}
-            <BookingDetailsModal
-                booking={selectedBooking}
-                isOpen={selectedBooking !== null}
-                onClose={() => setSelectedBooking(null)}
-                onUpdateStatus={handleUpdateBookingStatus}
-                onUpdateNotes={handleUpdateBookingNotes}
-                services={services}
-                staff={staff}
+                onAddBooking={handleAddBooking}
             />
         </div>
     );

@@ -1,58 +1,81 @@
-export interface ClinicService {
-    id: string;
-    name: string;
-    price: number;
-    durationMinutes: number; // e.g. 45
-    color: string; // e.g. 'primary' | 'tertiary' | 'muted' | 'error'
-    colorHex: string; // e.g. '#630ed4'
-}
-
-export interface Staff {
-    id: string;
-    name: string;
-    role: string;
-    avatar: string;
-    isActive: boolean;
-    onLeave: boolean;
-    colorHex: string;
-}
+export type BookingStatusTwo =
+    | 'Pending'
+    | 'Confirmed'
+    | 'Completed'
+    | 'Cancelled';
 
 export interface AdminBooking {
     id: string;
     clientName: string;
-    clientPhone: string;
     clientEmail: string;
     serviceId: string;
-    staffId: string;
-    room: string;
+    serviceName: string;
     date: string; // YYYY-MM-DD
-    time: string; // e.g. "09:00 AM" or "11:30 AM" or "14:15"
-    status:
-        | 'Confirmed'
-        | 'In Progress'
-        | 'Upcoming'
-        | 'Cancelled'
-        | 'Completed';
+    startTime: string; // HH:MM AM/PM
+    endTime: string; // HH:MM AM/PM
+    status: BookingStatusTwo;
     notes?: string;
-    createdTime: number; // timestamp
+    price: number;
 }
 
-export interface ActivityLog {
-    id: string;
-    type:
-        | 'booking_new'
-        | 'booking_rescheduled'
-        | 'booking_cancelled'
-        | 'staff_new'
-        | 'system';
-    title: string;
-    description: string;
-    timestamp: string; // e.g. "2 minutes ago", "5 hours ago"
-    createdTime: number; // timestamp for sorting
-}
-
-export interface RoomState {
+export interface WebsiteSettings {
     name: string;
-    capacity: number;
-    type: string;
+    managerName: string;
+    email: string;
+    phone: string;
+    role: string;
+    websiteUrl: string;
+    logoUrl: string;
+}
+
+export interface BookingRules {
+    minimumLeadTime: string;
+    bookingWindow: string;
+    cancellationPolicyEnabled: boolean;
+    cancellationPolicyText: string;
+}
+
+export interface TeamMember {
+    id: string;
+    name: string;
+    email: string;
+    role: 'Admin' | 'Staff';
+    status: 'Active' | 'Pending Invite';
+    avatarInitials: string;
+}
+
+export interface BusinessHours {
+    day: string; // e.g. "Monday"
+    dayIndex: number; // 0 = Sunday, 1 = Monday etc.
+    isOpen: boolean;
+    openTime: string; // "09:00"
+    closeTime: string; // "17:00"
+}
+
+export interface HolidayBlock {
+    id: string;
+    date: string;
+    reason: string;
+}
+
+export interface ServiceTwo {
+    id: string;
+    name: string;
+    description: string;
+    category: string;
+    duration: number; // in minutes
+    price: number;
+    status: 'Active' | 'Inactive';
+    bookingsCount: number;
+    imageUrl: string;
+    createdAt: string;
+}
+
+export interface AdminProfile {
+    name: string;
+    title: string;
+    email: string;
+    avatarUrl: string;
+    notificationsEnabled: boolean;
+    currency: string;
 }

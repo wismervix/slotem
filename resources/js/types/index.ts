@@ -7,4 +7,3 @@ export * from './user-profile';
 export * from './notification';
 export * from './admin-types';
 export * from './admin-types-two';
-export * from './admin-types-three';

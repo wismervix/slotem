@@ -416,31 +416,22 @@ export default function App() {
                                 Systems. All rights reserved.
                             </p>
                         </div>
-                        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs font-semibold text-zinc-400 dark:text-zinc-500">
-                            <a
-                                className="transition-colors hover:text-purple-600 dark:hover:text-purple-400"
-                                href="#privacy"
-                            >
-                                Privacy Policy
-                            </a>
-                            <a
-                                className="transition-colors hover:text-purple-600 dark:hover:text-purple-400"
-                                href="#terms"
-                            >
-                                Terms of Service
-                            </a>
-                            <a
-                                className="transition-colors hover:text-purple-600 dark:hover:text-purple-400"
-                                href="#help"
-                            >
-                                Help Center
-                            </a>
-                            <a
-                                className="transition-colors hover:text-purple-600 dark:hover:text-purple-400"
-                                href="#sales"
-                            >
-                                Contact Sales
-                            </a>
+
+                        <div className="flex gap-8">
+                            {[
+                                'Privacy Policy',
+                                'Terms of Service',
+                                'Help Center',
+                                'Contact Sales',
+                            ].map((link) => (
+                                <a
+                                    key={link}
+                                    href="#"
+                                    className="text-[11px] font-semibold text-on-surface-variant transition-colors hover:text-primary"
+                                >
+                                    {link}
+                                </a>
+                            ))}
                         </div>
                     </footer>
                 </main>

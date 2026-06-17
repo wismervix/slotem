@@ -18,12 +18,13 @@ Route::group(['prefix' => 'admin'], function () {
         Route::controller(DashboardController::class)->group(function () {
             Route::get('/dashboard', 'index')->name('admin.dashboard');
             Route::get('/availability', 'availability')->name('admin.availability');
-            Route::get('/settings')->name('admin.settings');
+            Route::get('/settings', 'settings')->name('admin.settings');
             Route::get('/profile')->name('admin.profile');
+            Route::get('/services', 'services')->name('admin.services');
+            Route::get('/service/edit')->name('admin.service.edit');
         });
         Route::controller(BookingController::class)->group(function () {
             Route::get('/bookings', 'index')->name('admin.bookings');
-            Route::get('/bookings/create', 'create')->name('admin.bookings.create');
         });
     });
 

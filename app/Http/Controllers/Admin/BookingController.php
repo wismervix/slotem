@@ -12,7 +12,7 @@ class BookingController extends Controller
     {
         $bookings = Booking::all();
 
-        return inertia('Admin/Bookings/Index', [
+        return inertia('Admin/Bookings', [
             'bookings' => $bookings,
         ]);
     }

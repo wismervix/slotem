@@ -67,7 +67,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                                         {auth.user.name ? (
                                             <img
                                                 alt="Profile Avatar"
-                                                src={auth.user.name}
+                                                src={auth.user.avatar_url}
                                                 title={`Hi, ${auth.user.name}`}
                                                 className="h-full w-full rounded-full object-cover"
                                             />

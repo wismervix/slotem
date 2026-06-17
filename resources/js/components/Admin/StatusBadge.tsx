@@ -15,7 +15,7 @@ export default function StatusBadge({ status }: Props) {
 
     return (
         <span
-            className={`rounded-full px-3 py-1 text-xs font-semibold ${styles[status]}`}
+            className={`rounded-full px-3 py-1 text-xs font-bold ${styles[status]}`}
         >
             {status.charAt(0).toUpperCase() + status.slice(1)}
         </span>

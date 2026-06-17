@@ -3,15 +3,21 @@ import {
     LayoutDashboard,
     Calendar,
     Clock,
-    Settings,
+    Settings as SettingsIcon,
     ChevronDown,
     ChevronRight,
     Plus,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useState } from 'react';
+import { motion } from 'motion/react';
 
-type MenuKey = 'bookings' | 'settings';
+interface SidebarProps {
+    businessName: string;
+    managerName: string;
+}
+
+type MenuKey = 'services' | 'settings';
 
 type ChildNavItem = {
     name: string;
@@ -26,9 +32,9 @@ type NavItem = {
     menuKey?: MenuKey;
 };
 
-export default function Sidebar() {
+export default function Sidebar({ businessName, managerName }: SidebarProps) {
     const [openMenus, setOpenMenus] = useState<Record<MenuKey, boolean>>({
-        bookings: true,
+        services: false,
         settings: false,
     });
 
@@ -49,15 +55,21 @@ export default function Sidebar() {
         {
             name: 'Bookings',
             icon: Calendar,
-            menuKey: 'bookings',
+            route: 'admin.bookings',
+        },
+
+        {
+            name: 'Service',
+            icon: Calendar,
+            menuKey: 'services',
             children: [
                 {
-                    name: 'All Bookings',
-                    route: 'admin.bookings',
+                    name: 'All Services',
+                    route: 'admin.service',
                 },
                 {
                     name: 'Create Booking',
-                    route: 'admin.bookings.create',
+                    route: 'admin.service.edit',
                 },
             ],
         },
@@ -70,7 +82,7 @@ export default function Sidebar() {
 
         {
             name: 'Settings',
-            icon: Settings,
+            icon: SettingsIcon,
             menuKey: 'settings',
             children: [
                 {
@@ -94,12 +106,13 @@ export default function Sidebar() {
     };
 
     return (
-        <aside className="fixed top-0 left-0 z-50 flex h-screen w-64 flex-col border-r border-outline-variant bg-surface-container-low p-4">
-            <div className="mb-8 px-2">
-                <h2 className="text-lg font-bold text-primary">Slotem Admin</h2>
-
-                <p className="text-xs font-medium text-on-surface-variant">
-                    Business Manager
+        <aside className="fixed top-0 left-0 z-50 flex h-screen w-64 flex-col border-r border-purple-100 bg-purple-50/70 p-4 transition-colors dark:border-zinc-800 dark:bg-zinc-950">
+            <div className="mb-8 px-2 py-1">
+                <h2 className="text-xl font-bold tracking-tight text-purple-700 select-none dark:text-purple-400">
+                    {businessName}
+                </h2>
+                <p className="mt-0.5 text-xs font-medium tracking-wider text-purple-500/80 uppercase dark:text-zinc-400">
+                    {managerName}
                 </p>
             </div>
 
@@ -116,21 +129,36 @@ export default function Sidebar() {
                             <div key={item.name}>
                                 <button
                                     onClick={() => toggleMenu(menuKey)}
-                                    className={`flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium transition-colors ${
+                                    className={`relative flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition-all ${
                                         active
-                                            ? 'bg-secondary-container text-primary'
-                                            : 'text-on-surface-variant hover:bg-surface-container-highest'
+                                            ? 'font-semibold text-purple-950 dark:text-purple-100'
+                                            : 'text-zinc-600 hover:bg-purple-100/40 hover:text-purple-700 dark:text-zinc-400 dark:hover:bg-zinc-800/50 dark:hover:text-purple-300'
                                     }`}
                                 >
+                                    {active && (
+                                        <motion.div
+                                            layoutId="activeTabIndicator"
+                                            className="absolute inset-0 rounded-xl bg-purple-200/60 dark:bg-purple-950/40"
+                                            transition={{
+                                                type: 'spring',
+                                                stiffness: 350,
+                                                damping: 30,
+                                            }}
+                                            style={{ zIndex: -1 }}
+                                        />
+                                    )}
                                     <div className="flex items-center gap-3">
                                         <Icon
-                                            size={20}
-                                            fill={
-                                                active ? 'currentColor' : 'none'
-                                            }
+                                            className={`h-5 w-5 transition-transform duration-200 ${
+                                                active
+                                                    ? 'scale-105 text-purple-700 dark:text-purple-400'
+                                                    : 'text-zinc-400 group-hover:scale-110 dark:text-zinc-500'
+                                            }`}
                                         />
 
-                                        {item.name}
+                                        <span className="relative z-10">
+                                            {item.name}
+                                        </span>
                                     </div>
 
                                     {openMenus[menuKey] ? (
@@ -153,8 +181,8 @@ export default function Sidebar() {
                                                     href={route(child.route)}
                                                     className={`block rounded-xl px-4 py-2 text-sm transition-colors ${
                                                         activeChild
-                                                            ? 'bg-primary text-primary-foreground'
-                                                            : 'text-on-surface-variant hover:bg-surface-container-highest'
+                                                            ? 'bg-primary text-purple-950 dark:text-purple-100'
+                                                            : 'text-zinc-600 hover:bg-purple-100/40 hover:text-purple-700 dark:text-zinc-400 dark:hover:bg-zinc-800/50 dark:hover:text-purple-300'
                                                     }`}
                                                 >
                                                     {child.name}
@@ -176,30 +204,47 @@ export default function Sidebar() {
                         <Link
                             key={item.name}
                             href={item.route ? route(item.route) : '#'}
-                            className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-colors ${
+                            className={`relative flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition-all ${
                                 active
-                                    ? 'bg-secondary-container text-primary'
-                                    : 'text-on-surface-variant hover:bg-surface-container-highest'
+                                    ? 'font-semibold text-purple-950 dark:text-purple-100'
+                                    : 'text-zinc-600 hover:bg-purple-100/40 hover:text-purple-700 dark:text-zinc-400 dark:hover:bg-zinc-800/50 dark:hover:text-purple-300'
                             }`}
                         >
+                            {active && (
+                                <motion.div
+                                    layoutId="activeTabIndicator"
+                                    className="absolute inset-0 rounded-xl bg-purple-200/60 dark:bg-purple-950/40"
+                                    transition={{
+                                        type: 'spring',
+                                        stiffness: 350,
+                                        damping: 30,
+                                    }}
+                                    style={{ zIndex: -1 }}
+                                />
+                            )}
                             <Icon
-                                size={20}
-                                fill={active ? 'currentColor' : 'none'}
+                                className={`h-5 w-5 transition-transform duration-200 ${
+                                    active
+                                        ? 'scale-105 text-purple-700 dark:text-purple-400'
+                                        : 'text-zinc-400 group-hover:scale-110 dark:text-zinc-500'
+                                }`}
                             />
-
-                            {item.name}
+                            <span className="relative z-10">{item.name}</span>
                         </Link>
                     );
                 })}
             </nav>
 
-            <Link
-                href={route('services')}
-                className="mt-auto flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3 font-semibold text-primary-foreground"
-            >
-                <Plus size={20} />
-                New Booking
-            </Link>
+            {/* New Booking CTA */}
+            <div className="mt-auto border-t border-purple-100 pt-4 dark:border-zinc-800">
+                <Link
+                    href={route('services')}
+                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-purple-600 px-4 py-3 font-semibold text-white transition-all hover:bg-purple-700 hover:shadow-lg hover:shadow-purple-500/20 active:scale-[0.98]"
+                >
+                    <Plus size={20} />
+                    New Booking
+                </Link>
+            </div>
         </aside>
     );
 }
