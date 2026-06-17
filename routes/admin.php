@@ -21,7 +21,7 @@ Route::group(['prefix' => 'admin'], function () {
             Route::get('/settings', 'settings')->name('admin.settings');
             Route::get('/profile')->name('admin.profile');
             Route::get('/services', 'services')->name('admin.services');
-            Route::get('/service/edit')->name('admin.service.edit');
+            Route::get('/service/edit')->name('admin.services.edit');
         });
         Route::controller(BookingController::class)->group(function () {
             Route::get('/bookings', 'index')->name('admin.bookings');

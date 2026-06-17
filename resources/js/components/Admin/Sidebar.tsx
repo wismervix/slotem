@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import {
     LayoutDashboard,
     Calendar,
+    BriefcaseBusiness,
     Clock,
     Settings as SettingsIcon,
     ChevronDown,
@@ -17,7 +18,7 @@ interface SidebarProps {
     managerName: string;
 }
 
-type MenuKey = 'services' | 'settings';
+type MenuKey = 'settings';
 
 type ChildNavItem = {
     name: string;
@@ -34,7 +35,6 @@ type NavItem = {
 
 export default function Sidebar({ businessName, managerName }: SidebarProps) {
     const [openMenus, setOpenMenus] = useState<Record<MenuKey, boolean>>({
-        services: false,
         settings: false,
     });
 
@@ -60,18 +60,8 @@ export default function Sidebar({ businessName, managerName }: SidebarProps) {
 
         {
             name: 'Service',
-            icon: Calendar,
-            menuKey: 'services',
-            children: [
-                {
-                    name: 'All Services',
-                    route: 'admin.service',
-                },
-                {
-                    name: 'Create Booking',
-                    route: 'admin.service.edit',
-                },
-            ],
+            icon: BriefcaseBusiness,
+            route: 'admin.services',
         },
 
         {
