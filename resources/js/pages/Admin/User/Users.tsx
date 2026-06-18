@@ -1,25 +1,45 @@
 import React, { useState, useMemo } from 'react';
 import { Download, UserPlus, Filter, Calendar, ArrowUpDown, RefreshCw, Eye, Edit, CheckCircle, X, Check, Mail, Phone, CalendarDays, BarChart, AlertTriangle, TrendingUp } from 'lucide-react';
 import { UserThree, BookingThree } from '@/types';
+import {
+    INITIAL_USERS,
+    INITIAL_BOOKINGSS,
+} from '@/data/initial-data';
+import AdminLayout from '@/layouts/Admin/AdminLayout';
+import { Link } from '@inertiajs/react';
 
 
-interface UserManagementProps {
-    users: UserThree[];
-    bookings: BookingThree[];
-    onAddUser: (user: UserThree) => void;
-    onUpdateUser: (user: UserThree) => void;
-    onDeleteUser: (userId: string) => void;
-    searchQuery: string;
-}
+export default function UserManagement() {
+    const [searchQuery, setSearchQuery] = useState<string>('');
 
-export default function UserManagement({
-  users,
-  bookings,
-  onAddUser,
-  onUpdateUser,
-  onDeleteUser,
-  searchQuery
-}: UserManagementProps) {
+    const [users, setUsers] = useState<UserThree[]>([...INITIAL_USERS]);
+    const [bookings, setBookings] = useState<BookingThree[]>([
+        ...INITIAL_BOOKINGSS,
+    ]);
+    
+        // State Action Handlers
+        const handleAddUser = (newUser: UserThree) => {
+            const updated = [newUser, ...users];
+            setUsers(updated);
+        };
+    
+        const handleUpdateUser = (updatedUser: UserThree) => {
+            const updated = users.map((u) =>
+                u.id === updatedUser.id ? updatedUser : u,
+            );
+            setUsers(updated);
+        };
+    
+        const handleDeleteUser = (userId: string) => {
+            const updated = users.filter((u) => u.id !== userId);
+            setUsers(updated);
+            // Also cancel bookings associated with deleted profiles
+            const updatedBookings = bookings.map((b) =>
+                b.userId === userId ? { ...b, status: 'Cancelled' as const } : b,
+            );
+            setBookings(updatedBookings);
+        };
+
   // Filters & Sorting state
   const [statusFilter, setStatusFilter] = useState<'All Statuses' | 'Active' | 'Suspended' | 'Pending'>('All Statuses');
   const [sortBy, setSortBy] = useState<'Registration Date' | 'Name (A-Z)' | 'Most Bookings'>('Registration Date');
@@ -151,7 +171,7 @@ export default function UserManagement({
             formAvatar ||
             'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
     };
-    onUpdateUser(updated);
+    handleUpdateUser(updated);
     setEditingUser(null);
   };
 
@@ -193,16 +213,17 @@ export default function UserManagement({
             formAvatar ||
             'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
     };
-    onAddUser(newUser);
+    handleAddUser(newUser);
     setIsAddingUser(false);
   };
 
   const handleToggleStatus = (user: UserThree) => {
       const nextStatus = user.status === 'Active' ? 'Suspended' : 'Active';
-      onUpdateUser({ ...user, status: nextStatus });
+      handleUpdateUser({ ...user, status: nextStatus });
   };
 
   return (
+    <AdminLayout>
     <div className="space-y-6">
       {/* Top Title Bar */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -585,6 +606,12 @@ export default function UserManagement({
               >
                 Close Details
               </button>
+              <Link
+                href={route('admin.users.details', 1)}
+                className="px-4 py-2 text-xs font-bold bg-primary text-on-primary rounded-lg hover:bg-primary-container transition-all cursor-pointer"
+              >
+                View Profile Details
+              </Link>
               <button
                 onClick={() => {
                   const toEdit = viewingUser;
@@ -673,7 +700,7 @@ export default function UserManagement({
               <button
                 onClick={() => {
                   if (confirm(`Are you absolutely sure you want to delete client ${editingUser.name}? All history will be archived.`)) {
-                    onDeleteUser(editingUser.id);
+                    handleDeleteUser(editingUser.id);
                     setEditingUser(null);
                   }
                 }}
@@ -792,5 +819,6 @@ export default function UserManagement({
         </div>
       )}
     </div>
+    </AdminLayout>
   );
 }
