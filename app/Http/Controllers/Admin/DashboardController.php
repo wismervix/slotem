@@ -19,6 +19,14 @@ class DashboardController extends Controller
     {
         return inertia('Admin/Services');
     }
+    public function users()
+    {
+        return inertia('Admin/Users');
+    }
+    public function userDetails()
+    {
+        return inertia('Admin/UserDetails');
+    }
     public function settings()
     {
         return inertia('Admin/Settings');

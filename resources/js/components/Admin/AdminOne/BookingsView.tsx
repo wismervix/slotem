@@ -1,218 +1,208 @@
-import React, { useState, useMemo } from 'react';
+import { useState } from 'react';
+import { 
+  Search, 
+  Calendar, 
+  Clock, 
+  User, 
+  Mail, 
+  FileText, 
+  Trash2, 
+  Check, 
+  X, 
+  Plus, 
+  FilterX
+} from 'lucide-react';
 import { BookingTwo } from '@/types';
-import { Calendar, Search, Trash2, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface BookingsViewProps {
     bookings: BookingTwo[];
-    onUpdateBookingStatus: (id: string, status: BookingTwo['status']) => void;
+    onApproveBooking: (id: string) => void;
+    onCancelBooking: (id: string) => void;
     onDeleteBooking: (id: string) => void;
-    searchQuery: string;
+    onNewBookingClick: () => void;
 }
 
 export default function BookingsView({
   bookings,
-  onUpdateBookingStatus,
+  onApproveBooking,
+  onCancelBooking,
   onDeleteBooking,
-  searchQuery
+  onNewBookingClick,
 }: BookingsViewProps) {
-  // Tabs: All, Confirmed, Completed, Cancelled
-  const [activeTab, setActiveTab] = useState<'All' | 'Confirmed' | 'Completed' | 'Cancelled'>('All');
-  
-  // Local pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'All' | 'Confirmed' | 'Pending' | 'Cancelled'>('All');
 
-  // Filtered Bookings
-  const filteredBookings = useMemo(() => {
-    return bookings.filter((b) => {
-      const matchesSearch =
-        b.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        b.clientEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        b.serviceName.toLowerCase().includes(searchQuery.toLowerCase());
-
-      const matchesTab = activeTab === 'All' ? true : b.status === activeTab;
-
-      return matchesSearch && matchesTab;
-    });
-  }, [bookings, searchQuery, activeTab]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredBookings.length / itemsPerPage));
-  const paginatedBookings = useMemo(() => {
-    const safePage = Math.min(currentPage, totalPages);
-    const startIdx = (safePage - 1) * itemsPerPage;
-    return filteredBookings.slice(startIdx, startIdx + itemsPerPage);
-  }, [filteredBookings, currentPage, totalPages]);
+  // Filter implementation
+  const filteredBookings = bookings.filter((booking) => {
+    const matchesSearch = 
+      booking.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.clientEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.serviceName.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (statusFilter === 'All') return matchesSearch;
+    return matchesSearch && booking.status === statusFilter;
+  });
 
   return (
-    <div className="space-y-6">
-      {/* Title Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div id="bookings-view" className="bg-white border border-outline-variant rounded-xl shadow-xs overflow-hidden">
+      {/* Title & Actions Bar */}
+      <div className="p-6 border-b border-outline-variant flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h2 className="font-sans text-3xl font-bold text-on-background tracking-tight font-sans">Bookings Registry</h2>
-          <p className="text-on-surface-variant mt-1 text-sm md:text-base">Review, confirm, or terminate customer session assignments.</p>
+          <h3 className="text-lg font-bold text-on-surface">Bookings Registers</h3>
+          <p className="text-xs text-on-surface-variant mt-0.5">
+            Audit, verify, and approve user-booked appointment dates and service blocks.
+          </p>
+        </div>
+        
+        <button 
+          onClick={onNewBookingClick}
+          className="bg-primary hover:bg-primary-container text-on-primary text-xs font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-1.5 transition-all self-start md:self-auto cursor-pointer"
+        >
+          <Plus className="w-4 h-4" /> Create General Booking
+        </button>
+      </div>
+
+      {/* Inputs: Search & Filters */}
+      <div className="p-4 bg-surface-container-low border-b border-outline-variant flex flex-col sm:flex-row sm:items-center gap-3">
+        {/* Search input */}
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-2.5 w-4 h-4 text-on-surface-variant/70" />
+          <input 
+            type="text" 
+            placeholder="Search by client name, email, or service..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-9 pr-4 py-1.5 border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary rounded-lg text-sm bg-white"
+          />
+        </div>
+
+        {/* Status Pills Tab */}
+        <div className="flex flex-wrap gap-1 bg-white border border-outline-variant p-1 rounded-lg">
+          {(['All', 'Confirmed', 'Pending', 'Cancelled'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setStatusFilter(tab)}
+              className={`px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+                statusFilter === tab 
+                  ? 'bg-primary text-on-primary shadow-xs' 
+                  : 'text-on-surface-variant hover:bg-surface-container'
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Filter status tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {(['All', 'Confirmed', 'Completed', 'Cancelled'] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => {
-              setActiveTab(tab);
-              setCurrentPage(1);
-            }}
-            className={`px-4 py-2 rounded-lg font-medium text-xs tracking-wide transition-colors whitespace-nowrap cursor-pointer ${
-              activeTab === tab
-                ? 'bg-primary-container text-on-primary-container shadow-sm'
-                : 'text-on-surface-variant hover:bg-surface-container'
-            }`}
-          >
-            {tab === 'All' ? 'All Bookings' : tab}
-          </button>
-        ))}
-      </div>
-
-      {/* Table listing */}
-      <div className="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          {filteredBookings.length === 0 ? (
-            <div className="p-12 text-center flex flex-col items-center justify-center space-y-3">
-              <div className="w-12 h-12 rounded-full bg-surface-container-low flex items-center justify-center text-outline">
-                <Calendar size={22} />
-              </div>
-              <div>
-                <p className="font-semibold text-on-surface">No bookings found</p>
-                <p className="text-xs text-outline mt-1">Try tweaking filters or select "New Booking" to schedule one.</p>
-              </div>
-            </div>
-          ) : (
-            <table className="w-full text-left border-collapse min-w-[700px]">
-              <thead className="bg-surface-container-low border-b border-outline-variant">
-                <tr>
-                  <th className="p-4 text-xs font-semibold uppercase tracking-wider text-outline">Client Name / Email</th>
-                  <th className="p-4 text-xs font-semibold uppercase tracking-wider text-outline">Registered Service</th>
-                  <th className="p-4 text-xs font-semibold uppercase tracking-wider text-outline">Date &amp; Time</th>
-                  <th className="p-4 text-xs font-semibold uppercase tracking-wider text-outline">Paid</th>
-                  <th className="p-4 text-xs font-semibold uppercase tracking-wider text-outline">Status Badge</th>
-                  <th className="p-4 text-xs font-semibold uppercase tracking-wider text-outline text-right">Perform Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-outline-variant">
-                {paginatedBookings.map((b) => (
-                  <tr key={b.id} className="hover:bg-surface-container-low/50 transition-colors">
-                    {/* Client Column */}
-                    <td className="p-4">
-                      <div>
-                        <p className="font-bold text-on-surface text-sm">{b.clientName}</p>
-                        <p className="text-[11px] text-outline mt-0.5">{b.clientEmail}</p>
-                      </div>
-                    </td>
-
-                    {/* Service Column */}
-                    <td className="p-4">
-                      <div className="font-semibold text-xs text-primary rounded px-2.5 py-1 bg-primary/10 inline-block font-sans">
-                        {b.serviceName}
-                      </div>
-                    </td>
-
-                    {/* Date/Time Column */}
-                    <td className="p-4">
-                      <div className="text-sm font-medium text-on-surface-variant flex items-center gap-1.5">
-                        <Calendar size={14} className="text-outline" />
-                        <span>{b.date}</span>
-                        <span className="text-outline text-xs">•</span>
-                        <span className="text-primary font-mono text-xs">{b.time}</span>
-                      </div>
-                    </td>
-
-                    {/* Price Column */}
-                    <td className="p-4">
-                      <span className="text-sm font-semibold text-on-background">${b.price.toFixed(2)}</span>
-                    </td>
-
-                    {/* Status Badge */}
-                    <td className="p-4">
-                      <span className={`text-[10px] font-bold uppercase rounded-full px-2.5 py-1 ${
-                        b.status === 'Confirmed'
-                          ? 'bg-amber-100 text-amber-800 border border-amber-300/35'
-                          : b.status === 'Completed'
-                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300/35'
-                          : 'bg-rose-100 text-rose-800 border border-rose-300/35'
-                      }`}>
-                        {b.status}
-                      </span>
-                    </td>
-
-                    {/* Action Trigger keys */}
-                    <td className="p-4 text-right">
-                      <div className="flex justify-end gap-1.5 items-center">
-                        {b.status === 'Confirmed' && (
-                          <>
-                            <button
-                              onClick={() => onUpdateBookingStatus(b.id, 'Completed')}
-                              title="Mark Completed"
-                              className="p-1.5 hover:bg-emerald-50 text-outline hover:text-emerald-700 hover:border-emerald-200 border border-transparent rounded transition-all cursor-pointer"
-                            >
-                              <CheckCircle size={15} />
-                            </button>
-                            <button
-                              onClick={() => onUpdateBookingStatus(b.id, 'Cancelled')}
-                              title="Cancel Session"
-                              className="p-1.5 hover:bg-rose-50 text-outline hover:text-rose-700 hover:border-rose-200 border border-transparent rounded transition-all cursor-pointer"
-                            >
-                              <XCircle size={15} />
-                            </button>
-                          </>
-                        )}
-                        {b.status === 'Cancelled' && (
-                          <button
-                            onClick={() => onUpdateBookingStatus(b.id, 'Confirmed')}
-                            title="Re-confirm"
-                            className="p-1.5 hover:bg-amber-50 text-outline hover:text-amber-700 hover:border-amber-200 border border-transparent rounded transition-all cursor-pointer"
-                          >
-                            <Clock size={15} />
-                          </button>
-                        )}
-                        <button
-                          onClick={() => onDeleteBooking(b.id)}
-                          title="Remove Entry"
-                          className="p-1.5 hover:bg-rose-100 hover:text-error text-outline hover:border-rose-300 border border-transparent rounded transition-all cursor-pointer ml-1"
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-
-        {/* Local Table Footer Pagination */}
-        {filteredBookings.length > 0 && (
-          <div className="p-4 border-t border-outline-variant bg-surface-container-low flex items-center justify-between">
-            <p className="text-xs font-medium text-on-surface-variant">
-              Showing <span className="font-bold">{Math.min(filteredBookings.length, (currentPage - 1) * itemsPerPage + 1)}-{Math.min(filteredBookings.length, currentPage * itemsPerPage)}</span> of <span className="font-bold">{filteredBookings.length}</span> bookings
+      {/* Bookings Table / Card list */}
+      <div className="overflow-x-auto">
+        {filteredBookings.length === 0 ? (
+          <div className="p-12 text-center flex flex-col items-center justify-center">
+            <FilterX className="w-12 h-12 text-on-surface-variant/35 mb-3" />
+            <p className="text-sm font-semibold text-on-surface-variant">No matching bookings found</p>
+            <p className="text-xs text-on-surface-variant/60 mt-1">
+              Try adjusting your lookup keywords or select a different filter category.
             </p>
-            <div className="flex gap-2">
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                className="p-1.5 rounded border border-outline-variant hover:bg-surface-container disabled:opacity-40 transition-all cursor-pointer disabled:cursor-not-allowed"
-              >
-                <ChevronLeft size={16} />
-              </button>
-              <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                className="p-1.5 rounded border border-outline-variant hover:bg-surface-container disabled:opacity-40 transition-all cursor-pointer disabled:cursor-not-allowed"
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
           </div>
+        ) : (
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-surface-container-low/40 border-b border-outline-variant text-on-surface-variant text-[11px] font-bold uppercase tracking-wider">
+                <th className="py-3.5 px-6">Client Info</th>
+                <th className="py-3.5 px-4">Service Required</th>
+                <th className="py-3.5 px-4">Reserved Schedule</th>
+                <th className="py-3.5 px-4">Status</th>
+                <th className="py-3.5 px-6 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-outline-variant/30 text-sm">
+              {filteredBookings.map((booking) => (
+                <tr key={booking.id} className="hover:bg-surface-container-low/30 transition-colors">
+                  {/* Client Info */}
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-full bg-primary/5 flex items-center justify-center text-primary font-bold text-xs uppercase">
+                        {booking.clientName.charAt(0)}
+                      </div>
+                      <div className="space-y-0.5">
+                        <p className="font-semibold text-on-surface flex items-center gap-1">
+                          <User className="w-3.5 h-3.5 text-on-surface-variant/60" /> {booking.clientName}
+                        </p>
+                        <p className="text-xs text-on-surface-variant flex items-center gap-1 font-mono">
+                          <Mail className="w-3 h-3 text-on-surface-variant/50" /> {booking.clientEmail}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+
+                  {/* Service */}
+                  <td className="py-4 px-4 max-w-[200px]">
+                    <p className="font-medium text-xs text-on-surface line-clamp-1 flex items-center gap-1">
+                      <FileText className="w-3.5 h-3.5 text-on-surface-variant/60" /> {booking.serviceName}
+                    </p>
+                  </td>
+
+                  {/* Reserved Date & Time */}
+                  <td className="py-4 px-4 font-mono text-xs">
+                    <div className="space-y-1">
+                      <span className="flex items-center gap-1 text-on-surface font-medium">
+                        <Calendar className="w-3.5 h-3.5 text-primary" /> {booking.date}
+                      </span>
+                      <span className="flex items-center gap-1 text-on-surface-variant">
+                        <Clock className="w-3.5 h-3.5 text-on-surface-variant/70" /> {booking.time}
+                      </span>
+                    </div>
+                  </td>
+
+                  {/* Status Badge */}
+                  <td className="py-4 px-4">
+                    <span className={`inline-flex items-center justify-center font-mono text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                      booking.status === 'Confirmed' 
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                        : booking.status === 'Pending'
+                        ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                        : 'bg-red-50 text-red-700 border border-red-200'
+                    }`}>
+                      {booking.status}
+                    </span>
+                  </td>
+
+                  {/* Quick Inline Actions */}
+                  <td className="py-4 px-6 text-right">
+                    <div className="flex items-center justify-end gap-1.5">
+                      {booking.status === 'Pending' && (
+                        <button
+                          onClick={() => onApproveBooking(booking.id)}
+                          title="Confirm Reservation"
+                          className="p-1.5 hover:bg-emerald-50 text-emerald-600 rounded-lg transition-colors border border-transparent hover:border-emerald-200 cursor-pointer"
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
+                      )}
+                      
+                      {booking.status !== 'Cancelled' && (
+                        <button
+                          onClick={() => onCancelBooking(booking.id)}
+                          title="Cancel Reservation"
+                          className="p-1.5 hover:bg-red-50 text-red-650 rounded-lg transition-colors border border-transparent hover:border-red-200 cursor-pointer"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                      
+                      <button
+                        onClick={() => onDeleteBooking(booking.id)}
+                        title="Delete Record"
+                        className="p-1.5 hover:bg-gray-100 text-on-surface-variant hover:text-dark-900 rounded-lg transition-colors cursor-pointer"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
     </div>

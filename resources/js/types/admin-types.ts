@@ -79,3 +79,25 @@ export interface AdminProfile {
     notificationsEnabled: boolean;
     currency: string;
 }
+export interface UserThree {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    registeredDate: string;
+    registeredTime: string;
+    bookingsCount: number;
+    status: 'Active' | 'Suspended' | 'Pending';
+    avatar: string;
+}
+
+export interface BookingThree {
+    id: string;
+    userName: string;
+    userEmail: string;
+    userId: string;
+    service: string;
+    date: string;
+    timeSlot: string;
+    status: 'Confirmed' | 'Pending' | 'Completed' | 'Cancelled';
+}

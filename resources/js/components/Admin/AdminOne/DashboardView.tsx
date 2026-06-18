@@ -1,281 +1,335 @@
-import React, { useMemo } from 'react';
-import { ServiceTwo, BookingTwo } from '@/types';
-import { TrendingUp, Calendar, DollarSign, Award, ArrowUpRight, ArrowDownRight, UserCheck } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
+import { motion } from 'motion/react';
+import {
+    Calendar,
+    CheckCircle,
+    Clock,
+    AlertTriangle,
+    TrendingUp,
+    ArrowUpRight,
+    Plus,
+    Users,
+    Sparkles,
+    ChevronRight,
+} from 'lucide-react';
+import { BookingTwo, HolidayOverride, DailySlots, SidebarTab } from '@/types';
 
 interface DashboardViewProps {
-    services: ServiceTwo[];
     bookings: BookingTwo[];
-    onCreateBookingClick: () => void;
-    onCreateServiceClick: () => void;
-    onNavigateToTab: (
-        tab: 'dashboard' | 'bookings' | 'availability' | 'settings',
-    ) => void;
+    holidays: HolidayOverride[];
+    dailySlots: DailySlots;
+    setCurrentTab: (tab: SidebarTab) => void;
+    onNewBookingClick: () => void;
 }
 
 export default function DashboardView({
-  services,
-  bookings,
-  onCreateBookingClick,
-  onCreateServiceClick,
-  onNavigateToTab
+    bookings,
+    holidays,
+    dailySlots,
+    setCurrentTab,
+    onNewBookingClick,
 }: DashboardViewProps) {
+    // Compute metrics dynamically from shared state
+    const activeBookings = bookings.filter((b) => b.status === 'Confirmed');
+    const pendingBookings = bookings.filter((b) => b.status === 'Pending');
+    const totalSlotsDefined = Object.values(dailySlots).reduce(
+        (sum, slots) => sum + slots.length,
+        0,
+    );
+    const occupancyPercentage =
+        totalSlotsDefined > 0
+            ? Math.round((activeBookings.length / totalSlotsDefined) * 100)
+            : 0;
 
-  // Dynamic calculations based on state
-  const totalRevenue = useMemo(() => {
-    return bookings
-      .filter((b) => b.status === 'Completed' || b.status === 'Confirmed')
-      .reduce((sum, b) => sum + b.price, 0);
-  }, [bookings]);
+    // Next 4 upcoming bookings chronological listing
+    const sortedUpcoming = [...bookings]
+        .filter((b) => b.status !== 'Cancelled')
+        .sort((a, b) => {
+            // Simple date + time sort approximation
+            const valA = `${a.date} ${a.time}`;
+            const valB = `${b.date} ${b.time}`;
+            return valA.localeCompare(valB);
+        })
+        .slice(0, 4);
 
-  const activeServicesCount = useMemo(() => {
-    return services.filter((s) => s.status === 'Active').length;
-  }, [services]);
-
-  // Chart Data compilation (e.g. Booking stats)
-  const chartData = useMemo(() => {
-    // Generate mock stats for the past 7 days up to today (2026-06-17)
-    return [
-      { date: 'Jun 11', bookings: 12, revenue: 1540, cancelled: 1 },
-      { date: 'Jun 12', bookings: 19, revenue: 2320, cancelled: 2 },
-      { date: 'Jun 13', bookings: 15, revenue: 1980, cancelled: 0 },
-      { date: 'Jun 14', bookings: 25, revenue: 3820, cancelled: 3 },
-      { date: 'Jun 15', bookings: 32, revenue: 4200, cancelled: 1 },
-      { date: 'Jun 16', bookings: 28, revenue: 3950, cancelled: 2 },
-      { date: 'Jun 17', bookings: bookings.length + 22, revenue: totalRevenue + 120, cancelled: 1 },
+    // Distribution of weekdays simulated data for beautifully stylized SVG bar chart
+    const weekDistribution = [
+        { day: 'Mon', count: 14, percent: 70 },
+        { day: 'Tue', count: 18, percent: 90 },
+        { day: 'Wed', count: 16, percent: 80 },
+        { day: 'Thu', count: 12, percent: 60 },
+        { day: 'Fri', count: 20, percent: 100 },
     ];
-  }, [bookings, totalRevenue]);
 
-  // Category distribution calculation
-  const categoryChartData = useMemo(() => {
-    const cats: Record<string, number> = {};
-    services.forEach((s) => {
-      cats[s.category] = (cats[s.category] || 0) + 1;
-    });
-    return Object.keys(cats).map((cat) => ({
-      name: cat,
-      count: cats[cat]
-    }));
-  }, [services]);
-
-  // Recent 4 bookings
-  const recentBookings = useMemo(() => {
-    return [...bookings]
-      .sort((a, b) => b.id.localeCompare(a.id))
-      .slice(0, 4);
-  }, [bookings]);
-
-  return (
-    <div className="space-y-6">
-      {/* Dynamic Header */}
-      <div>
-        <h2 className="font-sans text-3xl font-bold text-on-background tracking-tight">Executive Dashboard</h2>
-        <p className="text-on-surface-variant mt-1 text-sm md:text-base">Real-time analytical overview of your bookings, revenue, and client satisfaction metrics.</p>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Metric 1 */}
-        <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant shadow-sm flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-xs font-semibold text-outline uppercase tracking-wider">Total Revenue</p>
-            <h3 className="text-2xl font-bold text-on-background">${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
-            <span className="text-[11px] text-emerald-600 font-bold flex items-center gap-0.5">
-              <ArrowUpRight size={12} />
-              +14.2% <span className="text-outline font-normal">this month</span>
-            </span>
-          </div>
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-            <DollarSign size={22} strokeWidth={2.5} />
-          </div>
-        </div>
-
-        {/* Metric 2 */}
-        <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant shadow-sm flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-xs font-semibold text-outline uppercase tracking-wider">Active Bookings</p>
-            <h3 className="text-2xl font-bold text-on-background">{bookings.filter(b => b.status === 'Confirmed').length}</h3>
-            <span className="text-[11px] text-emerald-600 font-bold flex items-center gap-0.5">
-              <ArrowUpRight size={12} />
-              +8.3% <span className="text-outline font-normal">since yesterday</span>
-            </span>
-          </div>
-          <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600">
-            <Calendar size={22} strokeWidth={2.5} />
-          </div>
-        </div>
-
-        {/* Metric 3 */}
-        <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant shadow-sm flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-xs font-semibold text-outline uppercase tracking-wider">Active Services</p>
-            <h3 className="text-2xl font-bold text-on-background">{activeServicesCount} / {services.length}</h3>
-            <span className="text-[11px] text-rose-500 font-bold flex items-center gap-0.5">
-              <ArrowDownRight size={12} />
-              -2.1% <span className="text-outline font-normal">deactivated catalog</span>
-            </span>
-          </div>
-          <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-600">
-            <TrendingUp size={22} strokeWidth={2.5} />
-          </div>
-        </div>
-
-        {/* Metric 4 */}
-        <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant shadow-sm flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-xs font-semibold text-outline uppercase tracking-wider">Client Rating</p>
-            <h3 className="text-2xl font-bold text-on-background">4.92 / 5.0</h3>
-            <span className="text-[11px] text-emerald-600 font-bold flex items-center gap-0.5">
-              <ArrowUpRight size={12} />
-              +0.2% <span className="text-outline font-normal">from CSAT reviews</span>
-            </span>
-          </div>
-          <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-600">
-            <Award size={22} strokeWidth={2.5} />
-          </div>
-        </div>
-      </div>
-
-      {/* Charts section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Core Area Chart */}
-        <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant shadow-sm lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-sm font-bold text-on-surface">Weekly Booking Trends</h4>
-              <p className="text-xs text-outline mt-0.5">Displays client appointments set over past 7 cycles.</p>
-            </div>
-            <span className="text-[11px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded uppercase tracking-wider">Live Activity</span>
-          </div>
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorBookings" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#630ed4" stopOpacity={0.4}/>
-                    <stop offset="95%" stopColor="#630ed4" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                <XAxis dataKey="date" fontSize={11} stroke="#7b7487" tickLine={false} />
-                <YAxis fontSize={11} stroke="#7b7487" tickLine={false} />
-                <Tooltip />
-                <Area type="monotone" dataKey="bookings" stroke="#630ed4" strokeWidth={2.5} fillOpacity={1} fill="url(#colorBookings)" name="Bookings" />
-                <Area type="monotone" dataKey="cancelled" stroke="#ba1a1a" strokeWidth={1.5} fillOpacity={0} name="Cancelled" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Bar Chart Categories */}
-        <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-sm font-bold text-on-surface">Catalog Distribution</h4>
-              <p className="text-xs text-outline mt-0.5">Services count relative to specific sectors.</p>
-            </div>
-          </div>
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={categoryChartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                <XAxis dataKey="name" fontSize={10} stroke="#7b7487" tickLine={false} />
-                <YAxis fontSize={11} stroke="#7b7487" tickLine={false} allowDecimals={false} />
-                <Tooltip />
-                <Bar dataKey="count" fill="#7c3aed" radius={[4, 4, 0, 0]} barSize={35} name="Total Services" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
-
-      {/* Grid: Recent Bookings & Core Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Appointments */}
-        <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-sm font-bold text-on-surface">Recent Booking Actions</h4>
-              <p className="text-xs text-outline mt-0.5">Recently added client meetings.</p>
-            </div>
-            <button
-              onClick={() => onNavigateToTab('bookings')}
-              className="text-xs font-bold text-primary hover:underline cursor-pointer"
-            >
-              View All
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {recentBookings.map((booking) => (
-              <div key={booking.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-surface-container-low transition-colors border border-transparent hover:border-outline-variant/30">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
-                    {booking.clientName.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-on-surface">{booking.clientName}</p>
-                    <p className="text-[10px] text-outline">{booking.serviceName} • {booking.time}</p>
-                  </div>
+    return (
+        <div id="dashboard-view" className="space-y-gutter">
+            {/* Welcome Banner */}
+            <div className="relative overflow-hidden rounded-xl border border-outline-variant bg-surface-container p-6">
+                <div className="pointer-events-none absolute top-0 right-0 flex h-full w-1/3 items-center justify-center opacity-10">
+                    <Sparkles className="h-40 w-40 text-primary" />
                 </div>
-                <div className="text-right">
-                  <p className="text-xs font-bold text-on-surface">${booking.price.toFixed(2)}</p>
-                  <span className={`text-[9px] font-bold uppercase rounded px-1.5 py-0.5 ${
-                    booking.status === 'Confirmed'
-                      ? 'bg-amber-100 text-amber-800'
-                      : booking.status === 'Completed'
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : 'bg-rose-100 text-rose-800'
-                  }`}>
-                    {booking.status}
-                  </span>
+                <div className="max-w-2xl">
+                    <span className="rounded-full bg-primary/10 px-2.5 py-1 font-mono text-[10px] font-bold tracking-wider text-primary uppercase">
+                        Suite Active
+                    </span>
+                    <h2 className="text-h2 mt-2 font-heading font-bold text-on-surface">
+                        Welcome back, Slotem Administrator
+                    </h2>
+                    <p className="text-body-md mt-1 text-on-surface-variant">
+                        Your booking systems are live and synchronizing. You
+                        have {pendingBookings.length} pending appointment
+                        requests that require attention.
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-3">
+                        <button
+                            onClick={onNewBookingClick}
+                            className="flex cursor-pointer items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-95"
+                        >
+                            <Plus className="h-4 w-4" /> Add Quick Appointment
+                        </button>
+                        <button
+                            onClick={() => setCurrentTab('Availability')}
+                            className="flex items-center gap-1.5 rounded-lg border border-outline-variant bg-white px-4 py-2 text-xs font-semibold text-on-surface-variant transition-all hover:bg-surface-container"
+                        >
+                            Configure Schedule{' '}
+                            <ChevronRight className="h-3.5 w-3.5" />
+                        </button>
+                    </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Quick Operations panel */}
-        <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant shadow-sm space-y-4">
-          <div>
-            <h4 className="text-sm font-bold text-on-surface">Shortcut Diagnostics</h4>
-            <p className="text-xs text-outline mt-0.5">Execute priority processes directly from the cockpit.</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-            <button
-              onClick={onCreateBookingClick}
-              className="p-4 rounded-xl border border-outline-variant text-left hover:border-primary hover:bg-primary/5 transition-all cursor-pointer group"
-            >
-              <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600 group-hover:scale-110 transition-transform">
-                <Calendar size={16} />
-              </div>
-              <p className="text-xs font-bold text-on-surface mt-3">Book New Appointment</p>
-              <p className="text-[10px] text-outline mt-0.5">Schedule slots for existing clients instantly.</p>
-            </button>
-
-            <button
-              onClick={onCreateServiceClick}
-              className="p-4 rounded-xl border border-outline-variant text-left hover:border-primary hover:bg-primary/5 transition-all cursor-pointer group"
-            >
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                <UserCheck size={16} />
-              </div>
-              <p className="text-xs font-bold text-on-surface mt-3">Add Custom Service</p>
-              <p className="text-[10px] text-outline mt-0.5">Define new hourly rates and catalogs.</p>
-            </button>
-          </div>
-
-          {/* Quick Stats Banner */}
-          <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant flex items-center gap-3">
-            <span className="text-lg">🛎️</span>
-            <div>
-              <p className="text-[11px] font-bold text-on-surface">Proactive Alert: High Demand Season</p>
-              <p className="text-[10px] text-outline mt-0.5">Booking utilization is currently running at 94% on Tuesdays. Consider activating additional Styling shifts.</p>
             </div>
-          </div>
+
+            {/* Grid of 4 Key Metric Cards */}
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                {/* Card 1: Active Appts */}
+                <div className="flex items-start justify-between rounded-xl border border-outline-variant bg-white p-5 shadow-xs">
+                    <div>
+                        <p className="text-xs font-medium tracking-wider text-on-surface-variant/80 uppercase">
+                            Confirmed Bookings
+                        </p>
+                        <h3 className="mt-1.5 text-3xl font-bold text-on-surface">
+                            {activeBookings.length}
+                        </h3>
+                        <span className="mt-2 flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
+                            <TrendingUp className="h-3.5 w-3.5" /> +12% vs last
+                            week
+                        </span>
+                    </div>
+                    <div className="rounded-lg bg-emerald-50 p-3 text-emerald-700">
+                        <CheckCircle className="h-5 w-5" />
+                    </div>
+                </div>
+
+                {/* Card 2: Occupancy Rate */}
+                <div className="flex items-start justify-between rounded-xl border border-outline-variant bg-white p-5 shadow-xs">
+                    <div>
+                        <p className="text-xs font-medium tracking-wider text-on-surface-variant/80 uppercase">
+                            Occupancy Rate
+                        </p>
+                        <h3 className="mt-1.5 text-3xl font-bold text-on-surface">
+                            {occupancyPercentage}%
+                        </h3>
+                        <div className="bg-gray-150 mt-3 h-1.5 w-24 overflow-hidden rounded-full">
+                            <div
+                                className="h-full bg-primary transition-all duration-500"
+                                style={{
+                                    width: `${Math.min(occupancyPercentage, 100)}%`,
+                                }}
+                            />
+                        </div>
+                    </div>
+                    <div className="rounded-lg bg-primary/5 p-3 text-primary">
+                        <Users className="h-5 w-5" />
+                    </div>
+                </div>
+
+                {/* Card 3: Total Available Slots */}
+                <div className="flex items-start justify-between rounded-xl border border-outline-variant bg-white p-5 shadow-xs">
+                    <div>
+                        <p className="text-xs font-medium tracking-wider text-on-surface-variant/80 uppercase">
+                            Total Slots Active
+                        </p>
+                        <h3 className="mt-1.5 text-3xl font-bold text-on-surface">
+                            {totalSlotsDefined}
+                        </h3>
+                        <span className="mt-2 block font-mono text-[11px] text-on-surface-variant">
+                            Configured dynamically
+                        </span>
+                    </div>
+                    <div className="rounded-lg bg-indigo-50 p-3 text-indigo-700">
+                        <Clock className="h-5 w-5" />
+                    </div>
+                </div>
+
+                {/* Card 4: Holiday Overrides Active */}
+                <div className="flex items-start justify-between rounded-xl border border-outline-variant bg-white p-5 shadow-xs">
+                    <div>
+                        <p className="text-xs font-medium tracking-wider text-on-surface-variant/80 uppercase">
+                            Holiday Restrictions
+                        </p>
+                        <h3 className="mt-1.5 text-3xl font-bold text-on-surface">
+                            {holidays.length}
+                        </h3>
+                        <span className="mt-2 flex items-center gap-1 text-[11px] font-semibold text-amber-700">
+                            <AlertTriangle
+                                className="h-3.5 w-3.5"
+                                strokeWidth={2.5}
+                            />{' '}
+                            Prevents double book
+                        </span>
+                    </div>
+                    <div className="rounded-lg bg-amber-50 p-3 text-amber-700">
+                        <Calendar className="h-5 w-5" />
+                    </div>
+                </div>
+            </div>
+
+            {/* Bento Layout: Main content area */}
+            <div className="gap-gutter grid grid-cols-1 lg:grid-cols-12">
+                {/* Left Side: Weekly Traffic Graph & Quick schedule overview */}
+                <div className="space-y-6 lg:col-span-7">
+                    <div className="rounded-xl border border-outline-variant bg-white p-5 shadow-xs">
+                        <div className="mb-6 flex items-center justify-between">
+                            <div>
+                                <h4 className="text-base font-semibold text-on-surface">
+                                    Weekly Slot Load Distribution
+                                </h4>
+                                <p className="mt-0.5 text-xs text-on-surface-variant">
+                                    Capacity allocated by week day routinely
+                                </p>
+                            </div>
+                            <span className="rounded bg-primary/5 px-2 py-1 font-mono text-xs font-semibold text-primary">
+                                MON - FRI
+                            </span>
+                        </div>
+
+                        {/* SVG Interactive Chart */}
+                        <div className="flex h-44 items-end justify-between border-b border-outline-variant/30 px-2 pt-4">
+                            {weekDistribution.map((item, idx) => (
+                                <div
+                                    key={idx}
+                                    className="group flex flex-1 flex-col items-center"
+                                >
+                                    <div className="relative flex h-32 w-full max-w-[40px] items-end rounded-t-md bg-indigo-50 transition-all hover:bg-primary/15">
+                                        {/* Hover state pill */}
+                                        <div className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 rounded bg-on-surface px-1.5 py-0.5 font-mono text-[10px] whitespace-nowrap text-white opacity-0 shadow transition-opacity group-hover:opacity-100">
+                                            {item.count} slots
+                                        </div>
+                                        {/* Filled bar */}
+                                        <motion.div
+                                            initial={{ height: 0 }}
+                                            animate={{
+                                                height: `${item.percent}%`,
+                                            }}
+                                            transition={{
+                                                duration: 0.6,
+                                                delay: idx * 0.1,
+                                            }}
+                                            className="w-full rounded-t-md bg-primary transition-colors hover:bg-primary-container"
+                                        />
+                                    </div>
+                                    <span className="mt-2 text-xs font-medium text-on-surface-variant">
+                                        {item.day}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="mt-4 flex items-center justify-between gap-4 pt-1 text-xs text-on-surface-variant">
+                            <span>
+                                * Automated by time-slot allocation engine (30 /
+                                60 min increments)
+                            </span>
+                            <button
+                                onClick={() => setCurrentTab('Availability')}
+                                className="flex items-center gap-1 font-semibold text-primary hover:underline"
+                            >
+                                Go to settings{' '}
+                                <ArrowUpRight className="h-3 w-3" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right Side: Upcoming Bookings Chronological Timeline */}
+                <div className="lg:col-span-5">
+                    <div className="flex h-full flex-col justify-between rounded-xl border border-outline-variant bg-white p-5 shadow-xs">
+                        <div>
+                            <div className="mb-4 flex items-center justify-between">
+                                <h4 className="text-base font-semibold text-on-surface">
+                                    Next Upcoming Appointments
+                                </h4>
+                                <button
+                                    onClick={() => setCurrentTab('Bookings')}
+                                    className="text-xs font-semibold text-primary hover:underline"
+                                >
+                                    View All
+                                </button>
+                            </div>
+
+                            {sortedUpcoming.length === 0 ? (
+                                <div className="flex h-48 flex-col items-center justify-center rounded-lg border border-dashed border-outline-variant p-4 text-center">
+                                    <Calendar className="mb-2 h-8 w-8 text-on-surface-variant/40" />
+                                    <p className="text-sm font-medium text-on-surface-variant">
+                                        No upcoming slots booked
+                                    </p>
+                                    <p className="mt-1 text-xs text-on-surface-variant/70">
+                                        Check settings or manually make a new
+                                        booking
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3.5">
+                                    {sortedUpcoming.map((booking) => (
+                                        <div
+                                            key={booking.id}
+                                            className="flex items-start justify-between rounded-lg border border-outline-variant/30 bg-surface-container-low p-3 transition-colors hover:border-primary/35"
+                                        >
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-2">
+                                                    <p className="text-xs font-semibold text-on-surface">
+                                                        {booking.clientName}
+                                                    </p>
+                                                    <span
+                                                        className={`rounded px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase ${
+                                                            booking.status ===
+                                                            'Confirmed'
+                                                                ? 'bg-emerald-50 text-emerald-700'
+                                                                : 'bg-amber-100 text-amber-800'
+                                                        }`}
+                                                    >
+                                                        {booking.status}
+                                                    </span>
+                                                </div>
+                                                <p className="line-clamp-1 text-[11px] text-on-surface-variant">
+                                                    {booking.serviceName}
+                                                </p>
+                                                <div className="mt-1 flex items-center gap-1 font-mono text-[11px] font-medium text-on-surface-variant/80">
+                                                    <Calendar className="h-3 w-3" />{' '}
+                                                    {booking.date}
+                                                    <span className="mx-1">
+                                                        •
+                                                    </span>
+                                                    <Clock className="h-3 w-3" />{' '}
+                                                    {booking.time}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="mt-5 border-t border-outline-variant/30 pt-3">
+                            <div className="flex items-center gap-3 rounded-lg border border-tertiary-container/40 bg-tertiary-container/30 p-3">
+                                <div className="h-2 w-2 animate-pulse rounded-full bg-primary" />
+                                <span className="text-xs font-semibold text-on-tertiary-container">
+                                    Next block out is Labor Day Holiday
+                                    overrides on Sep 2nd.
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }

@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
 import {
-    Calendar,
+    CalendarClock,
     CheckCircle2,
     ShieldCheck,
     Zap,
@@ -94,7 +94,7 @@ const Home = () => {
                         <div className="absolute top-1/2 right-0 hidden max-w-xs -translate-y-1/2 rounded-2xl border border-slate-200 bg-white p-6 shadow-xl md:block dark:border-slate-700 dark:bg-slate-900">
                             <div className="flex flex-col gap-3">
                                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-purple-100 text-purple-600 dark:bg-purple-500/10">
-                                    <Calendar className="h-6 w-6" />
+                                    <CalendarClock className="h-6 w-6" />
                                 </div>
 
                                 <h3 className="text-lg font-bold">Next Slot</h3>
@@ -108,7 +108,10 @@ const Home = () => {
                 </section>
 
                 {/* How It Works */}
-                <section id='how-it-works' className="bg-slate-100 py-24 dark:bg-slate-900">
+                <section
+                    id="how-it-works"
+                    className="bg-slate-100 py-24 dark:bg-slate-900"
+                >
                     <div className="mx-auto max-w-7xl px-6">
                         <div className="mb-16 text-center">
                             <h2 className="text-4xl font-bold">How it Works</h2>
@@ -144,10 +147,10 @@ const Home = () => {
                                     2
                                 </div>
 
-                                <Calendar className="mt-4 mb-6 h-10 w-10 text-purple-600" />
+                                <CalendarClock className="mt-4 mb-6 h-10 w-10 text-purple-600" />
 
                                 <h3 className="mb-3 text-xl font-bold">
-                                    Pick a Time
+                                    Pick a Date & Time
                                 </h3>
 
                                 <p className="text-slate-600 dark:text-slate-400">

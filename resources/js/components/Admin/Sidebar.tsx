@@ -3,7 +3,8 @@ import {
     LayoutDashboard,
     Calendar,
     BriefcaseBusiness,
-    Clock,
+    CalendarClock,
+    Users,
     Settings as SettingsIcon,
     ChevronDown,
     ChevronRight,
@@ -66,8 +67,14 @@ export default function Sidebar({ businessName, managerName }: SidebarProps) {
 
         {
             name: 'Availability',
-            icon: Clock,
+            icon: CalendarClock,
             route: 'admin.availability',
+        },
+
+        {
+            name: 'Users',
+            icon: Users,
+            route: 'admin.users',
         },
 
         {
@@ -97,13 +104,21 @@ export default function Sidebar({ businessName, managerName }: SidebarProps) {
 
     return (
         <aside className="fixed top-0 left-0 z-50 flex h-screen w-64 flex-col border-r border-purple-100 bg-purple-50/70 p-4 transition-colors dark:border-zinc-800 dark:bg-zinc-950">
-            <div className="mb-8 px-2 py-1">
-                <h2 className="text-xl font-bold tracking-tight text-purple-700 select-none dark:text-purple-400">
-                    {businessName}
-                </h2>
-                <p className="mt-0.5 text-xs font-medium tracking-wider text-purple-500/80 uppercase dark:text-zinc-400">
-                    {managerName}
-                </p>
+            {/* Brand Header */}
+            <div className="group mb-8 px-2 py-1">
+                <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-purple-700 text-xl font-bold text-white shadow-md transition-transform group-hover:rotate-12">
+                        S
+                    </div>
+                    <div>
+                        <h1 className="font-sans text-xl font-bold tracking-tight text-purple-700 select-none dark:text-purple-400">
+                            {businessName}
+                        </h1>
+                        <p className="text-[10px] leading-none font-semibold tracking-widest text-purple-500/80 uppercase dark:text-zinc-400">
+                            {managerName}
+                        </p>
+                    </div>
+                </div>
             </div>
 
             <nav className="flex-grow space-y-1">

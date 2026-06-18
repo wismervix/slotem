@@ -115,7 +115,18 @@
     --radius-xl: 0.5rem;
     --radius-2xl: 1rem;
     --radius-3xl: 1rem;
+    
+    
+    --animate-spin-slow: spin 3s linear infinite;
+
+
+
+    
+
+  /* --color-tertiary-container: #ffdfcb;
+  --color-on-tertiary-container: #713700; */
 }
+
 
 
 @layer base {
@@ -157,6 +168,8 @@
 body {
     font-family: var(--font-sans);
     background-color: #fef7ff;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* Scrollbar utilities */
@@ -182,6 +195,23 @@ body {
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
+  /* background: #7b7487; */
+  background: #630ed4;
+}
+
+
+/* Custom scrollbar utility */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-outline-variant);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #7b7487;
 }
 
@@ -200,3 +230,20 @@ body {
 .animate-fade-in {
     animation: fadeIn 0.2s ease-out forwards;
 }
+
+/* Active transitions */
+.animate-scale-up {
+  animation: scaleUp 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes scaleUp {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+

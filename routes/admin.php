@@ -17,11 +17,14 @@ Route::group(['prefix' => 'admin'], function () {
     Route::middleware('auth:admin')->group(function () {
         Route::controller(DashboardController::class)->group(function () {
             Route::get('/dashboard', 'index')->name('admin.dashboard');
-            Route::get('/availability', 'availability')->name('admin.availability');
-            Route::get('/settings', 'settings')->name('admin.settings');
-            Route::get('/profile')->name('admin.profile');
             Route::get('/services', 'services')->name('admin.services');
-            Route::get('/service/edit')->name('admin.services.edit');
+            Route::get('/availability', 'availability')->name('admin.availability');
+
+            Route::get('/users', 'users')->name('admin.users');
+            Route::get('/users/user-details/{id}', 'userDetails')->name('admin.users.details');
+            
+            Route::get('/profile')->name('admin.profile');
+            Route::get('/settings', 'settings')->name('admin.settings');
         });
         Route::controller(BookingController::class)->group(function () {
             Route::get('/bookings', 'index')->name('admin.bookings');
