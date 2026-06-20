@@ -28,6 +28,17 @@ export const INITIAL_ADMIN_PROFILE: AdminProfile = {
     currency: 'USD',
 };
 
+export const WEBSITE_SETTINGS: WebsiteSettings = {
+    name: 'Slotem',
+    managerName: 'Admin  Manager',
+    email: 'manager@slotem.com',
+    phone: '+1 (555) 124-7890',
+    role: 'System Administrator',
+    websiteUrl: 'https://slotem.design',
+    logoUrl:
+        'https://lh3.googleusercontent.com/aida-public/AB6AXuC1rP8O-hKV-IMgURs4PoVY9K0CmDPbRU41joJp_l23yeKaWxXAbDePLHsiw-qTEcFI2YGm54EU5vl5sy4NKq7f39BDoyFTzRK5wIi9dUXP7sf4DeOX2rHqSJMlUATco37WzvAh_JYt1tnHqChw1yCFGEM4OSbKOIh83qpmJOuMvVCmw95xjFVIKnHqw6aynPwW-3W0Neg4OTRPYVoHD98-LfPWfY6xQLdESm_9IXZYRuG4DpiprU2_5Ck0ajhO_ow3eJ3iYQI_5-U',
+};
+
 export const INITIAL_SERVICES: ServiceTwo[] = [
     {
         id: 's1',
@@ -124,17 +135,6 @@ export const INITIAL_SERVICES: ServiceTwo[] = [
         createdAt: 'Jul 22, 2024',
     },
 ];
-
-export const WEBSITE_SETTINGS: WebsiteSettings = {
-    name: 'Slotem',
-    managerName: 'Admin  Manager',
-    email: 'manager@slotem.com',
-    phone: '+1 (555) 124-7890',
-    role: 'System Administrator',
-    websiteUrl: 'https://slotem.design',
-    logoUrl:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuC1rP8O-hKV-IMgURs4PoVY9K0CmDPbRU41joJp_l23yeKaWxXAbDePLHsiw-qTEcFI2YGm54EU5vl5sy4NKq7f39BDoyFTzRK5wIi9dUXP7sf4DeOX2rHqSJMlUATco37WzvAh_JYt1tnHqChw1yCFGEM4OSbKOIh83qpmJOuMvVCmw95xjFVIKnHqw6aynPwW-3W0Neg4OTRPYVoHD98-LfPWfY6xQLdESm_9IXZYRuG4DpiprU2_5Ck0ajhO_ow3eJ3iYQI_5-U',
-};
 
 export const INITIAL_BUSINESS_HOURS: BusinessHours[] = [
     {

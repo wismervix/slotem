@@ -24,36 +24,14 @@ export default function AdminLayout({ children }: Props) {
     const [searchQuery, setSearchQuery] = useState('');
 
     // Responsive sidebar toggle for smaller viewports
-    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+    const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-    const [adminProfile, setAdminProfile] = useState<AdminProfile>(() => {
-        return INITIAL_ADMIN_PROFILE;
-    });
-
-    // Floating notifications
-    const [toasts, setToasts] = useState<Toast[]>([]);
-
-    // Toast Helpers
-    const addToast = (
-        message: string,
-        type: 'success' | 'info' | 'error' = 'success',
-    ) => {
-        const id = Math.random().toString(36).substring(2, 9);
-        setToasts((prev) => [...prev, { id, message, type }]);
-        setTimeout(() => {
-            removeToast(id);
-        }, 4000);
-    };
-
-    const removeToast = (id: string) => {
-        setToasts((prev) => prev.filter((t) => t.id !== id));
-    };
-
-    const [websiteSettings, setWebsiteSettings] = useState<WebsiteSettings>(
-        () => {
-            return WEBSITE_SETTINGS;
-        },
+    const [adminProfile, setAdminProfile] = useState<AdminProfile>(
+        INITIAL_ADMIN_PROFILE,
     );
+
+    const [websiteSettings, setWebsiteSettings] =
+        useState<WebsiteSettings>(WEBSITE_SETTINGS);
 
     // Determine header search input placeholder adaptively
     const getSearchPlaceholder = () => {
@@ -70,20 +48,24 @@ export default function AdminLayout({ children }: Props) {
     };
 
     return (
-        <div className="min-h-screen bg-purple-50/20 font-sans text-zinc-800 transition-colors duration-250 dark:bg-zinc-950 dark:text-zinc-200">
+        <div className="flex min-h-screen bg-purple-50/20 font-sans text-zinc-800 antialiased transition-colors duration-250 dark:bg-zinc-950 dark:text-zinc-200">
             <Sidebar
                 businessName={websiteSettings.name}
                 managerName={websiteSettings.managerName}
+                mobileSidebarOpen={mobileSidebarOpen}
+                setMobileSidebarOpen={setMobileSidebarOpen}
             />
 
-            <main className="flex min-h-screen w-full flex-1 flex-col overflow-hidden pb-24 pl-64">
+            <main className="motion-safe:animate-in motion-safe:fade-in flex min-h-screen w-full flex-1 flex-col overflow-hidden pb-24 duration-500">
                 {/* Top Header Bar */}
                 <header className="z-10 flex h-16 shrink-0 items-center justify-between border-b border-outline-variant bg-surface px-6 select-none dark:border-slate-700 dark:bg-zinc-950">
                     {/* Logo toggle on mobile */}
                     <div className="flex items-center gap-2">
                         <button
-                            onClick={() => setIsMobileSidebarOpen(true)}
-                            className="cursor-pointer rounded-lg p-2 text-on-surface-variant hover:bg-surface-container md:hidden dark:text-slate-400 dark:hover:bg-slate-800"
+                            onClick={() =>
+                                setMobileSidebarOpen(!mobileSidebarOpen)
+                            }
+                            className="cursor-pointer rounded-lg p-2 text-on-surface-variant hover:bg-surface-container lg:hidden dark:text-slate-400 dark:hover:bg-slate-800"
                         >
                             <Menu size={20} />
                         </button>

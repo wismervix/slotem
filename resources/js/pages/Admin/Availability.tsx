@@ -443,12 +443,12 @@ export default function AdminAvailability() {
     return (
         <AdminLayout>
             {/* Header banner action row */}
-            <div className="flex flex-col justify-between gap-4 border-b border-outline-variant/15 pb-5 sm:flex-row sm:items-end">
+            <div className="flex flex-col justify-between gap-4 border-b border-outline-variant/15 pb-5 sm:flex-row sm:items-end dark:border-slate-700/50">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-on-surface">
+                    <h1 className="text-2xl font-bold tracking-tight text-on-surface dark:text-white">
                         Availability Management
                     </h1>
-                    <p className="mt-1 text-xs text-on-surface-variant">
+                    <p className="mt-1 text-xs text-on-surface-variant dark:text-slate-400">
                         Configure active booking rules, weekly schedule
                         routines, overrides and time slot generating
                         constraints.
@@ -459,7 +459,7 @@ export default function AdminAvailability() {
                 <div className="flex items-center gap-2 self-start sm:self-auto">
                     <button
                         onClick={handleExportRules}
-                        className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-outline bg-white px-4 py-2 text-xs font-semibold text-on-surface transition-colors hover:bg-surface-container-low"
+                        className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-outline bg-surface px-4 py-2 text-xs font-semibold text-on-surface transition-colors hover:bg-surface-container dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800"
                     >
                         <Download className="h-3.5 w-3.5" /> Export Rules
                     </button>
@@ -467,7 +467,7 @@ export default function AdminAvailability() {
                     <button
                         onClick={handleSaveAllChanges}
                         disabled={isSavingAll}
-                        className="flex min-w-[124px] cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-bold text-on-primary shadow-sm transition-all hover:bg-primary-container active:scale-95 disabled:bg-primary/75"
+                        className="flex min-w-[124px] cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-bold text-on-primary shadow-sm transition-all hover:bg-primary-container active:scale-95 disabled:bg-primary/75 dark:bg-purple-600 dark:hover:bg-purple-700 dark:disabled:bg-purple-600/75"
                     >
                         {isSavingAll ? (
                             <>
@@ -483,19 +483,19 @@ export default function AdminAvailability() {
 
             <div id="availability-management-view" className="space-y-gutter">
                 {/* Grid: Bento Left & Right */}
-                <div className="gap-gutter grid grid-cols-1 items-start lg:grid-cols-12">
+                <div className="gap-gutter mb-8 grid grid-cols-1 items-start gap-3 lg:grid-cols-12">
                     {/* LEFT COLUMN: Setup panels */}
                     <div className="col-span-12 space-y-6 lg:col-span-5">
                         {/* Bento Card 1: Weekly Schedule */}
-                        <section className="rounded-xl border border-outline-variant bg-white p-6 shadow-xs">
+                        <section className="rounded-xl border border-outline-variant bg-surface p-6 shadow-xs dark:border-slate-700 dark:bg-slate-900">
                             <div className="mb-5 flex items-center justify-between">
-                                <h3 className="flex items-center gap-2 text-base font-semibold text-on-surface">
-                                    <Clock className="h-5 w-5 text-primary" />
+                                <h3 className="flex items-center gap-2 text-base font-semibold text-on-surface dark:text-white">
+                                    <Clock className="h-5 w-5 text-primary dark:text-purple-400" />
                                     Weekly Schedule
                                 </h3>
                                 <button
                                     onClick={handleCopyToAll}
-                                    className="cursor-pointer text-xs font-semibold text-primary hover:underline"
+                                    className="cursor-pointer text-xs font-semibold text-primary transition-colors hover:underline dark:text-purple-400"
                                 >
                                     Copy to all
                                 </button>
@@ -503,16 +503,16 @@ export default function AdminAvailability() {
 
                             <div className="space-y-4">
                                 {/* Daily Hours Block */}
-                                <div className="flex items-center justify-between rounded-xl border border-outline-variant/30 bg-surface-container-low p-3.5">
-                                    <span className="w-16 font-mono text-xs font-bold tracking-wider text-on-surface-variant">
+                                <div className="flex items-center justify-between rounded-xl border border-outline-variant/30 bg-surface-container-low p-3.5 dark:border-slate-700 dark:bg-slate-800/50">
+                                    <span className="w-16 font-mono text-xs font-bold tracking-wider text-on-surface-variant dark:text-slate-500">
                                         MON-FRI
                                     </span>
                                     <div className="flex flex-1 items-center justify-center gap-2">
-                                        <span className="rounded-lg bg-surface-container-highest px-2.5 py-1.5 font-mono text-xs font-semibold text-on-surface">
+                                        <span className="rounded-lg bg-surface-container-highest px-2.5 py-1.5 font-mono text-xs font-semibold text-on-surface dark:bg-slate-700 dark:text-white">
                                             {weeklySchedule.monToFriStart}
                                         </span>
-                                        <ArrowRight className="h-4 w-4 text-on-surface-variant/70" />
-                                        <span className="rounded-lg bg-surface-container-highest px-2.5 py-1.5 font-mono text-xs font-semibold text-on-surface">
+                                        <ArrowRight className="h-4 w-4 text-on-surface-variant/70 dark:text-slate-600" />
+                                        <span className="rounded-lg bg-surface-container-highest px-2.5 py-1.5 font-mono text-xs font-semibold text-on-surface dark:bg-slate-700 dark:text-white">
                                             {weeklySchedule.monToFriEnd}
                                         </span>
                                     </div>
@@ -526,15 +526,15 @@ export default function AdminAvailability() {
                                             );
                                             setIsEditingWeeklyTime(true);
                                         }}
-                                        className="cursor-pointer rounded-lg p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container"
+                                        className="cursor-pointer rounded-lg p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container dark:text-slate-600 dark:hover:bg-slate-800"
                                     >
                                         <Edit2 className="h-4 w-4" />
                                     </button>
                                 </div>
 
                                 {/* Saturday Toggle Row */}
-                                <div className="flex items-center justify-between border-t border-outline-variant/20 py-1 pt-3">
-                                    <span className="font-mono text-xs font-bold tracking-wide text-on-surface-variant">
+                                <div className="flex items-center justify-between border-t border-outline-variant/20 py-1 pt-3 dark:border-slate-700/50">
+                                    <span className="font-mono text-xs font-bold tracking-wide text-on-surface-variant dark:text-slate-500">
                                         SATURDAY
                                     </span>
                                     <label className="relative inline-flex cursor-pointer items-center">
@@ -552,13 +552,13 @@ export default function AdminAvailability() {
                                             }
                                             className="peer sr-only"
                                         />
-                                        <div className="peer h-6 w-11 rounded-full bg-outline-variant/65 peer-checked:bg-primary after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full" />
+                                        <div className="peer h-6 w-11 rounded-full bg-outline-variant/65 peer-checked:bg-primary after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full dark:bg-slate-700 dark:peer-checked:bg-purple-600 dark:after:border-slate-600" />
                                     </label>
                                 </div>
 
                                 {/* Sunday Toggle Row */}
                                 <div className="flex items-center justify-between py-1">
-                                    <span className="font-mono text-xs font-bold tracking-wide text-on-surface-variant">
+                                    <span className="font-mono text-xs font-bold tracking-wide text-on-surface-variant dark:text-slate-500">
                                         SUNDAY
                                     </span>
                                     <label className="relative inline-flex cursor-pointer items-center">
@@ -576,17 +576,17 @@ export default function AdminAvailability() {
                                             }
                                             className="peer sr-only"
                                         />
-                                        <div className="peer h-6 w-11 rounded-full bg-outline-variant/65 peer-checked:bg-primary after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full" />
+                                        <div className="peer h-6 w-11 rounded-full bg-outline-variant/65 peer-checked:bg-primary after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full dark:bg-slate-700 dark:peer-checked:bg-purple-600 dark:after:border-slate-600" />
                                     </label>
                                 </div>
                             </div>
 
                             {/* Time Slot Generation Split Tabs */}
-                            <div className="mt-6 border-t border-outline-variant/40 pt-5">
-                                <p className="mb-2.5 text-[10px] font-bold tracking-widest text-on-surface-variant/80 uppercase">
+                            <div className="mt-6 border-t border-outline-variant/40 pt-5 dark:border-slate-700/50">
+                                <p className="mb-2.5 text-[10px] font-bold tracking-widest text-on-surface-variant/80 uppercase dark:text-slate-500">
                                     Time Slot Generation
                                 </p>
-                                <div className="flex rounded-lg bg-surface-container p-1">
+                                <div className="flex rounded-lg bg-surface-container p-1 dark:bg-slate-800">
                                     <button
                                         onClick={() =>
                                             setWeeklySchedule({
@@ -597,8 +597,8 @@ export default function AdminAvailability() {
                                         className={`flex-1 cursor-pointer rounded-md py-2 text-xs font-semibold transition-all ${
                                             weeklySchedule.timeSlotMinutes ===
                                             30
-                                                ? 'bg-white text-primary shadow-xs'
-                                                : 'text-on-surface-variant hover:text-on-surface'
+                                                ? 'bg-surface text-primary shadow-xs dark:bg-slate-700 dark:text-purple-400'
+                                                : 'text-on-surface-variant hover:text-on-surface dark:text-slate-500 dark:hover:text-slate-300'
                                         }`}
                                     >
                                         30 min slots
@@ -613,8 +613,8 @@ export default function AdminAvailability() {
                                         className={`flex-1 cursor-pointer rounded-md py-2 text-xs font-semibold transition-all ${
                                             weeklySchedule.timeSlotMinutes ===
                                             60
-                                                ? 'bg-primary text-on-primary shadow-xs'
-                                                : 'text-on-surface-variant hover:text-on-surface'
+                                                ? 'bg-primary text-on-primary shadow-xs dark:bg-purple-600'
+                                                : 'text-on-surface-variant hover:text-on-surface dark:text-slate-500 dark:hover:text-slate-300'
                                         }`}
                                     >
                                         60 min slots
@@ -624,14 +624,14 @@ export default function AdminAvailability() {
                         </section>
 
                         {/* Bento Card 2: Availability Range Window */}
-                        <section className="rounded-xl border border-outline-variant bg-white p-6 shadow-xs">
-                            <h3 className="mb-4 flex items-center gap-2 text-base font-semibold text-on-surface">
-                                <CalendarDays className="h-5 w-5 text-primary" />
+                        <section className="rounded-xl border border-outline-variant bg-surface p-6 shadow-xs dark:border-slate-700 dark:bg-slate-900">
+                            <h3 className="mb-4 flex items-center gap-2 text-base font-semibold text-on-surface dark:text-white">
+                                <CalendarDays className="h-5 w-5 text-primary dark:text-purple-400" />
                                 Availability Range
                             </h3>
                             <div className="space-y-4">
                                 <div>
-                                    <label className="mb-1.5 block text-xs font-semibold text-on-surface-variant">
+                                    <label className="mb-1.5 block text-xs font-semibold text-on-surface-variant dark:text-slate-400">
                                         Booking Window
                                     </label>
                                     <select
@@ -641,7 +641,7 @@ export default function AdminAvailability() {
                                                 e.target.value as BookingWindow,
                                             )
                                         }
-                                        className="w-full cursor-pointer rounded-lg border border-outline-variant bg-white p-2.5 text-xs font-semibold focus:border-primary focus:ring-1 focus:ring-primary"
+                                        className="w-full cursor-pointer rounded-lg border border-outline-variant bg-surface p-2.5 text-xs font-semibold focus:border-primary focus:ring-1 focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
                                     >
                                         <option value="Next 30 Days">
                                             Next 30 Days
@@ -656,13 +656,13 @@ export default function AdminAvailability() {
                                 </div>
 
                                 {/* Pro Tip Box */}
-                                <div className="flex items-start gap-2.5 rounded-xl border border-tertiary-container/55 bg-tertiary-container/30 p-3">
-                                    <HelpCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-tertiary" />
+                                <div className="flex items-start gap-2.5 rounded-xl border border-tertiary-container/55 bg-tertiary-container/30 p-3 dark:border-amber-950/40 dark:bg-amber-950/20">
+                                    <HelpCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-tertiary dark:text-amber-400" />
                                     <div className="space-y-0.5">
-                                        <p className="text-xs font-bold text-tertiary">
+                                        <p className="text-xs font-bold text-tertiary dark:text-amber-400">
                                             Pro Tip:
                                         </p>
-                                        <p className="text-[11px] leading-relaxed text-on-surface-variant">
+                                        <p className="text-[11px] leading-relaxed text-on-surface-variant dark:text-slate-400">
                                             A 90-day window increases slot
                                             booking conversion by 22% for most
                                             business advisory service types.
@@ -673,15 +673,15 @@ export default function AdminAvailability() {
                         </section>
 
                         {/* Bento Card 3: Holiday Overrides */}
-                        <section className="rounded-xl border border-outline-variant bg-white p-6 shadow-xs">
+                        <section className="rounded-xl border border-outline-variant bg-surface p-6 shadow-xs dark:border-slate-700 dark:bg-slate-900">
                             <div className="mb-4 flex items-center justify-between">
-                                <h3 className="flex items-center gap-2 text-base font-semibold text-on-surface">
-                                    <AlertTriangle className="h-4.5 w-4.5 text-primary" />
+                                <h3 className="flex items-center gap-2 text-base font-semibold text-on-surface dark:text-white">
+                                    <AlertTriangle className="h-4.5 w-4.5 text-primary dark:text-purple-400" />
                                     Holiday Overrides
                                 </h3>
                                 <button
                                     onClick={() => setIsAddingHoliday(true)}
-                                    className="flex cursor-pointer items-center gap-1 text-xs font-semibold text-primary transition-colors hover:text-primary"
+                                    className="flex cursor-pointer items-center gap-1 text-xs font-semibold text-primary transition-colors hover:text-primary dark:text-purple-400 dark:hover:text-purple-300"
                                 >
                                     <PlusCircle className="h-5 w-5" />
                                 </button>
@@ -689,20 +689,20 @@ export default function AdminAvailability() {
 
                             <div className="custom-scrollbar max-h-[220px] space-y-2.5 overflow-y-auto pr-1">
                                 {holidays.length === 0 ? (
-                                    <p className="py-4 text-center text-xs text-on-surface-variant/75 italic">
+                                    <p className="py-4 text-center text-xs text-on-surface-variant/75 italic dark:text-slate-500">
                                         No overrides set
                                     </p>
                                 ) : (
                                     holidays.map((override) => (
                                         <div
                                             key={override.id}
-                                            className="flex items-center justify-between rounded-xl border border-outline-variant/15 bg-surface-container-low p-3 transition-colors hover:bg-surface-container"
+                                            className="flex items-center justify-between rounded-xl border border-outline-variant/15 bg-surface-container-low p-3 transition-colors hover:bg-surface-container dark:border-slate-700/50 dark:bg-slate-800/50 dark:hover:bg-slate-800"
                                         >
                                             <div>
-                                                <p className="text-xs font-semibold text-on-surface">
+                                                <p className="text-xs font-semibold text-on-surface dark:text-white">
                                                     {override.name}
                                                 </p>
-                                                <p className="mt-0.5 font-mono text-[10px] text-on-surface-variant/85">
+                                                <p className="mt-0.5 font-mono text-[10px] text-on-surface-variant/85 dark:text-slate-500">
                                                     {override.startDate}{' '}
                                                     {override.endDate !==
                                                         override.startDate &&
@@ -714,8 +714,8 @@ export default function AdminAvailability() {
                                                     className={`rounded-md px-2 py-0.5 text-[8px] font-bold tracking-wide uppercase ${
                                                         override.type ===
                                                         'Blocked'
-                                                            ? 'border border-red-200 bg-error-container font-mono text-on-error-container'
-                                                            : 'text-orange-850 border border-orange-200 bg-orange-100 font-mono'
+                                                            ? 'border border-red-200 bg-error-container font-mono text-on-error-container dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400'
+                                                            : 'text-orange-850 border border-orange-200 bg-orange-100 font-mono dark:border-orange-900/40 dark:bg-orange-950/30 dark:text-orange-400'
                                                     }`}
                                                 >
                                                     {override.type}
@@ -729,7 +729,7 @@ export default function AdminAvailability() {
                                                             `Override "${override.name}" removed.`,
                                                         );
                                                     }}
-                                                    className="hover:text-red-650 cursor-pointer rounded p-1 text-on-surface-variant transition-colors hover:bg-white/40"
+                                                    className="hover:text-red-650 cursor-pointer rounded p-1 text-on-surface-variant transition-colors hover:bg-white/40 dark:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-red-400"
                                                 >
                                                     <Trash2 className="h-3.5 w-3.5" />
                                                 </button>
@@ -743,25 +743,25 @@ export default function AdminAvailability() {
 
                     {/* RIGHT COLUMN: Calendar Panel Canvas */}
                     <div className="col-span-12 lg:col-span-7">
-                        <div className="flex flex-col justify-between overflow-hidden rounded-xl border border-outline-variant bg-white shadow-xs">
+                        <div className="flex flex-col justify-between overflow-hidden rounded-xl border border-outline-variant bg-surface shadow-xs dark:border-slate-700 dark:bg-slate-900">
                             {/* Calendar UI Header bar */}
-                            <div className="flex items-center justify-between border-b border-outline-variant bg-surface-container-lowest p-5">
+                            <div className="flex items-center justify-between border-b border-outline-variant bg-surface-container-lowest p-5 dark:border-slate-700 dark:bg-slate-800">
                                 <div className="flex items-center gap-3">
-                                    <h2 className="text-lg font-bold text-on-surface">
+                                    <h2 className="text-lg font-bold text-on-surface dark:text-white">
                                         {monthNames[currentMonth]} {currentYear}
                                     </h2>
-                                    <div className="flex gap-0.5 rounded-md bg-surface-container p-1">
+                                    <div className="flex gap-0.5 rounded-md bg-surface-container p-1 dark:bg-slate-700">
                                         <button
                                             onClick={handlePrevMonth}
-                                            className="cursor-pointer rounded p-1 transition-all hover:bg-white active:scale-90"
+                                            className="cursor-pointer rounded p-1 transition-all hover:bg-white active:scale-90 dark:hover:bg-slate-600"
                                         >
-                                            <ChevronLeft className="h-4 w-4 text-on-surface-variant" />
+                                            <ChevronLeft className="h-4 w-4 text-on-surface-variant dark:text-slate-500" />
                                         </button>
                                         <button
                                             onClick={handleNextMonth}
-                                            className="cursor-pointer rounded p-1 transition-all hover:bg-white active:scale-90"
+                                            className="cursor-pointer rounded p-1 transition-all hover:bg-white active:scale-90 dark:hover:bg-slate-600"
                                         >
-                                            <ChevronRight className="h-4 w-4 text-on-surface-variant" />
+                                            <ChevronRight className="h-4 w-4 text-on-surface-variant dark:text-slate-500" />
                                         </button>
                                     </div>
                                 </div>
@@ -769,14 +769,14 @@ export default function AdminAvailability() {
                                 {/* Status color indicators */}
                                 <div className="flex items-center gap-4">
                                     <div className="flex items-center gap-1.5">
-                                        <span className="h-2.5 w-2.5 rounded-full bg-primary" />
-                                        <span className="text-[11px] font-medium text-on-surface-variant">
+                                        <span className="h-2.5 w-2.5 rounded-full bg-primary dark:bg-purple-500" />
+                                        <span className="text-[11px] font-medium text-on-surface-variant dark:text-slate-500">
                                             Available
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-1.5">
-                                        <span className="h-2.5 w-2.5 rounded-full bg-outline-variant" />
-                                        <span className="text-[11px] font-medium text-on-surface-variant">
+                                        <span className="h-2.5 w-2.5 rounded-full bg-outline-variant dark:bg-slate-700" />
+                                        <span className="text-[11px] font-medium text-on-surface-variant dark:text-slate-500">
                                             Blocked
                                         </span>
                                     </div>
@@ -784,33 +784,33 @@ export default function AdminAvailability() {
                             </div>
 
                             {/* Calendar Grid container */}
-                            <div className="bg-white p-4">
-                                <div className="grid grid-cols-7 border-b border-l border-outline-variant/30 bg-surface-container-low/20 text-center text-[10px] font-bold text-on-surface-variant">
-                                    <div className="border-t border-r border-outline-variant/30 py-2.5">
+                            <div className="bg-surface p-4 dark:bg-slate-900">
+                                <div className="grid grid-cols-7 border-b border-l border-outline-variant/30 bg-surface-container-low/20 text-center text-[10px] font-bold text-on-surface-variant dark:border-slate-700 dark:bg-slate-800/30 dark:text-slate-500">
+                                    <div className="border-t border-r border-outline-variant/30 py-2.5 dark:border-slate-700">
                                         SUN
                                     </div>
-                                    <div className="border-t border-r border-outline-variant/30 py-2.5">
+                                    <div className="border-t border-r border-outline-variant/30 py-2.5 dark:border-slate-700">
                                         MON
                                     </div>
-                                    <div className="border-t border-r border-outline-variant/30 py-2.5">
+                                    <div className="border-t border-r border-outline-variant/30 py-2.5 dark:border-slate-700">
                                         TUE
                                     </div>
-                                    <div className="border-t border-r border-outline-variant/30 py-2.5">
+                                    <div className="border-t border-r border-outline-variant/30 py-2.5 dark:border-slate-700">
                                         WED
                                     </div>
-                                    <div className="border-t border-r border-outline-variant/30 py-2.5">
+                                    <div className="border-t border-r border-outline-variant/30 py-2.5 dark:border-slate-700">
                                         THU
                                     </div>
-                                    <div className="border-t border-r border-outline-variant/30 py-2.5">
+                                    <div className="border-t border-r border-outline-variant/30 py-2.5 dark:border-slate-700">
                                         FRI
                                     </div>
-                                    <div className="border-t border-r border-outline-variant/30 py-2.5">
+                                    <div className="border-t border-r border-outline-variant/30 py-2.5 dark:border-slate-700">
                                         SAT
                                     </div>
                                 </div>
 
                                 {/* Generated Calendar Dates */}
-                                <div className="grid grid-cols-7 border-l border-outline-variant/20">
+                                <div className="grid grid-cols-7 border-l border-outline-variant/20 dark:border-slate-700">
                                     {calendarDays.map((day, ix) => {
                                         const dayDetails = getDayDetails(
                                             day.dateString,
@@ -828,27 +828,27 @@ export default function AdminAvailability() {
                                                         day.dateString,
                                                     )
                                                 }
-                                                className={`relative flex min-h-[92px] cursor-pointer flex-col justify-between border-t border-r border-outline-variant/30 p-2 transition-all select-none ${
+                                                className={`relative flex min-h-[92px] cursor-pointer flex-col justify-between border-t border-r border-outline-variant/30 p-2 transition-all select-none dark:border-slate-700 ${
                                                     !day.isCurrentMonth
-                                                        ? 'bg-gray-50/40 text-on-surface-variant/80 opacity-30'
-                                                        : 'bg-white'
+                                                        ? 'bg-gray-50/40 text-on-surface-variant/80 opacity-30 dark:bg-slate-800/30'
+                                                        : 'bg-surface dark:bg-slate-900'
                                                 } ${
                                                     dayDetails.holiday
-                                                        ? 'bg-red-50/15'
+                                                        ? 'bg-red-50/15 dark:bg-red-950/20'
                                                         : ''
                                                 } ${
                                                     isSelected
-                                                        ? 'bg-primary/5 ring-2 ring-primary ring-inset'
-                                                        : 'hover:bg-primary/5'
+                                                        ? 'bg-primary/5 ring-2 ring-primary ring-inset dark:bg-purple-950/20 dark:ring-purple-500'
+                                                        : 'hover:bg-primary/5 dark:hover:bg-purple-950/10'
                                                 }`}
                                             >
                                                 {/* Day Number Label */}
                                                 <span
                                                     className={`self-start font-mono text-xs font-bold ${
                                                         isSelected
-                                                            ? 'text-primary'
-                                                            : 'text-on-surface'
-                                                    } ${isToday ? 'text-primary' : ''}`}
+                                                            ? 'text-primary dark:text-purple-400'
+                                                            : 'text-on-surface dark:text-white'
+                                                    } ${isToday ? 'text-primary dark:text-purple-400' : ''}`}
                                                 >
                                                     {day.dayNum}
                                                 </span>
@@ -857,8 +857,8 @@ export default function AdminAvailability() {
                                                 <div className="space-y-1">
                                                     {dayDetails.holiday ? (
                                                         <div className="space-y-0.5">
-                                                            <div className="h-1 w-full rounded-full bg-error" />
-                                                            <p className="font-sans text-[9px] leading-none font-medium text-error">
+                                                            <div className="h-1 w-full rounded-full bg-error dark:bg-red-500" />
+                                                            <p className="font-sans text-[9px] leading-none font-medium text-error dark:text-red-400">
                                                                 {
                                                                     dayDetails.holiday.name.split(
                                                                         ' ',
@@ -869,8 +869,8 @@ export default function AdminAvailability() {
                                                     ) : dayDetails.slotsCount >
                                                       0 ? (
                                                         <div className="space-y-0.5">
-                                                            <div className="h-1 w-full animate-pulse rounded-full bg-primary" />
-                                                            <p className="font-sans text-[10px] leading-none font-semibold text-primary">
+                                                            <div className="h-1 w-full animate-pulse rounded-full bg-primary dark:bg-purple-500" />
+                                                            <p className="font-sans text-[10px] leading-none font-semibold text-primary dark:text-purple-400">
                                                                 {
                                                                     dayDetails.slotsCount
                                                                 }{' '}
@@ -888,7 +888,7 @@ export default function AdminAvailability() {
                                                     )}
 
                                                     {isToday && (
-                                                        <span className="absolute top-1 right-1.5 rounded bg-primary px-1 py-0.5 text-[7px] font-bold text-on-primary uppercase">
+                                                        <span className="absolute top-1 right-1.5 rounded bg-primary px-1 py-0.5 text-[7px] font-bold text-on-primary uppercase dark:bg-purple-600">
                                                             Today
                                                         </span>
                                                     )}
@@ -900,9 +900,9 @@ export default function AdminAvailability() {
                             </div>
 
                             {/* Dynamic slot controller panel */}
-                            <div className="rounded-b-xl border-t border-outline-variant bg-surface-container-low p-4">
+                            <div className="rounded-b-xl border-t border-outline-variant bg-surface-container-low p-4 dark:border-slate-700 dark:bg-slate-800/50">
                                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                    <p className="flex items-center gap-1 text-xs font-bold text-primary">
+                                    <p className="flex items-center gap-1 text-xs font-bold text-primary dark:text-purple-400">
                                         Selected Day: {selectedDayLabel}
                                     </p>
 
@@ -914,14 +914,14 @@ export default function AdminAvailability() {
                                                 .map((slot, ix) => (
                                                     <div
                                                         key={ix}
-                                                        className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-primary-container text-[8px] font-bold tracking-tighter text-on-primary-container"
+                                                        className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-surface bg-primary-container text-[8px] font-bold tracking-tighter text-on-primary-container dark:border-slate-900 dark:bg-purple-950/50 dark:text-purple-300"
                                                     >
                                                         {slot.split(' ')[0]}
                                                     </div>
                                                 ))}
                                             {selectedDayDetails.slotsCount >
                                                 3 && (
-                                                <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-surface-container-highest font-mono text-[9px] font-bold text-on-surface-variant">
+                                                <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-surface bg-surface-container-highest font-mono text-[9px] font-bold text-on-surface-variant dark:border-slate-900 dark:bg-slate-700 dark:text-slate-500">
                                                     +
                                                     {selectedDayDetails.slotsCount -
                                                         3}
@@ -929,7 +929,7 @@ export default function AdminAvailability() {
                                             )}
                                             {selectedDayDetails.slotsCount ===
                                                 0 && (
-                                                <span className="px-2 text-[11px] text-on-surface-variant/70 italic">
+                                                <span className="px-2 text-[11px] text-on-surface-variant/70 italic dark:text-slate-500">
                                                     No active slots custom
                                                     configured
                                                 </span>
@@ -940,7 +940,7 @@ export default function AdminAvailability() {
                                             onClick={() =>
                                                 setIsManagingSlots(true)
                                             }
-                                            className="cursor-pointer rounded-lg border border-outline bg-white px-3.5 py-1.5 text-xs font-semibold text-on-surface transition-colors hover:bg-surface-container"
+                                            className="cursor-pointer rounded-lg border border-outline bg-surface px-3.5 py-1.5 text-xs font-semibold text-on-surface transition-colors hover:bg-surface-container dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
                                         >
                                             Manage Slots
                                         </button>
@@ -952,16 +952,16 @@ export default function AdminAvailability() {
                 </div>
 
                 {/* Bulk Availability Generator Fixed Box (matches screenshot mock bottom bar) */}
-                <div className="flex flex-col gap-4 rounded-xl border border-neutral-800 bg-neutral-900 p-5 text-white shadow-lg md:flex-row md:items-center md:justify-between">
+                <div className="flex flex-col gap-4 rounded-xl border border-neutral-800 bg-neutral-900 p-5 text-white shadow-lg md:flex-row md:items-center md:justify-between dark:border-slate-800 dark:bg-slate-950">
                     <div className="flex items-start gap-3.5">
-                        <div className="flex-shrink-0 rounded-xl bg-[#d2bbff]/15 p-2.5 text-[#d2bbff]">
+                        <div className="flex-shrink-0 rounded-xl bg-[#d2bbff]/15 p-2.5 text-[#d2bbff] dark:bg-purple-950/40 dark:text-purple-300">
                             <Sparkles className="h-5 w-5" />
                         </div>
                         <div>
                             <h4 className="text-sm font-bold tracking-wide">
                                 Bulk Availability Generator
                             </h4>
-                            <p className="mt-0.5 text-xs text-neutral-300">
+                            <p className="mt-0.5 text-xs text-neutral-300 dark:text-slate-400">
                                 Automatically generate hourly slots for the next
                                 90 days following your active parameters.
                             </p>
@@ -969,8 +969,8 @@ export default function AdminAvailability() {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-4">
-                        <div className="flex items-center gap-2 border-r border-neutral-800 pr-4">
-                            <span className="text-xs font-semibold tracking-wider text-neutral-400 uppercase">
+                        <div className="flex items-center gap-2 border-r border-neutral-800 pr-4 dark:border-slate-800">
+                            <span className="text-xs font-semibold tracking-wider text-neutral-400 uppercase dark:text-slate-500">
                                 Buffer:
                             </span>
                             <select
@@ -978,7 +978,7 @@ export default function AdminAvailability() {
                                 onChange={(e) =>
                                     setBufferOption(e.target.value)
                                 }
-                                className="cursor-pointer rounded-lg border border-neutral-700 bg-neutral-800 px-2.5 py-1 text-xs font-semibold text-white focus:border-indigo-400 focus:ring-0"
+                                className="cursor-pointer rounded-lg border border-neutral-700 bg-neutral-800 px-2.5 py-1 text-xs font-semibold text-white focus:border-indigo-400 focus:ring-0 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                             >
                                 <option value="15 mins">15 mins</option>
                                 <option value="30 mins">30 mins</option>
@@ -987,7 +987,7 @@ export default function AdminAvailability() {
                         </div>
                         <button
                             onClick={handleRunBatchGenerator}
-                            className="cursor-pointer rounded-lg bg-primary px-6 py-2.5 text-xs font-bold text-white shadow-md transition-all hover:bg-primary-container active:scale-95"
+                            className="cursor-pointer rounded-lg bg-primary px-6 py-2.5 text-xs font-bold text-white shadow-md transition-all hover:bg-primary-container active:scale-95 dark:bg-purple-600 dark:hover:bg-purple-700"
                         >
                             Run Batch Generator
                         </button>
@@ -996,15 +996,15 @@ export default function AdminAvailability() {
 
                 {/* MODAL 1: Add Holiday Override */}
                 {isAddingHoliday && (
-                    <div className="fixed inset-0 z-55 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
-                        <div className="w-full max-w-md space-y-4 rounded-xl border border-outline-variant bg-white p-6 shadow-2xl">
-                            <div className="flex items-center justify-between border-b border-outline-variant/40 pb-2">
-                                <h4 className="font-bold text-on-surface">
+                    <div className="fixed inset-0 z-55 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs dark:bg-black/70">
+                        <div className="w-full max-w-md space-y-4 rounded-xl border border-outline-variant bg-surface p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+                            <div className="flex items-center justify-between border-b border-outline-variant/40 pb-2 dark:border-slate-700/50">
+                                <h4 className="font-bold text-on-surface dark:text-white">
                                     Add Holiday Override
                                 </h4>
                                 <button
                                     onClick={() => setIsAddingHoliday(false)}
-                                    className="cursor-pointer rounded-lg p-1 text-on-surface-variant hover:text-on-surface"
+                                    className="cursor-pointer rounded-lg p-1 text-on-surface-variant transition-colors hover:text-on-surface dark:text-slate-500 dark:hover:text-slate-300"
                                 >
                                     <X className="h-5 w-5" />
                                 </button>
@@ -1015,7 +1015,7 @@ export default function AdminAvailability() {
                                 className="space-y-4"
                             >
                                 <div>
-                                    <label className="mb-1 block text-xs font-bold tracking-wider text-on-surface-variant uppercase">
+                                    <label className="mb-1 block text-xs font-bold tracking-wider text-on-surface-variant uppercase dark:text-slate-400">
                                         Override Label
                                     </label>
                                     <input
@@ -1026,13 +1026,13 @@ export default function AdminAvailability() {
                                         }
                                         placeholder="e.g. Christmas Eve"
                                         required
-                                        className="w-full rounded-lg border border-outline-variant bg-white p-2.5 text-xs font-semibold focus:border-primary focus:ring-1 focus:ring-primary"
+                                        className="w-full rounded-lg border border-outline-variant bg-surface p-2.5 text-xs font-semibold focus:border-primary focus:ring-1 focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500 dark:focus:border-purple-500 dark:focus:ring-purple-500"
                                     />
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="mb-1 block text-xs font-bold tracking-wider text-on-surface-variant uppercase">
+                                        <label className="mb-1 block text-xs font-bold tracking-wider text-on-surface-variant uppercase dark:text-slate-400">
                                             Start Date
                                         </label>
                                         <input
@@ -1044,11 +1044,11 @@ export default function AdminAvailability() {
                                                 )
                                             }
                                             required
-                                            className="w-full rounded-lg border border-outline-variant p-2 font-mono text-xs focus:border-primary focus:ring-1"
+                                            className="w-full rounded-lg border border-outline-variant p-2 font-mono text-xs focus:border-primary focus:ring-1 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
                                         />
                                     </div>
                                     <div>
-                                        <label className="mb-1 block text-xs font-bold tracking-wider text-on-surface-variant uppercase">
+                                        <label className="mb-1 block text-xs font-bold tracking-wider text-on-surface-variant uppercase dark:text-slate-400">
                                             End Date
                                         </label>
                                         <input
@@ -1058,17 +1058,17 @@ export default function AdminAvailability() {
                                                 setNewHolidayEnd(e.target.value)
                                             }
                                             required
-                                            className="w-full rounded-lg border border-outline-variant p-2 font-mono text-xs focus:border-primary focus:ring-1"
+                                            className="w-full rounded-lg border border-outline-variant p-2 font-mono text-xs focus:border-primary focus:ring-1 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
                                         />
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label className="mb-1 block text-xs font-bold tracking-wider text-on-surface-variant uppercase">
+                                    <label className="mb-1 block text-xs font-bold tracking-wider text-on-surface-variant uppercase dark:text-slate-400">
                                         Status Action
                                     </label>
                                     <div className="mt-1 flex gap-2.5">
-                                        <label className="flex flex-1 cursor-pointer items-center gap-1.5 rounded-lg border border-outline-variant/30 bg-surface-container-low p-2">
+                                        <label className="flex flex-1 cursor-pointer items-center gap-1.5 rounded-lg border border-outline-variant/30 bg-surface-container-low p-2 dark:border-slate-700 dark:bg-slate-800">
                                             <input
                                                 type="radio"
                                                 name="holidayType"
@@ -1078,13 +1078,13 @@ export default function AdminAvailability() {
                                                 onChange={() =>
                                                     setNewHolidayType('Blocked')
                                                 }
-                                                className="text-primary focus:ring-0"
+                                                className="text-primary focus:ring-0 dark:text-purple-600"
                                             />
-                                            <span className="text-xs font-semibold text-on-surface">
+                                            <span className="text-xs font-semibold text-on-surface dark:text-white">
                                                 Blocked (No slots)
                                             </span>
                                         </label>
-                                        <label className="flex flex-1 cursor-pointer items-center gap-1.5 rounded-lg border border-outline-variant/30 bg-surface-container-low p-2">
+                                        <label className="flex flex-1 cursor-pointer items-center gap-1.5 rounded-lg border border-outline-variant/30 bg-surface-container-low p-2 dark:border-slate-700 dark:bg-slate-800">
                                             <input
                                                 type="radio"
                                                 name="holidayType"
@@ -1094,9 +1094,9 @@ export default function AdminAvailability() {
                                                 onChange={() =>
                                                     setNewHolidayType('Partial')
                                                 }
-                                                className="text-primary focus:ring-0"
+                                                className="text-primary focus:ring-0 dark:text-purple-600"
                                             />
-                                            <span className="text-xs font-semibold text-on-surface">
+                                            <span className="text-xs font-semibold text-on-surface dark:text-white">
                                                 Partial (Customizable)
                                             </span>
                                         </label>
@@ -1109,13 +1109,13 @@ export default function AdminAvailability() {
                                         onClick={() =>
                                             setIsAddingHoliday(false)
                                         }
-                                        className="cursor-pointer rounded-lg bg-gray-100 px-4 py-2 text-xs font-semibold text-on-surface-variant hover:bg-gray-200"
+                                        className="cursor-pointer rounded-lg bg-gray-100 px-4 py-2 text-xs font-semibold text-on-surface-variant transition-colors hover:bg-gray-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className="cursor-pointer rounded-lg bg-primary px-4 py-2 text-xs font-bold text-on-primary hover:bg-primary-container"
+                                        className="cursor-pointer rounded-lg bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container dark:bg-purple-600 dark:hover:bg-purple-700"
                                     >
                                         Save Override
                                     </button>
@@ -1127,17 +1127,17 @@ export default function AdminAvailability() {
 
                 {/* MODAL 2: Weekly Schedule Hours Edit */}
                 {isEditingWeeklyTime && (
-                    <div className="fixed inset-0 z-55 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
-                        <div className="w-full max-w-sm space-y-4 rounded-xl border border-outline-variant bg-white p-6 shadow-2xl">
-                            <div className="flex items-center justify-between border-b border-outline-variant/40 pb-2">
-                                <h4 className="font-bold text-on-surface">
+                    <div className="fixed inset-0 z-55 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs dark:bg-black/70">
+                        <div className="w-full max-w-sm space-y-4 rounded-xl border border-outline-variant bg-surface p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+                            <div className="flex items-center justify-between border-b border-outline-variant/40 pb-2 dark:border-slate-700/50">
+                                <h4 className="font-bold text-on-surface dark:text-white">
                                     Edit Routine Time
                                 </h4>
                                 <button
                                     onClick={() =>
                                         setIsEditingWeeklyTime(false)
                                     }
-                                    className="cursor-pointer rounded-lg p-1 text-on-surface-variant hover:text-on-surface"
+                                    className="cursor-pointer rounded-lg p-1 text-on-surface-variant transition-colors hover:text-on-surface dark:text-slate-500 dark:hover:text-slate-300"
                                 >
                                     <X className="h-5 w-5" />
                                 </button>
@@ -1149,7 +1149,7 @@ export default function AdminAvailability() {
                             >
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="mb-1.5 block text-xs font-bold tracking-wider text-on-surface-variant uppercase">
+                                        <label className="mb-1.5 block text-xs font-bold tracking-wider text-on-surface-variant uppercase dark:text-slate-400">
                                             Start Time
                                         </label>
                                         <select
@@ -1157,7 +1157,7 @@ export default function AdminAvailability() {
                                             onChange={(e) =>
                                                 setTempStartTime(e.target.value)
                                             }
-                                            className="w-full cursor-pointer rounded-lg border border-outline-variant bg-white p-2 font-mono text-xs"
+                                            className="w-full cursor-pointer rounded-lg border border-outline-variant bg-surface p-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                                         >
                                             <option value="08:00 AM">
                                                 08:00 AM
@@ -1174,7 +1174,7 @@ export default function AdminAvailability() {
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="mb-1.5 block text-xs font-bold tracking-wider text-on-surface-variant uppercase">
+                                        <label className="mb-1.5 block text-xs font-bold tracking-wider text-on-surface-variant uppercase dark:text-slate-400">
                                             End Time
                                         </label>
                                         <select
@@ -1182,7 +1182,7 @@ export default function AdminAvailability() {
                                             onChange={(e) =>
                                                 setTempEndTime(e.target.value)
                                             }
-                                            className="w-full cursor-pointer rounded-lg border border-outline-variant bg-white p-2 font-mono text-xs"
+                                            className="w-full cursor-pointer rounded-lg border border-outline-variant bg-surface p-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                                         >
                                             <option value="03:00 PM">
                                                 03:00 PM
@@ -1209,13 +1209,13 @@ export default function AdminAvailability() {
                                         onClick={() =>
                                             setIsEditingWeeklyTime(false)
                                         }
-                                        className="cursor-pointer rounded-lg bg-gray-100 px-4 py-2 text-xs font-semibold text-on-surface-variant hover:bg-gray-200"
+                                        className="cursor-pointer rounded-lg bg-gray-100 px-4 py-2 text-xs font-semibold text-on-surface-variant transition-colors hover:bg-gray-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className="cursor-pointer rounded-lg bg-primary px-4 py-2 text-xs font-bold text-on-primary hover:bg-primary-container"
+                                        className="cursor-pointer rounded-lg bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container dark:bg-purple-600 dark:hover:bg-purple-700"
                                     >
                                         Update Hours
                                     </button>
@@ -1227,22 +1227,22 @@ export default function AdminAvailability() {
 
                 {/* MODAL 3: Manage Day Slots */}
                 {isManagingSlots && (
-                    <div className="fixed inset-0 z-55 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
-                        <div className="w-full max-w-sm space-y-4 rounded-xl border border-outline-variant bg-white p-6 shadow-2xl">
-                            <div className="flex items-center justify-between border-b border-outline-variant/40 pb-2">
-                                <h4 className="text-base font-bold text-on-surface">
+                    <div className="fixed inset-0 z-55 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs dark:bg-black/70">
+                        <div className="w-full max-w-sm space-y-4 rounded-xl border border-outline-variant bg-surface p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+                            <div className="flex items-center justify-between border-b border-outline-variant/40 pb-2 dark:border-slate-700/50">
+                                <h4 className="text-base font-bold text-on-surface dark:text-white">
                                     Manage Slots: {selectedDayLabel}
                                 </h4>
                                 <button
                                     onClick={() => setIsManagingSlots(false)}
-                                    className="cursor-pointer rounded-lg p-1 text-on-surface-variant hover:text-on-surface"
+                                    className="cursor-pointer rounded-lg p-1 text-on-surface-variant transition-colors hover:text-on-surface dark:text-slate-500 dark:hover:text-slate-300"
                                 >
                                     <X className="h-5 w-5" />
                                 </button>
                             </div>
 
                             <div>
-                                <p className="mb-4 text-xs leading-relaxed text-on-surface-variant">
+                                <p className="mb-4 text-xs leading-relaxed text-on-surface-variant dark:text-slate-400">
                                     Check or uncheck the specific hour intervals
                                     you wish to unlock for clients dynamically.
                                     Changes take effect on-the-fly.
@@ -1259,8 +1259,8 @@ export default function AdminAvailability() {
                                                 key={slot}
                                                 className={`flex cursor-pointer items-center gap-2.5 rounded-lg border p-2.5 transition-all select-none ${
                                                     isChecked
-                                                        ? 'border-primary/45 bg-primary/5 text-primary'
-                                                        : 'border-outline-variant/40 bg-white text-on-surface-variant hover:bg-surface-container-low'
+                                                        ? 'border-primary/45 bg-primary/5 text-primary dark:border-purple-500/50 dark:bg-purple-950/30 dark:text-purple-300'
+                                                        : 'border-outline-variant/40 bg-surface text-on-surface-variant hover:bg-surface-container-low dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700'
                                                 }`}
                                             >
                                                 <input
@@ -1271,7 +1271,7 @@ export default function AdminAvailability() {
                                                             slot,
                                                         )
                                                     }
-                                                    className="rounded text-primary focus:ring-0"
+                                                    className="rounded text-primary focus:ring-0 dark:text-purple-600"
                                                 />
                                                 <span className="font-mono text-xs font-semibold">
                                                     {slot}
@@ -1285,7 +1285,7 @@ export default function AdminAvailability() {
                             <div className="flex justify-end pt-3">
                                 <button
                                     onClick={() => setIsManagingSlots(false)}
-                                    className="w-full cursor-pointer rounded-lg bg-primary px-4 py-2 text-xs font-bold text-on-primary shadow hover:bg-primary-container"
+                                    className="w-full cursor-pointer rounded-lg bg-primary px-4 py-2 text-xs font-bold text-on-primary shadow transition-all hover:bg-primary-container dark:bg-purple-600 dark:hover:bg-purple-700"
                                 >
                                     Apply Constraints
                                 </button>

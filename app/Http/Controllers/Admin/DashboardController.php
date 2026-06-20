@@ -2,14 +2,20 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
+use App\Models\Booking;
 // use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        return inertia('Admin/Dashboard');
+        // $bookings = Booking::all();
+        $bookings = Booking::with('service')->get();
+
+        return inertia('Admin/Dashboard', [
+            'bookings' => $bookings,
+        ]);
     }
     public function availability()
     {
@@ -21,11 +27,11 @@ class DashboardController extends Controller
     }
     public function users()
     {
-        return inertia('Admin/Users');
+        return inertia('Admin/User/Users');
     }
     public function userDetails()
     {
-        return inertia('Admin/UserDetails');
+        return inertia('Admin/User/UserDetails');
     }
     public function settings()
     {

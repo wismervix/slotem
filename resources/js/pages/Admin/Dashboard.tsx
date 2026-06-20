@@ -1,5 +1,5 @@
 import AdminLayout from '@/layouts/Admin/AdminLayout';
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import {
     TrendingUp,
@@ -25,9 +25,13 @@ import {
     Cell,
     Legend,
 } from 'recharts';
-import { AdminBooking, BookingStatusTwo, AdminService } from '@/types';
-import { INITIAL_BOOKINGS } from '@/data/initial-data';
-import { Link } from '@inertiajs/react';
+import { Service, Booking, BookingStatus } from '@/types';
+import { Link, usePage } from '@inertiajs/react';
+import { formatTime } from '@/lib/calendar-utils';
+
+interface AdminDashboardProps {
+    bookings: Booking[];
+}
 
 interface Toast {
     id: string;
@@ -35,116 +39,40 @@ interface Toast {
     type: 'success' | 'info' | 'error';
 }
 
-export default function AdminDashboard() {
-    // Floating notifications
-    const [toasts, setToasts] = useState<Toast[]>([]);
-
-    const [bookings, setBookings] = useState<AdminBooking[]>(() => {
-        return INITIAL_BOOKINGS;
-    });
-
-    // Toast Helpers
-    const addToast = (
-        message: string,
-        type: 'success' | 'info' | 'error' = 'success',
-    ) => {
-        const id = Math.random().toString(36).substring(2, 9);
-        setToasts((prev) => [...prev, { id, message, type }]);
-        setTimeout(() => {
-            removeToast(id);
-        }, 4000);
-    };
-
-    const removeToast = (id: string) => {
-        setToasts((prev) => prev.filter((t) => t.id !== id));
-    };
+export default function AdminDashboard({ bookings }: AdminDashboardProps) {
+    const { services } = usePage<{ services: Service[] }>().props;
 
     // 2. Global Event Handlers for Bookings state
     const handleApproveBooking = (id: string) => {
-        setBookings((prev) =>
-            prev.map((b) =>
-                b.id === id
-                    ? { ...b, status: 'Confirmed' as BookingStatusTwo }
-                    : b,
-            ),
-        );
-        const target = bookings.find((b) => b.id === id);
-        addToast(
-            `Approved booking for ${target?.clientName || 'customer'}!`,
-            'success',
-        );
+        console.log('Handle Approve Booking!');
     };
 
     const handleCompleteBooking = (id: string) => {
-        setBookings((prev) =>
-            prev.map((b) =>
-                b.id === id
-                    ? { ...b, status: 'Completed' as BookingStatusTwo }
-                    : b,
-            ),
-        );
-        const target = bookings.find((b) => b.id === id);
-        addToast(
-            `Marked Done: ${target?.clientName}'s session completed!`,
-            'success',
-        );
+        console.log('Handle Complete Booking!');
     };
 
-    const handleUpdateBookingStatus = (
-        id: string,
-        status: BookingStatusTwo,
-    ) => {
-        setBookings((prev) =>
-            prev.map((b) => (b.id === id ? { ...b, status } : b)),
-        );
-        addToast(`Booking status set to "${status}"`, 'success');
+    const handleUpdateBookingStatus = (id: number, status: BookingStatus) => {
+        console.log('Handle Update Booking Status!');
     };
 
-    // 1. Bento Grid Statistics calculations (aligned to mockup defaults)
-    // Mockup shows: Total Bookings: 1,284; Pending: 12; Today: 8; Completion Rate: 94%
-    // We want our app data to reactively update these statistics
-    const stats = useMemo(() => {
-        const totalRealPending = bookings.filter(
-            (b) => b.status === 'Pending',
-        ).length;
-        const totalRealCompleted = bookings.filter(
-            (b) => b.status === 'Completed',
-        ).length;
-        const totalRealCancelled = bookings.filter(
-            (b) => b.status === 'Cancelled',
-        ).length;
+    const today = new Date().toISOString().split('T')[0];
 
-        // Baselines to match exact mockup counts initially and update on additions/modifications
-        const baseTotalCount = 1272 + bookings.length; // baseline to make initial 1284
-        const basePendingCount = 9 + totalRealPending; // baseline to make initial 12
-        const baseTodayCount =
-            5 +
-            bookings.filter(
-                (b) => b.date === '2024-10-28' || b.date === '2024-10-24',
-            ).length; // base 8
+    const todayBookings = bookings.filter((a) => a.date === today);
+    const pendingBookings = bookings.filter((a) => a.status === 'pending');
+    const completedBookings = bookings.filter((a) => a.status === 'completed');
+    const cancelledBookings = bookings.filter((a) => a.status === 'cancelled');
 
-        // Completion rate math
-        const nonCancelled = bookings.filter(
-            (b) => b.status !== 'Cancelled',
-        ).length;
-        let completionRate = 94;
-        if (bookings.length > 0) {
-            completionRate = Math.round(
-                (totalRealCompleted /
-                    (totalRealCompleted + totalRealCancelled || 1)) *
-                    100,
-            );
-            if (isNaN(completionRate) || completionRate === 0)
-                completionRate = 94; // safeguard default
-        }
-
-        return {
-            total: baseTotalCount,
-            pending: basePendingCount,
-            today: baseTodayCount,
-            completionRate: Math.min(100, Math.max(75, completionRate)),
-        };
-    }, [bookings]);
+    // completion rate math
+    let completionRate;
+    if (bookings.length > 0) {
+        completionRate = Math.round(
+            (completedBookings.length /
+                (completedBookings.length + cancelledBookings.length || 1)) *
+                100,
+        );
+        if (isNaN(completionRate) || completionRate === 0) completionRate = 0;
+        // completionRate = 'No completed bookings yet!';
+    }
 
     // 2. Charts Data
     // Weekly Load Analysis
@@ -165,9 +93,8 @@ export default function AdminDashboard() {
     // Services distribution data
     const servicesDistribution = useMemo(() => {
         const categoryCounts: { [key: string]: number } = {};
-        bookings.forEach((b) => {
-            categoryCounts[b.serviceName] =
-                (categoryCounts[b.serviceName] || 0) + 1;
+        services.forEach((s) => {
+            categoryCounts[s.name] = (categoryCounts[s.name] || 0) + 1;
         });
 
         const colors = [
@@ -183,7 +110,7 @@ export default function AdminDashboard() {
             value,
             color: colors[idx % colors.length],
         }));
-    }, [bookings]);
+    }, [services]);
 
     const COLORS = [
         '#7c3aed',
@@ -197,9 +124,32 @@ export default function AdminDashboard() {
     // Upcoming Active schedule (filter on Pending or Confirmed and limit to 4 items)
     const upcomingQueue = useMemo(() => {
         return bookings
-            .filter((b) => b.status === 'Pending' || b.status === 'Confirmed')
+            .filter((b) => b.status === 'pending' || b.status === 'approved')
             .slice(0, 4);
     }, [bookings]);
+
+    const styles = {
+        pending:
+            'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400',
+        approved:
+            'bg-purple-100 text-purple-800 dark:bg-purple-950/40 dark:text-purple-400',
+        completed:
+            'bg-purple-100 text-purple-800 dark:bg-purple-950/40 dark:text-purple-400',
+        cancelled:
+            'bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-400',
+        rejected:
+            'bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-400',
+    };
+
+    const dotStyles = {
+        pending: 'bg-emerald-500',
+        approved: 'bg-purple-500',
+        completed: 'bg-purple-500',
+        cancelled: 'bg-rose-500',
+        rejected: 'bg-rose-500',
+    };
+
+    // console.log('Bookings from backend: ', bookings);
 
     return (
         <AdminLayout>
@@ -239,7 +189,7 @@ export default function AdminDashboard() {
                         </div>
                         <div>
                             <div className="text-3xl font-extrabold text-zinc-900 select-all dark:text-zinc-50">
-                                {stats.total.toLocaleString()}
+                                {bookings.length}
                             </div>
                             <p className="mt-1 flex items-center gap-0.5 text-[11px] font-medium text-emerald-600">
                                 <TrendingUp className="h-3 w-3" />
@@ -260,7 +210,7 @@ export default function AdminDashboard() {
                         </div>
                         <div>
                             <div className="text-3xl font-extrabold text-zinc-900 select-all dark:text-zinc-50">
-                                {stats.pending}
+                                {pendingBookings.length}
                             </div>
                             <p className="mt-1 text-[11px] text-zinc-400 dark:text-zinc-500">
                                 Requires coordinator approval
@@ -280,7 +230,7 @@ export default function AdminDashboard() {
                         </div>
                         <div>
                             <div className="text-3xl font-extrabold text-zinc-900 select-all dark:text-zinc-50">
-                                {stats.today}
+                                {todayBookings.length}
                             </div>
                             <p className="mt-1 text-[11px] text-zinc-400 dark:text-zinc-500">
                                 Active client meetings scheduled
@@ -303,7 +253,7 @@ export default function AdminDashboard() {
                         </div>
                         <div>
                             <div className="text-3xl font-extrabold select-all">
-                                {stats.completionRate}%
+                                {completionRate}%
                             </div>
                             <p className="mt-1 text-[11px] opacity-80">
                                 High standard quality benchmark
@@ -457,7 +407,6 @@ export default function AdminDashboard() {
                     </div>
                 </section>
 
-
                 {/* Recent Activity / Active Bookings Stream */}
                 <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
                     <div className="flex items-center justify-between border-b border-slate-100 p-6 dark:border-zinc-800">
@@ -513,10 +462,10 @@ export default function AdminDashboard() {
                                         <td className="px-6 py-4">
                                             <div>
                                                 <p className="font-semibold text-slate-800 dark:text-zinc-100">
-                                                    {b.clientName}
+                                                    {b.client_name}
                                                 </p>
                                                 <p className="text-xs text-gray-400 dark:text-zinc-500">
-                                                    {b.clientEmail}
+                                                    {b.client_email}
                                                 </p>
                                             </div>
                                         </td>
@@ -524,10 +473,12 @@ export default function AdminDashboard() {
                                         <td className="px-6 py-4">
                                             <div>
                                                 <p className="font-medium text-slate-700 dark:text-zinc-300">
-                                                    {b.serviceName}
+                                                    {b?.service?.name ||
+                                                        'No service available'}
                                                 </p>
                                                 <p className="font-mono text-xs font-bold text-purple-700 dark:text-purple-400">
-                                                    ${b.price.toLocaleString()}
+                                                    $
+                                                    {b?.service?.price.toLocaleString()}
                                                 </p>
                                             </div>
                                         </td>
@@ -535,47 +486,69 @@ export default function AdminDashboard() {
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col">
                                                 <span className="font-mono text-xs font-medium text-slate-600 dark:text-zinc-400">
-                                                    {b.date}
+                                                    {new Intl.DateTimeFormat(
+                                                        'en-US',
+                                                        {
+                                                            weekday: 'long',
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                            year: 'numeric',
+                                                        },
+                                                    ).format(new Date(b.date))}
                                                 </span>
                                                 <span className="font-mono text-xs text-gray-400 dark:text-zinc-500">
-                                                    {b.startTime} - {b.endTime}
+                                                    {formatTime(b.start_time)} —{' '}
+                                                    {formatTime(b.end_time)}
                                                 </span>
                                             </div>
                                         </td>
 
                                         <td className="px-6 py-4">
                                             <span
-                                                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                                                    b.status === 'Completed'
-                                                        ? 'bg-purple-100 text-purple-800 dark:bg-purple-950/40 dark:text-purple-400'
-                                                        : b.status ===
-                                                            'Cancelled'
-                                                          ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-400'
-                                                          : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400'
-                                                }`}
+                                                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold ${styles[b.status]}`}
                                             >
                                                 <span
-                                                    className={`h-1.5 w-1.5 rounded-full ${
-                                                        b.status === 'Completed'
-                                                            ? 'bg-purple-500'
-                                                            : b.status ===
-                                                                'Cancelled'
-                                                              ? 'bg-rose-500'
-                                                              : 'bg-emerald-500'
-                                                    }`}
+                                                    className={`h-1.5 w-1.5 rounded-full ${dotStyles[b.status]}`}
                                                 />
                                                 {b.status}
                                             </span>
                                         </td>
 
                                         <td className="px-6 py-4 text-right">
-                                            {b.status === 'Confirmed' ? (
+                                            {b.status === 'pending' && (
+                                                <div className="flex justify-end gap-2">
+                                                    <button
+                                                        onClick={() =>
+                                                            console.log(
+                                                                'Approve Booking',
+                                                            )
+                                                        }
+                                                        className="cursor-pointer rounded-md bg-purple-50 px-2.5 py-1 text-xs font-bold text-purple-700 transition-colors hover:bg-purple-100 dark:bg-purple-950/40 dark:text-purple-400 dark:hover:bg-purple-950/60"
+                                                    >
+                                                        Approve Booking
+                                                    </button>
+
+                                                    <button
+                                                        onClick={() =>
+                                                            handleUpdateBookingStatus(
+                                                                b.id,
+                                                                'rejected',
+                                                            )
+                                                        }
+                                                        className="cursor-pointer rounded-md bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-700 transition-colors hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-400 dark:hover:bg-rose-950/60"
+                                                    >
+                                                        Reject
+                                                    </button>
+                                                </div>
+                                            )}
+
+                                            {b.status === 'approved' && (
                                                 <div className="flex justify-end gap-2">
                                                     <button
                                                         onClick={() =>
                                                             handleUpdateBookingStatus(
                                                                 b.id,
-                                                                'Completed',
+                                                                'completed',
                                                             )
                                                         }
                                                         className="cursor-pointer rounded-md bg-purple-50 px-2.5 py-1 text-xs font-bold text-purple-700 transition-colors hover:bg-purple-100 dark:bg-purple-950/40 dark:text-purple-400 dark:hover:bg-purple-950/60"
@@ -587,15 +560,39 @@ export default function AdminDashboard() {
                                                         onClick={() =>
                                                             handleUpdateBookingStatus(
                                                                 b.id,
-                                                                'Cancelled',
+                                                                'rejected',
                                                             )
                                                         }
                                                         className="cursor-pointer rounded-md bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-700 transition-colors hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-400 dark:hover:bg-rose-950/60"
                                                     >
-                                                        Cancel
+                                                        Reject
                                                     </button>
                                                 </div>
-                                            ) : (
+                                            )}
+
+                                            {b.status === 'rejected' && (
+                                                <div className="flex justify-end gap-2">
+                                                    <button
+                                                        onClick={() =>
+                                                            handleUpdateBookingStatus(
+                                                                b.id,
+                                                                'rejected',
+                                                            )
+                                                        }
+                                                        className="cursor-pointer rounded-md bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-700 transition-colors hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-400 dark:hover:bg-rose-950/60"
+                                                    >
+                                                        Rejected
+                                                    </button>
+                                                </div>
+                                            )}
+
+                                            {b.status === 'completed' && (
+                                                <span className="text-xs text-gray-400 dark:text-zinc-500">
+                                                    No actions needed
+                                                </span>
+                                            )}
+
+                                            {b.status === 'cancelled' && (
                                                 <span className="text-xs text-gray-400 dark:text-zinc-500">
                                                     No actions needed
                                                 </span>

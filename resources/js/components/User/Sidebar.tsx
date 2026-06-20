@@ -102,7 +102,7 @@ export default function Sidebar({
 
             {/* Sidebar navigation */}
             <aside
-                className={`fixed top-0 bottom-0 left-0 z-40 flex h-screen w-64 shrink-0 flex-col gap-2 overflow-y-auto border-r border-outline-variant bg-[#f9f1ff] p-4 transition-transform duration-300 md:relative md:translate-x-0 dark:border-neutral-800 dark:bg-neutral-900 ${
+                className={`fixed top-0 bottom-0 left-0 z-40 flex h-screen w-64 shrink-0 flex-col gap-2 overflow-y-auto border-r border-outline-variant bg-[#f9f1ff] p-4 transition-transform duration-300 md:relative md:translate-x-0 dark:border-neutral-800 dark:bg-neutral-900/40 ${
                     mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
                 }`}
             >
