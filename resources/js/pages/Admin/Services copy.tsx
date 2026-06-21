@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Service, ServiceBadge } from '@/types';
+import { Service, ServiceTwo } from '@/types';
 import {
     Eye,
     Edit,
@@ -15,27 +15,18 @@ import {
 import { INITIAL_SERVICES } from '@/data/initial-data';
 import { motion, AnimatePresence } from 'motion/react';
 import AdminLayout from '@/layouts/Admin/AdminLayout';
-import { serviceIcons } from '@/lib/service-icons';
-import { usePage } from '@inertiajs/react';
-import { formatDateAndTime } from '@/lib/calendar-utils';
 
 export default function ServicesView() {
-    const { services } = usePage<{ services: Service[] }>().props;
-
     // Tabs for Quick Filters
     const [activeFilter, setActiveFilter] = useState<
-        'All' | 'Popular' | 'Recommended' | 'Best Value'
-    >('All');
-
-    const [activeVariant, setActiveVariant] = useState<
-        'All' | 'standard' | 'featured'
+        'All' | 'Consulting' | 'Styling' | 'Workshops'
     >('All');
 
     // Global adaptive search string
     const [searchQuery, setSearchQuery] = useState('');
 
     // Load from local storage or defaults
-    // const [services, setServices] = useState<ServiceTwo[]>(INITIAL_SERVICES);
+    const [services, setServices] = useState<ServiceTwo[]>(INITIAL_SERVICES);
 
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
@@ -61,60 +52,57 @@ export default function ServicesView() {
 
     // Modal for Delete Confirmation
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [serviceToDelete, setServiceToDelete] = useState<Service | null>(
+    const [serviceToDelete, setServiceToDelete] = useState<ServiceTwo | null>(
         null,
     );
 
     // Modal for Viewing Detail
-    const [viewingService, setViewingService] = useState<Service | null>(null);
+    const [viewingService, setViewingService] = useState<ServiceTwo | null>(
+        null,
+    );
 
     // Categories helper to match filter
-    const doesBadgeMatch = (
-        badges: ServiceBadge[] | null | undefined,
-        filter: 'All' | 'Popular' | 'Recommended' | 'Best Value',
-    ) => {
+    const doesCategoryMatch = (serviceCategory: string, filter: string) => {
         if (filter === 'All') return true;
-
-        if (!badges?.length) return false;
-
-        switch (filter) {
-            case 'Popular':
-                return badges.includes('popular');
-
-            case 'Recommended':
-                return badges.includes('recommended');
-
-            case 'Best Value':
-                return badges.includes('best-value');
+        if (filter === 'Consulting')
+            return serviceCategory.toLowerCase() === 'consulting';
+        if (filter === 'Styling') {
+            return (
+                serviceCategory.toLowerCase() === 'styling' ||
+                serviceCategory.toLowerCase() === 'personal branding'
+            );
         }
-    };
-
-    const doesVariantMatch = (
-        variant: Service['variant'],
-        filter: 'All' | 'standard' | 'featured',
-    ) => {
-        return filter === 'All' || variant === filter;
+        if (filter === 'Workshops') {
+            return (
+                serviceCategory.toLowerCase() === 'workshops' ||
+                serviceCategory.toLowerCase() === 'design'
+            );
+        }
+        return false;
     };
 
     // Filtered Services List
     const filteredServices = useMemo(() => {
-        const query = searchQuery.toLowerCase();
-
         return services.filter((service) => {
             const matchesSearch =
-                service.name.toLowerCase().includes(query) ||
-                (service.description ?? '').toLowerCase().includes(query);
+                service.name
+                    .toLowerCase()
+                    .includes(searchQuery.toLowerCase()) ||
+                service.description
+                    .toLowerCase()
+                    .includes(searchQuery.toLowerCase()) ||
+                service.category
+                    .toLowerCase()
+                    .includes(searchQuery.toLowerCase());
 
-            const matchesBadge = doesBadgeMatch(service.badges, activeFilter);
-
-            const matchesVariant = doesVariantMatch(
-                service.variant,
-                activeVariant,
+            const matchesCategory = doesCategoryMatch(
+                service.category,
+                activeFilter,
             );
 
-            return matchesSearch && matchesBadge && matchesVariant;
+            return matchesSearch && matchesCategory;
         });
-    }, [services, searchQuery, activeFilter, activeVariant]);
+    }, [services, searchQuery, activeFilter]);
 
     // Paginated elements
     const totalPages = Math.max(
@@ -130,17 +118,29 @@ export default function ServicesView() {
 
     // Service Handlers
     const handleAddService = (
-        newServiceData: Omit<Service, 'id' | 'createdAt' | 'bookingsCount'>,
+        newServiceData: Omit<ServiceTwo, 'id' | 'createdAt' | 'bookingsCount'>,
     ) => {
-        console.log('Add new Service Here!');
+        const freshService: ServiceTwo = {
+            ...newServiceData,
+            id: `s_${Date.now()}`,
+            bookingsCount: 0,
+            createdAt: new Date().toLocaleDateString('en-US', {
+                month: 'short',
+                day: '2-digit',
+                year: 'numeric',
+            }),
+        };
+        setServices((prev) => [freshService, ...prev]);
     };
 
-    const handleUpdateService = (updatedService: Service) => {
-        console.log('Handle Update Service!');
+    const handleUpdateService = (updatedService: ServiceTwo) => {
+        setServices((prev) =>
+            prev.map((s) => (s.id === updatedService.id ? updatedService : s)),
+        );
     };
 
-    const handleDeleteService = (id: number) => {
-        console.log('Handle Delete Service!');
+    const handleDeleteService = (id: string) => {
+        setServices((prev) => prev.filter((s) => s.id !== id));
     };
 
     // Handle Create click
@@ -160,26 +160,69 @@ export default function ServicesView() {
     };
 
     // Handle Edit click
-    const handleOpenEdit = (service: Service) => {
+    const handleOpenEdit = (service: ServiceTwo) => {
         setDrawerMode('edit');
-        console.log('Form Data (Edit info):', formData);
+        setEditingServiceId(service.id);
+        setFormData({
+            name: service.name,
+            description: service.description,
+            category:
+                service.category === 'Personal Branding'
+                    ? 'Styling'
+                    : service.category === 'Design'
+                      ? 'Workshops'
+                      : service.category,
+            duration: service.duration,
+            price: service.price,
+            imageUrl: service.imageUrl,
+            status: service.status,
+        });
         setIsDrawerOpen(true);
     };
 
     // Handle Form Submit
     const handleFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Form Data:', formData);
+        if (!formData.name.trim()) return;
+
+        if (drawerMode === 'create') {
+            handleAddService({
+                name: formData.name,
+                description: formData.description,
+                category: formData.category,
+                duration: Number(formData.duration),
+                price: Number(formData.price),
+                imageUrl: formData.imageUrl,
+                status: formData.status,
+            });
+        } else if (drawerMode === 'edit' && editingServiceId) {
+            const original = services.find((s) => s.id === editingServiceId);
+            if (original) {
+                handleUpdateService({
+                    ...original,
+                    name: formData.name,
+                    description: formData.description,
+                    category: formData.category,
+                    duration: Number(formData.duration),
+                    price: Number(formData.price),
+                    imageUrl: formData.imageUrl,
+                    status: formData.status,
+                });
+            }
+        }
         setIsDrawerOpen(false);
     };
 
     // Toggle active/inactive instantly in row click
-    const handleToggleStatus = (service: Service) => {
-        console.log('Toggle Active Status');
+    const handleToggleStatus = (service: ServiceTwo) => {
+        handleUpdateService({
+            ...service,
+            status: service.status === 'Active' ? 'Inactive' : 'Active',
+        });
     };
 
     // Handle Delete Confirmation
-    const triggerDelete = (service: Service) => {
+    const triggerDelete = (service: ServiceTwo) => {
         setServiceToDelete(service);
         setIsDeleteModalOpen(true);
     };
@@ -215,54 +258,26 @@ export default function ServicesView() {
                     </button>
                 </div>
 
-                <div className="flex justify-between gap-3">
-                    {/* Tabs / Filter Tabs */}
-                    <div className="flex gap-2 overflow-x-auto pb-1">
-                        {(
-                            [
-                                'All',
-                                'Popular',
-                                'Recommended',
-                                'Best Value',
-                            ] as const
-                        ).map((filter) => (
-                            <button
-                                key={filter}
-                                onClick={() => {
-                                    setActiveFilter(filter);
-                                    setCurrentPage(1);
-                                }}
-                                className={`cursor-pointer rounded-lg px-4 py-2 text-xs font-medium tracking-wide whitespace-nowrap transition-colors ${
-                                    activeFilter === filter
-                                        ? 'bg-primary-container text-on-primary-container shadow-sm dark:bg-purple-950/50 dark:text-purple-300'
-                                        : 'text-on-surface-variant hover:bg-surface-container dark:text-slate-400 dark:hover:bg-slate-800'
-                                }`}
-                            >
-                                {filter === 'All' ? 'All Services' : filter}
-                            </button>
-                        ))}
-                    </div>
-                    {/* Tabs / Filter Tabs */}
-                    <div className="flex gap-2 overflow-x-auto pb-1">
-                        {(['All', 'standard', 'featured'] as const).map(
-                            (filter) => (
-                                <button
-                                    key={filter}
-                                    onClick={() => {
-                                        setActiveVariant(filter);
-                                        setCurrentPage(1);
-                                    }}
-                                    className={`cursor-pointer rounded-lg px-4 py-2 text-xs font-medium tracking-wide whitespace-nowrap transition-colors ${
-                                        activeVariant === filter
-                                            ? 'bg-primary-container text-on-primary-container shadow-sm dark:bg-purple-950/50 dark:text-purple-300'
-                                            : 'text-on-surface-variant hover:bg-surface-container dark:text-slate-400 dark:hover:bg-slate-800'
-                                    }`}
-                                >
-                                    {filter === 'All' ? 'All Services' : filter}
-                                </button>
-                            ),
-                        )}
-                    </div>
+                {/* Tabs / Filter Tabs */}
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                    {(
+                        ['All', 'Consulting', 'Styling', 'Workshops'] as const
+                    ).map((filter) => (
+                        <button
+                            key={filter}
+                            onClick={() => {
+                                setActiveFilter(filter);
+                                setCurrentPage(1);
+                            }}
+                            className={`cursor-pointer rounded-lg px-4 py-2 text-xs font-medium tracking-wide whitespace-nowrap transition-colors ${
+                                activeFilter === filter
+                                    ? 'bg-primary-container text-on-primary-container shadow-sm dark:bg-purple-950/50 dark:text-purple-300'
+                                    : 'text-on-surface-variant hover:bg-surface-container dark:text-slate-400 dark:hover:bg-slate-800'
+                            }`}
+                        >
+                            {filter === 'All' ? 'All Services' : filter}
+                        </button>
+                    ))}
                 </div>
 
                 {/* Data Table Wrapper */}
@@ -291,7 +306,7 @@ export default function ServicesView() {
                                             Service Name
                                         </th>
                                         <th className="p-4 text-xs font-semibold tracking-wider text-outline uppercase dark:text-slate-500">
-                                            Description
+                                            Category
                                         </th>
                                         <th className="p-4 text-xs font-semibold tracking-wider text-outline uppercase dark:text-slate-500">
                                             Duration
@@ -302,159 +317,117 @@ export default function ServicesView() {
                                         <th className="p-4 text-xs font-semibold tracking-wider text-outline uppercase dark:text-slate-500">
                                             Status
                                         </th>
+                                        <th className="p-4 text-xs font-semibold tracking-wider text-outline uppercase dark:text-slate-500">
+                                            Bookings
+                                        </th>
                                         <th className="p-4 text-right text-xs font-semibold tracking-wider text-outline uppercase dark:text-slate-500">
                                             Actions
                                         </th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-outline-variant dark:divide-slate-700">
-                                    {paginatedServices.map((service) => {
-                                        const Icon = serviceIcons[service.icon];
-                                        return (
-                                            <tr
-                                                key={service.id}
-                                                className="group transition-colors hover:bg-surface-container-low dark:hover:bg-slate-800/50"
-                                            >
-                                                <td className="p-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded bg-secondary-container dark:bg-slate-700">
-                                                            {service?.image ? (
-                                                                <img
-                                                                    className="h-full w-full object-cover"
-                                                                    src={
-                                                                        service.image
-                                                                    }
-                                                                    alt={
-                                                                        service.name
-                                                                    }
-                                                                    referrerPolicy="no-referrer"
-                                                                />
-                                                            ) : (
-                                                                <div className="flex h-full w-full items-center justify-center bg-gray-100 text-gray-500">
-                                                                    <div className="text-center">
-                                                                        <svg
-                                                                            className="mx-auto mb-2 h-10 w-10"
-                                                                            fill="none"
-                                                                            stroke="currentColor"
-                                                                            viewBox="0 0 24 24"
-                                                                        >
-                                                                            <path
-                                                                                strokeLinecap="round"
-                                                                                strokeLinejoin="round"
-                                                                                strokeWidth={
-                                                                                    1.5
-                                                                                }
-                                                                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"
-                                                                            />
-                                                                        </svg>
-                                                                        {/* <p className="text-sm">
-                                                                            No
-                                                                            image
-                                                                            available
-                                                                        </p> */}
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        <div>
-                                                            <p className="mb-1 flex items-center gap-2 text-sm font-bold text-on-surface dark:text-white">
-                                                                <Icon className="h-5 w-5" />
-                                                                <span>
-                                                                    {
-                                                                        service.name
-                                                                    }{' '}
-                                                                </span>
-                                                            </p>
-                                                            <p className="text-[11px] text-outline dark:text-slate-500">
-                                                                Created{' '}
-                                                                {formatDateAndTime(
-                                                                    service.created_at,
-                                                                )}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="p-4 text-sm font-medium text-on-surface-variant dark:text-slate-400">
-                                                    <div
-                                                        title={
-                                                            service.description ||
-                                                            'No description'
-                                                        }
-                                                        className="max-w-[300px] truncate"
-                                                    >
-                                                        {service.description ||
-                                                            'No description'}
-                                                    </div>
-                                                </td>
-                                                <td className="p-4 text-sm text-on-surface-variant dark:text-slate-400">
-                                                    {service.duration} Mins
-                                                </td>
-                                                <td className="p-4 text-sm font-semibold text-on-surface dark:text-white">
-                                                    ${service.price}
-                                                </td>
-                                                <td className="p-4">
-                                                    <label className="relative inline-flex cursor-pointer items-center">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={
-                                                                service.active
+                                    {paginatedServices.map((service) => (
+                                        <tr
+                                            key={service.id}
+                                            className="group transition-colors hover:bg-surface-container-low dark:hover:bg-slate-800/50"
+                                        >
+                                            <td className="p-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded bg-secondary-container dark:bg-slate-700">
+                                                        <img
+                                                            className="h-full w-full object-cover"
+                                                            src={
+                                                                service.imageUrl
                                                             }
-                                                            onChange={() =>
-                                                                handleToggleStatus(
-                                                                    service,
-                                                                )
-                                                            }
-                                                            className="peer sr-only"
+                                                            alt={service.name}
+                                                            referrerPolicy="no-referrer"
                                                         />
-                                                        <div className="peer h-6 w-11 rounded-full bg-outline-variant/60 peer-checked:bg-primary peer-focus:outline-none after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white dark:bg-slate-700 dark:peer-checked:bg-purple-600"></div>
-                                                        <span
-                                                            className={`ml-3 text-xs font-medium ${service.active === true ? 'text-on-surface-variant dark:text-slate-300' : 'text-outline dark:text-slate-500'}`}
-                                                        >
-                                                            {service.active &&
-                                                                'Active'}
-                                                        </span>
-                                                    </label>
-                                                </td>
-                                                <td className="p-4 text-right">
-                                                    <div className="flex justify-end gap-1">
-                                                        <button
-                                                            onClick={() =>
-                                                                setViewingService(
-                                                                    service,
-                                                                )
-                                                            }
-                                                            title="View Details"
-                                                            className="cursor-pointer rounded-lg p-2 text-outline transition-all hover:bg-surface-container hover:text-primary dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-purple-400"
-                                                        >
-                                                            <Eye size={16} />
-                                                        </button>
-                                                        <button
-                                                            onClick={() =>
-                                                                handleOpenEdit(
-                                                                    service,
-                                                                )
-                                                            }
-                                                            title="Edit Service"
-                                                            className="cursor-pointer rounded-lg p-2 text-outline transition-all hover:bg-surface-container hover:text-primary dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-purple-400"
-                                                        >
-                                                            <Edit size={16} />
-                                                        </button>
-                                                        <button
-                                                            onClick={() =>
-                                                                triggerDelete(
-                                                                    service,
-                                                                )
-                                                            }
-                                                            title="Delete Service"
-                                                            className="cursor-pointer rounded-lg p-2 text-outline transition-all hover:bg-error-container/20 hover:text-error dark:text-slate-500 dark:hover:bg-red-950/40 dark:hover:text-red-400"
-                                                        >
-                                                            <Trash2 size={16} />
-                                                        </button>
                                                     </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
+                                                    <div>
+                                                        <p className="text-sm font-bold text-on-surface dark:text-white">
+                                                            {service.name}
+                                                        </p>
+                                                        <p className="text-[11px] text-outline dark:text-slate-500">
+                                                            Created{' '}
+                                                            {service.createdAt}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="p-4 text-sm font-medium text-on-surface-variant dark:text-slate-400">
+                                                {service.category}
+                                            </td>
+                                            <td className="p-4 text-sm text-on-surface-variant dark:text-slate-400">
+                                                {service.duration} Mins
+                                            </td>
+                                            <td className="p-4 text-sm font-semibold text-on-surface dark:text-white">
+                                                ${service.price.toFixed(2)}
+                                            </td>
+                                            <td className="p-4">
+                                                <label className="relative inline-flex cursor-pointer items-center">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={
+                                                            service.status ===
+                                                            'Active'
+                                                        }
+                                                        onChange={() =>
+                                                            handleToggleStatus(
+                                                                service,
+                                                            )
+                                                        }
+                                                        className="peer sr-only"
+                                                    />
+                                                    <div className="peer h-6 w-11 rounded-full bg-outline-variant/60 peer-checked:bg-primary peer-focus:outline-none after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white dark:bg-slate-700 dark:peer-checked:bg-purple-600"></div>
+                                                    <span
+                                                        className={`ml-3 text-xs font-medium ${service.status === 'Active' ? 'text-on-surface-variant dark:text-slate-300' : 'text-outline dark:text-slate-500'}`}
+                                                    >
+                                                        {service.status}
+                                                    </span>
+                                                </label>
+                                            </td>
+                                            <td className="p-4 text-sm font-medium text-on-surface-variant dark:text-slate-400">
+                                                {service.bookingsCount.toLocaleString()}
+                                            </td>
+                                            <td className="p-4 text-right">
+                                                <div className="flex justify-end gap-1">
+                                                    <button
+                                                        onClick={() =>
+                                                            setViewingService(
+                                                                service,
+                                                            )
+                                                        }
+                                                        title="View Details"
+                                                        className="cursor-pointer rounded-lg p-2 text-outline transition-all hover:bg-surface-container hover:text-primary dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-purple-400"
+                                                    >
+                                                        <Eye size={16} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() =>
+                                                            handleOpenEdit(
+                                                                service,
+                                                            )
+                                                        }
+                                                        title="Edit Service"
+                                                        className="cursor-pointer rounded-lg p-2 text-outline transition-all hover:bg-surface-container hover:text-primary dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-purple-400"
+                                                    >
+                                                        <Edit size={16} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() =>
+                                                            triggerDelete(
+                                                                service,
+                                                            )
+                                                        }
+                                                        title="Delete Service"
+                                                        className="cursor-pointer rounded-lg p-2 text-outline transition-all hover:bg-error-container/20 hover:text-error dark:text-slate-500 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
                                 </tbody>
                             </table>
                         )}
@@ -907,38 +880,12 @@ export default function ServicesView() {
                                 className="relative z-20 flex w-full max-w-md flex-col overflow-hidden rounded-2xl bg-surface shadow-2xl dark:bg-slate-900"
                             >
                                 <div className="relative h-48 overflow-hidden bg-primary-container dark:bg-slate-800">
-                                    {viewingService?.image ? (
-                                        <img
-                                            src={
-                                                viewingService.image ||
-                                                'https://lh3.googleusercontent.com/aida-public/AB6AXuAS4hUTLFx0E6J98uzd04i3YX6UOkhedlYUCmPnbrvti24Ue_CL6ri6q8vvcD63qahKE-7K_01ONMTOkm7IPXtgdV-TEaq37JuFM-5sjMu1ZaVI1rzD_8U8PNnuBFrixHoY11-QO-v2o22VH5iCzzuqXgzXh8ziXm5jJpj3gYs7mJICzXvnr61i7sCB6Q1do1IsZEgg-ruxOHu7mP4fkgIIXgkTMq0CfMnHZc29JZ51XanpLw0JXNLLrR0XIr2A_YvkkkTl4TVWVbs'
-                                            }
-                                            alt={viewingService.name}
-                                            className="h-full w-full object-cover"
-                                            referrerPolicy="no-referrer"
-                                        />
-                                    ) : (
-                                        <div className="flex h-full w-full items-center justify-center bg-gray-100 text-gray-500">
-                                            <div className="text-center">
-                                                <svg
-                                                    className="mx-auto mb-2 h-10 w-10"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={1.5}
-                                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"
-                                                    />
-                                                </svg>
-                                                <p className="text-sm">
-                                                    No image available
-                                                </p>
-                                            </div>
-                                        </div>
-                                    )}
+                                    <img
+                                        src={viewingService.imageUrl}
+                                        alt={viewingService.name}
+                                        className="h-full w-full object-cover"
+                                        referrerPolicy="no-referrer"
+                                    />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                                     <button
                                         onClick={() => setViewingService(null)}
@@ -948,7 +895,7 @@ export default function ServicesView() {
                                     </button>
                                     <div className="absolute right-4 bottom-4 left-4">
                                         <span className="rounded bg-primary px-2 py-0.5 text-[10px] font-bold tracking-wider text-on-primary uppercase dark:bg-purple-600">
-                                            {viewingService.variant}
+                                            {viewingService.category}
                                         </span>
                                         <h3 className="mt-1 text-lg font-bold text-white">
                                             {viewingService.name}
@@ -979,52 +926,35 @@ export default function ServicesView() {
                                                 Price
                                             </p>
                                             <p className="mt-1 text-sm font-bold text-primary dark:text-purple-400">
-                                                ${viewingService.price}
+                                                $
+                                                {viewingService.price.toFixed(
+                                                    2,
+                                                )}
                                             </p>
                                         </div>
                                         <div className="text-center">
                                             <p className="text-xs font-semibold text-outline dark:text-slate-500">
-                                                Tags
+                                                Bookings
                                             </p>
-
-                                            {viewingService.badges?.length ? (
-                                                <div className="mt-2 flex flex-wrap justify-center gap-1">
-                                                    {viewingService.badges.map(
-                                                        (badge) => (
-                                                            <span
-                                                                key={badge}
-                                                                className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[10px] font-semibold text-primary capitalize dark:border-purple-500/20 dark:bg-purple-500/15 dark:text-purple-300"
-                                                            >
-                                                                {badge.replace(
-                                                                    '-',
-                                                                    ' ',
-                                                                )}
-                                                            </span>
-                                                        ),
-                                                    )}
-                                                </div>
-                                            ) : (
-                                                <p className="mt-1 text-sm text-outline dark:text-slate-500">
-                                                    None
-                                                </p>
-                                            )}
+                                            <p className="mt-1 text-sm font-bold text-on-surface dark:text-white">
+                                                {viewingService.bookingsCount}
+                                            </p>
                                         </div>
                                     </div>
                                     <div className="flex items-center justify-between pt-1 text-xs text-outline dark:text-slate-500">
                                         <span>
                                             Created Date:{' '}
-                                            {formatDateAndTime(
-                                                viewingService.created_at,
-                                            )}
+                                            {viewingService.createdAt}
                                         </span>
                                         <span
                                             className={`rounded-full px-2 py-1 text-[10px] font-bold ${
-                                                viewingService.active === true
+                                                viewingService.status ===
+                                                'Active'
                                                     ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400'
                                                     : 'bg-rose-100 text-rose-800 dark:bg-red-950/40 dark:text-red-400'
                                             }`}
                                         >
-                                            {viewingService.active && 'Active'}
+                                            {viewingService.status}
                                         </span>
                                     </div>
                                     <button
