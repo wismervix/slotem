@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Service, ServiceBadge } from '@/types';
+import { Service, ServiceBadge, ServiceIcon } from '@/types';
 import {
     Eye,
     Edit,
@@ -12,7 +12,6 @@ import {
     Check,
     AlertTriangle,
 } from 'lucide-react';
-import { INITIAL_SERVICES } from '@/data/initial-data';
 import { motion, AnimatePresence } from 'motion/react';
 import AdminLayout from '@/layouts/Admin/AdminLayout';
 import { serviceIcons } from '@/lib/service-icons';
@@ -34,8 +33,6 @@ export default function ServicesView() {
     // Global adaptive search string
     const [searchQuery, setSearchQuery] = useState('');
 
-    // Load from local storage or defaults
-    // const [services, setServices] = useState<ServiceTwo[]>(INITIAL_SERVICES);
 
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
@@ -44,7 +41,7 @@ export default function ServicesView() {
     // Drawer for Create / Edit
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [drawerMode, setDrawerMode] = useState<'create' | 'edit'>('create');
-    const [editingServiceId, setEditingServiceId] = useState<string | null>(
+    const [editingServiceId, setEditingServiceId] = useState<number | null>(
         null,
     );
 
@@ -52,11 +49,14 @@ export default function ServicesView() {
     const [formData, setFormData] = useState({
         name: '',
         description: '',
-        category: 'Consulting',
+        icon: 'sparkles' as ServiceIcon, // NEW - service icon
+        // image: '', // Changed from imageUrl
+        price: '0.00', // Changed to string (was number)
+        variant: 'standard' as 'standard' | 'featured', // NEW - variant type
         duration: 60,
-        price: 150,
-        imageUrl: 'https://picsum.photos/seed/default/300/300',
-        status: 'Active' as 'Active' | 'Inactive',
+        active: true, // Changed from status string to boolean
+        badges: [] as ServiceBadge[], // NEW - badges array
+        image: 'https://picsum.photos/seed/default/300/300',
     });
 
     // Modal for Delete Confirmation
@@ -150,11 +150,13 @@ export default function ServicesView() {
         setFormData({
             name: '',
             description: '',
-            category: 'Consulting',
+            icon: 'sparkles' as ServiceIcon, // NEW - service icon
+            price: '0.00', // Changed to string (was number)
+            variant: 'standard' as 'standard' | 'featured', // NEW - variant type
             duration: 60,
-            price: 150,
-            imageUrl: 'https://picsum.photos/seed/default/300/300',
-            status: 'Active',
+            image: 'https://picsum.photos/seed/default/300/300',
+            active: true,
+            badges: [] as ServiceBadge[],
         });
         setIsDrawerOpen(true);
     };
@@ -162,6 +164,19 @@ export default function ServicesView() {
     // Handle Edit click
     const handleOpenEdit = (service: Service) => {
         setDrawerMode('edit');
+        setEditingServiceId(service.id);
+        setFormData({
+            name: service.name,
+            description: service.description || '',
+            icon: service.icon as ServiceIcon,
+            price: service.price,
+            variant: service.variant,
+            duration: service.duration,
+            image:
+                service.image || 'https://picsum.photos/seed/default/300/300',
+            active: service.active,
+            badges: service.badges as ServiceBadge[],
+        });
         console.log('Form Data (Edit info):', formData);
         setIsDrawerOpen(true);
     };
@@ -599,37 +614,92 @@ export default function ServicesView() {
                                             />
                                         </div>
 
-                                        {/* Row: Category & Duration */}
                                         <div className="grid grid-cols-2 gap-4">
+                                            {/* Icon Selection */}
                                             <div className="space-y-1">
                                                 <label className="text-xs font-semibold text-on-surface-variant dark:text-slate-400">
-                                                    Category
+                                                    Service Icon
                                                 </label>
                                                 <select
-                                                    value={formData.category}
+                                                    value={formData.icon}
                                                     onChange={(e) =>
                                                         setFormData({
                                                             ...formData,
-                                                            category:
-                                                                e.target.value,
+                                                            icon: e.target
+                                                                .value as ServiceIcon,
                                                         })
                                                     }
                                                     className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-2.5 text-sm font-medium transition-all outline-none focus:border-primary focus:ring-1 focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
                                                 >
-                                                    <option value="Consulting">
-                                                        Consulting
+                                                    <option value="scissors">
+                                                        Scissors
                                                     </option>
-                                                    <option value="Styling">
-                                                        Styling
+                                                    <option value="user-check">
+                                                        User Check
                                                     </option>
-                                                    <option value="Design">
-                                                        Design
+                                                    <option value="sparkles">
+                                                        Sparkles
                                                     </option>
-                                                    <option value="Workshops">
-                                                        Workshops
+                                                    <option value="paintbrush">
+                                                        Paintbrush
                                                     </option>
-                                                    <option value="Personal Branding">
-                                                        Personal Branding
+                                                    <option value="shield-check">
+                                                        Shield Check
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            {/* Price */}
+                                            <div className="space-y-1">
+                                                <label className="text-xs font-semibold text-on-surface-variant dark:text-slate-400">
+                                                    Price ($)
+                                                </label>
+                                                <div className="relative">
+                                                    <span className="absolute top-1/2 left-4 -translate-y-1/2 text-sm text-outline dark:text-slate-500">
+                                                        $
+                                                    </span>
+                                                    <input
+                                                        required
+                                                        type="number"
+                                                        min={0}
+                                                        step="0.01"
+                                                        value={formData.price}
+                                                        onChange={(e) =>
+                                                            setFormData({
+                                                                ...formData,
+                                                                price: e.target
+                                                                    .value,
+                                                            })
+                                                        }
+                                                        className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest py-2.5 pr-4 pl-8 text-sm font-medium transition-all outline-none focus:border-primary focus:ring-1 focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500 dark:focus:border-purple-500 dark:focus:ring-purple-500"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Row: Category & Duration */}
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-1">
+                                                <label className="text-xs font-semibold text-on-surface-variant dark:text-slate-400">
+                                                    Variant
+                                                </label>
+                                                <select
+                                                    value={formData.variant}
+                                                    onChange={(e) =>
+                                                        setFormData({
+                                                            ...formData,
+                                                            variant: e.target
+                                                                .value as
+                                                                | 'standard'
+                                                                | 'featured',
+                                                        })
+                                                    }
+                                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-2.5 text-sm font-medium transition-all outline-none focus:border-primary focus:ring-1 focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
+                                                >
+                                                    <option value="standard">
+                                                        Standard
+                                                    </option>
+                                                    <option value="featured">
+                                                        Featured
                                                     </option>
                                                 </select>
                                             </div>
@@ -656,31 +726,67 @@ export default function ServicesView() {
                                             </div>
                                         </div>
 
-                                        {/* Price */}
-                                        <div className="space-y-1">
+                                        {/* Badges Selection */}
+                                        <div className="space-y-2">
                                             <label className="text-xs font-semibold text-on-surface-variant dark:text-slate-400">
-                                                Price ($)
+                                                Service Badges
                                             </label>
-                                            <div className="relative">
-                                                <span className="absolute top-1/2 left-4 -translate-y-1/2 text-sm text-outline dark:text-slate-500">
-                                                    $
-                                                </span>
-                                                <input
-                                                    required
-                                                    type="number"
-                                                    min={0}
-                                                    step="0.01"
-                                                    value={formData.price}
-                                                    onChange={(e) =>
-                                                        setFormData({
-                                                            ...formData,
-                                                            price: Number(
-                                                                e.target.value,
-                                                            ),
-                                                        })
-                                                    }
-                                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest py-2.5 pr-4 pl-8 text-sm font-medium transition-all outline-none focus:border-primary focus:ring-1 focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500 dark:focus:border-purple-500 dark:focus:ring-purple-500"
-                                                />
+                                            <div className="space-y-2">
+                                                {(
+                                                    [
+                                                        'popular',
+                                                        'recommended',
+                                                        'best-value',
+                                                    ] as const
+                                                ).map((badge) => (
+                                                    <label
+                                                        key={badge}
+                                                        className="flex cursor-pointer items-center gap-2 rounded-lg border border-outline-variant/40 p-2.5 transition-all dark:border-slate-700 dark:bg-slate-800/30"
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={formData.badges.includes(
+                                                                badge,
+                                                            )}
+                                                            onChange={(e) => {
+                                                                if (
+                                                                    e.target
+                                                                        .checked
+                                                                ) {
+                                                                    setFormData(
+                                                                        {
+                                                                            ...formData,
+                                                                            badges: [
+                                                                                ...formData.badges,
+                                                                                badge,
+                                                                            ],
+                                                                        },
+                                                                    );
+                                                                } else {
+                                                                    setFormData(
+                                                                        {
+                                                                            ...formData,
+                                                                            badges: formData.badges.filter(
+                                                                                (
+                                                                                    b,
+                                                                                ) =>
+                                                                                    b !==
+                                                                                    badge,
+                                                                            ),
+                                                                        },
+                                                                    );
+                                                                }
+                                                            }}
+                                                            className="cursor-pointer rounded text-primary focus:ring-primary dark:text-purple-500 dark:focus:ring-purple-500"
+                                                        />
+                                                        <span className="text-sm font-medium text-on-surface capitalize dark:text-white">
+                                                            {badge.replace(
+                                                                '-',
+                                                                ' ',
+                                                            )}
+                                                        </span>
+                                                    </label>
+                                                ))}
                                             </div>
                                         </div>
 
@@ -714,12 +820,11 @@ export default function ServicesView() {
                                                         onClick={() =>
                                                             setFormData({
                                                                 ...formData,
-                                                                imageUrl:
-                                                                    item.url,
+                                                                image: item.url,
                                                             })
                                                         }
                                                         className={`relative aspect-square cursor-pointer overflow-hidden rounded-md border-2 ${
-                                                            formData.imageUrl ===
+                                                            formData.image ===
                                                             item.url
                                                                 ? 'border-primary dark:border-purple-500'
                                                                 : 'border-transparent'
@@ -734,7 +839,7 @@ export default function ServicesView() {
                                                         <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-[10px] font-bold text-white">
                                                             {item.name}
                                                         </div>
-                                                        {formData.imageUrl ===
+                                                        {formData.image ===
                                                             item.url && (
                                                             <div className="absolute top-1 right-1 rounded-full bg-primary p-0.5 text-on-primary dark:bg-purple-600">
                                                                 <Check
@@ -748,48 +853,31 @@ export default function ServicesView() {
                                         </div>
 
                                         {/* Status selection in drawer */}
+                                        {/* Active/Inactive Status as Toggle */}
                                         <div className="space-y-1">
                                             <label className="block text-xs font-semibold text-on-surface-variant dark:text-slate-400">
-                                                Default Status
+                                                Status
                                             </label>
-                                            <div className="mt-1 flex gap-4">
-                                                <label className="flex cursor-pointer items-center gap-2 text-sm text-on-surface dark:text-white">
-                                                    <input
-                                                        type="radio"
-                                                        name="status"
-                                                        checked={
-                                                            formData.status ===
-                                                            'Active'
-                                                        }
-                                                        onChange={() =>
-                                                            setFormData({
-                                                                ...formData,
-                                                                status: 'Active',
-                                                            })
-                                                        }
-                                                        className="cursor-pointer text-primary focus:ring-primary dark:text-purple-500 dark:focus:ring-purple-500"
-                                                    />
-                                                    <span>Active</span>
-                                                </label>
-                                                <label className="flex cursor-pointer items-center gap-2 text-sm text-on-surface dark:text-white">
-                                                    <input
-                                                        type="radio"
-                                                        name="status"
-                                                        checked={
-                                                            formData.status ===
-                                                            'Inactive'
-                                                        }
-                                                        onChange={() =>
-                                                            setFormData({
-                                                                ...formData,
-                                                                status: 'Inactive',
-                                                            })
-                                                        }
-                                                        className="cursor-pointer text-primary focus:ring-primary dark:text-purple-500 dark:focus:ring-purple-500"
-                                                    />
-                                                    <span>Inactive</span>
-                                                </label>
-                                            </div>
+                                            <label className="relative inline-flex cursor-pointer items-center">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.active}
+                                                    onChange={(e) =>
+                                                        setFormData({
+                                                            ...formData,
+                                                            active: e.target
+                                                                .checked,
+                                                        })
+                                                    }
+                                                    className="peer sr-only"
+                                                />
+                                                <div className="peer h-6 w-11 rounded-full bg-outline-variant/65 peer-checked:bg-primary after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full dark:bg-slate-700 dark:peer-checked:bg-purple-600 dark:after:border-slate-600"></div>
+                                                <span className="ml-3 text-xs font-medium text-on-surface-variant dark:text-slate-400">
+                                                    {formData.active
+                                                        ? 'Active'
+                                                        : 'Inactive'}
+                                                </span>
+                                            </label>
                                         </div>
 
                                         {/* Drag and drop upload zone representation */}

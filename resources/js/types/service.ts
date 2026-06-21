@@ -19,7 +19,7 @@ export interface Service {
     // duration in minutes
     duration: number;
 
-    active?: boolean;
+    active: boolean;
     badges?: ServiceBadge[] | null;
     created_at: string;
 }
