@@ -7,6 +7,21 @@ export function formatDate(date: Date): string {
     return `${year}-${month}-${day}`;
 }
 
+export const extractAndFormatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-GB', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',});
+};
+
+export const extractAndFormatTime = (dateString: string) => {
+    return new Date(dateString).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+};
+
 export function formatDateAndTime(dateString: string) {
     const date = new Date(dateString);
 

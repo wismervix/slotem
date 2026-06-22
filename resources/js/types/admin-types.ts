@@ -84,7 +84,7 @@ export interface UserThree {
     name: string;
     email: string;
     phone: string;
-    registeredDate: string;
+    created_at: string;
     registeredTime: string;
     bookingsCount: number;
     status: 'Active' | 'Suspended' | 'Pending';

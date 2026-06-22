@@ -18,53 +18,49 @@ import {
     AlertTriangle,
     TrendingUp,
 } from 'lucide-react';
-import { User, UserStatus } from '@/types';
+import { UserThree, BookingThree, User } from '@/types';
+import { INITIAL_USERS, INITIAL_BOOKINGSS } from '@/data/initial-data';
 import AdminLayout from '@/layouts/Admin/AdminLayout';
 import { Link } from '@inertiajs/react';
-import { extractAndFormatDate, extractAndFormatTime, formatDateAndTime, formatTime } from '@/lib/calendar-utils';
 
 interface AdminUsersProps {
     users: User[];
 }
 
-export default function AdminUsers({ users }: AdminUsersProps) {
+export default function AdminUsers({ users: InitialUsers }: AdminUsersProps) {
     const [searchQuery, setSearchQuery] = useState<string>('');
 
+    const [users, setUsers] = useState<UserThree[]>([...INITIAL_USERS]);
+    const [bookings, setBookings] = useState<BookingThree[]>([
+        ...INITIAL_BOOKINGSS,
+    ]);
 
     // State Action Handlers
-    const handleAddUser = (newUser: User) => {
+    const handleAddUser = (newUser: UserThree) => {
         const updated = [newUser, ...users];
-        // setUsers(updated);
-        console.log("Added new user", updated)
+        setUsers(updated);
     };
-    
-    const handleUpdateUser = (updatedUser: User) => {
+
+    const handleUpdateUser = (updatedUser: UserThree) => {
         const updated = users.map((u) =>
             u.id === updatedUser.id ? updatedUser : u,
-    );
-    // setUsers(updated);
-    console.log("Updated new user", updated)
-};
-
-const handleDeleteUser = (userId: number) => {
-        const updated = users.filter((u) => u.id !== userId);
-        // setUsers(updated);
-        console.log("Deleted new user", updated)
-        // Also cancel bookings associated with deleted profiles
-        const updatedBookings = users.flatMap((u) =>
-            (u.bookings ?? []).map((b) => ({
-                ...b,
-                status: 'cancelled' as const,
-            }))
         );
-        
-        // setBookings(updatedBookings);
-        console.log("Cancelled all bookings ass. w this user", updatedBookings)
+        setUsers(updated);
+    };
+
+    const handleDeleteUser = (userId: string) => {
+        const updated = users.filter((u) => u.id !== userId);
+        setUsers(updated);
+        // Also cancel bookings associated with deleted profiles
+        const updatedBookings = bookings.map((b) =>
+            b.userId === userId ? { ...b, status: 'Cancelled' as const } : b,
+        );
+        setBookings(updatedBookings);
     };
 
     // Filters & Sorting state
     const [statusFilter, setStatusFilter] = useState<
-        'All Statuses' | 'Active' | 'Inactive' | 'Suspended' | 'Deleted'
+        'All Statuses' | 'Active' | 'Suspended' | 'Pending'
     >('All Statuses');
     const [sortBy, setSortBy] = useState<
         'Registration Date' | 'Name (A-Z)' | 'Most Bookings'
@@ -77,15 +73,17 @@ const handleDeleteUser = (userId: number) => {
     const itemsPerPage = 5;
 
     // Selected User Modal States
-    const [viewingUser, setViewingUser] = useState<User | null>(null);
-    const [editingUser, setEditingUser] = useState<User | null>(null);
+    const [viewingUser, setViewingUser] = useState<UserThree | null>(null);
+    const [editingUser, setEditingUser] = useState<UserThree | null>(null);
     const [isAddingUser, setIsAddingUser] = useState(false);
 
     // Form states for Add/Edit
     const [formName, setFormName] = useState('');
     const [formEmail, setFormEmail] = useState('');
     const [formPhone, setFormPhone] = useState('');
-    const [formStatus, setFormStatus] = useState<UserStatus>('active');
+    const [formStatus, setFormStatus] = useState<
+        'Active' | 'Suspended' | 'Pending'
+    >('Active');
     const [formAvatar, setFormAvatar] = useState('');
 
     // CSV Export animation/feedback
@@ -102,33 +100,6 @@ const handleDeleteUser = (userId: number) => {
         }, 600);
     };
 
-    const doesStatusMatch = (
-        statuses: UserStatus | null | undefined,
-        filter:
-            | 'All Statuses'
-            | 'Active'
-            | 'Inactive'
-            | 'Suspended'
-            | 'Deleted',
-    ) => {
-        if (filter === 'All Statuses') return true;
-
-        if (!statuses?.length) return false;
-
-        switch (filter) {
-            case 'Active':
-                return statuses.includes('active')
-            case 'Inactive':
-                return statuses.includes('inactive')
-            case 'Suspended':
-                return statuses.includes('suspended')
-            case 'Deleted':
-                return statuses.includes('deleted')
-        }
-        
-        // return filter === 'All Statuses' || statuses === filter;
-    };
-
     // Filtered & Sorted users list
     const processedUsers = useMemo(() => {
         return users
@@ -139,13 +110,12 @@ const handleDeleteUser = (userId: number) => {
                     !query ||
                     user.name.toLowerCase().includes(query) ||
                     user.email.toLowerCase().includes(query) ||
-                    user.id.toString().includes(query);
+                    user.id.toLowerCase().includes(query);
 
                 // Status filter
-                // const matchesStatus =
-                //     statusFilter === 'All Statuses' ||
-                //     user.status === statusFilter;
-                const matchesStatus = doesStatusMatch(user.status, statusFilter);
+                const matchesStatus =
+                    statusFilter === 'All Statuses' ||
+                    user.status === statusFilter;
 
                 // Custom Date filter (e.g. Month name or date string)
                 const matchesDate =
@@ -161,13 +131,12 @@ const handleDeleteUser = (userId: number) => {
                     return a.name.localeCompare(b.name);
                 }
                 if (sortBy === 'Most Bookings') {
-                    return (b.bookings_count ?? 0) - (a.bookings_count ?? 0);
+                    return b.bookingsCount - a.bookingsCount;
                 }
                 // Default Sort by Date (assume ID order correlates to registration order for simplicity, or reverse chronological)
-                return b.id - a.id;
+                return b.id.localeCompare(a.id);
             });
     }, [users, searchQuery, statusFilter, sortBy, dateFilter]);
-
 
     // Paginated partition
     const totalItems = processedUsers.length;
@@ -184,13 +153,13 @@ const handleDeleteUser = (userId: number) => {
 
     // Computed stats for quick insight cards
     const totalActiveCount = useMemo(
-        () => users.filter((u) => u.status === 'active').length,
+        () => users.filter((u) => u.status === 'Active').length,
         [users],
     );
     const reportsPendingCount = useMemo(
         () =>
             users.filter(
-                (u) => u.status === 'suspended' || u.status === 'inactive',
+                (u) => u.status === 'Suspended' || u.status === 'Pending',
             ).length,
         [users],
     );
@@ -229,13 +198,13 @@ const handleDeleteUser = (userId: number) => {
     };
 
     // Setup form with current user values for editing
-    const handleStartEdit = (user: User) => {
+    const handleStartEdit = (user: UserThree) => {
         setEditingUser(user);
         setFormName(user.name);
         setFormEmail(user.email);
-        setFormPhone(user.phone || '');
+        setFormPhone(user.phone);
         setFormStatus(user.status);
-        setFormAvatar(user.avatar || '');
+        setFormAvatar(user.avatar);
     };
 
     const handleSaveEdit = () => {
@@ -244,7 +213,7 @@ const handleDeleteUser = (userId: number) => {
             alert('Name and Email are required.');
             return;
         }
-        const updated: User = {
+        const updated: UserThree = {
             ...editingUser,
             name: formName,
             email: formEmail,
@@ -263,7 +232,7 @@ const handleDeleteUser = (userId: number) => {
         setFormName('');
         setFormEmail('');
         setFormPhone('');
-        setFormStatus('active');
+        setFormStatus('Active');
         // Random beautiful placeholder avatar
         const randId = Math.floor(Math.random() * 100);
         setFormAvatar(
@@ -278,9 +247,8 @@ const handleDeleteUser = (userId: number) => {
         }
         // Generate novel ID
         const newIdNum = 49200 + users.length + 1;
-        const newUser: User = {
-            // id: `SL-${newIdNum}`,
-            id: newIdNum,
+        const newUser: UserThree = {
+            id: `SL-${newIdNum}`,
             name: formName,
             email: formEmail,
             phone: formPhone || '+1 (555) 000-0000',
@@ -289,15 +257,9 @@ const handleDeleteUser = (userId: number) => {
                 day: '2-digit',
                 year: 'numeric',
             }),
-            updated_at: new Date().toLocaleDateString('en-US', {
-                month: 'short',
-                day: '2-digit',
-                year: 'numeric',
-            }),
-            email_verified_at: new Date().toLocaleDateString('en-US', {
-                month: 'short',
-                day: '2-digit',
-                year: 'numeric',
+            registeredTime: new Date().toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
             }),
             bookingsCount: 0,
             status: formStatus,
@@ -309,12 +271,12 @@ const handleDeleteUser = (userId: number) => {
         setIsAddingUser(false);
     };
 
-    const handleToggleStatus = (user: User) => {
-        const nextStatus = user.status === 'active' ? 'suspended' : 'active';
+    const handleToggleStatus = (user: UserThree) => {
+        const nextStatus = user.status === 'Active' ? 'Suspended' : 'Active';
         handleUpdateUser({ ...user, status: nextStatus });
     };
 
-    console.log('Users Prop: ', users);
+    console.log('Users Prop: ', InitialUsers);
 
     return (
         <AdminLayout>
@@ -465,8 +427,7 @@ const handleDeleteUser = (userId: number) => {
                                     paginatedUsers.map((user) => {
                                         // Bookings relative bar (let's assume out of 30 max Bookings list scale for design styling)
                                         const relativeProgress = Math.min(
-                                            ((user.bookings_count ?? 0) / 30) *
-                                                100,
+                                            (user.bookingsCount / 30) * 100,
                                             100,
                                         );
 
@@ -503,22 +464,16 @@ const handleDeleteUser = (userId: number) => {
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <p className="text-xs font-medium text-on-surface dark:text-white">
-                                                        {extractAndFormatDate(
-                                                            user.created_at,
-                                                        )}
+                                                        {user.created_at}
                                                     </p>
                                                     <p className="text-[10px] text-on-surface-variant dark:text-slate-500">
-                                                        {extractAndFormatTime(
-                                                            user.created_at,
-                                                        )}
+                                                        {user.registeredTime}
                                                     </p>
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center gap-2">
                                                         <span className="w-4 text-xs font-bold text-on-surface dark:text-white">
-                                                            {
-                                                                user.bookings_count
-                                                            }
+                                                            {user.bookingsCount}
                                                         </span>
                                                         <span className="block h-1.5 w-16 overflow-hidden rounded-full bg-surface-container-highest dark:bg-slate-700">
                                                             <span
@@ -532,12 +487,12 @@ const handleDeleteUser = (userId: number) => {
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     {user.status ===
-                                                    'active' ? (
+                                                    'Active' ? (
                                                         <span className="inline-flex items-center rounded-full border border-green-200 bg-green-100 px-2.5 py-0.5 text-[10px] font-semibold text-green-800 dark:border-green-900/50 dark:bg-green-950/40 dark:text-green-400">
                                                             Active
                                                         </span>
                                                     ) : user.status ===
-                                                      'suspended' ? (
+                                                      'Suspended' ? (
                                                         <span className="inline-flex items-center rounded-full border border-red-200 bg-red-100 px-2.5 py-0.5 text-[10px] font-semibold text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-400">
                                                             Suspended
                                                         </span>
@@ -580,19 +535,19 @@ const handleDeleteUser = (userId: number) => {
                                                             }
                                                             className={`cursor-pointer rounded-lg p-1.5 transition-all ${
                                                                 user.status ===
-                                                                'active'
+                                                                'Active'
                                                                     ? 'text-outline hover:bg-red-50 hover:text-red-600 dark:text-slate-600 dark:hover:bg-red-950/20 dark:hover:text-red-400'
                                                                     : 'text-outline hover:bg-green-50 hover:text-green-600 dark:text-slate-600 dark:hover:bg-green-950/20 dark:hover:text-green-400'
                                                             }`}
                                                             title={
                                                                 user.status ===
-                                                                'active'
+                                                                'Active'
                                                                     ? 'Toggle Suspend'
                                                                     : 'Activate User'
                                                             }
                                                         >
                                                             {user.status ===
-                                                            'active' ? (
+                                                            'Active' ? (
                                                                 <X className="h-4 w-4" />
                                                             ) : (
                                                                 <Check className="h-4 w-4" />
@@ -755,7 +710,7 @@ const handleDeleteUser = (userId: number) => {
                                             <span
                                                 className={`inline-block rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
                                                     viewingUser.status ===
-                                                    'active'
+                                                    'Active'
                                                         ? 'bg-green-500/20 text-green-200'
                                                         : 'bg-red-500/20 text-red-200'
                                                 }`}
@@ -798,14 +753,8 @@ const handleDeleteUser = (userId: number) => {
                                                 Registered
                                             </p>
                                             <p className="font-medium text-on-surface dark:text-white">
-                                                {extractAndFormatDate(
-                                                    viewingUser.created_at,
-                                                )}{' '}
-                                                @{' '}
-                                                {extractAndFormatTime(
-                                                    viewingUser.created_at,
-                                                )}
-                                                {/* {viewingUser.registeredTime} */}
+                                                {viewingUser.created_at} @{' '}
+                                                {viewingUser.registeredTime}
                                             </p>
                                         </div>
                                     </div>
@@ -816,7 +765,7 @@ const handleDeleteUser = (userId: number) => {
                                                 Total Reservations
                                             </p>
                                             <p className="font-bold text-on-surface dark:text-white">
-                                                {viewingUser.bookings_count}{' '}
+                                                {viewingUser.bookingsCount}{' '}
                                                 slots filled
                                             </p>
                                         </div>
@@ -827,59 +776,50 @@ const handleDeleteUser = (userId: number) => {
                                 <div className="border-t border-outline-variant/60 pt-4 dark:border-slate-700">
                                     <h4 className="mb-2.5 text-xs font-bold tracking-wide text-on-surface uppercase dark:text-white">
                                         Schedule Feed (
-                                        {viewingUser?.bookings?.length})
+                                        {
+                                            bookings.filter(
+                                                (b) =>
+                                                    b.userId === viewingUser.id,
+                                            ).length
+                                        }
+                                        )
                                     </h4>
                                     <div className="max-h-40 space-y-2 overflow-y-auto">
-                                        {viewingUser?.bookings?.length === 0 ? (
+                                        {bookings.filter(
+                                            (b) => b.userId === viewingUser.id,
+                                        ).length === 0 ? (
                                             <p className="text-[11px] text-on-surface-variant italic dark:text-slate-500">
                                                 No current bookings under this
                                                 profile.
                                             </p>
                                         ) : (
-                                            viewingUser?.bookings?.map(
-                                                (book) => (
+                                            bookings
+                                                .filter(
+                                                    (b) =>
+                                                        b.userId ===
+                                                        viewingUser.id,
+                                                )
+                                                .map((book) => (
                                                     <div
                                                         key={book.id}
                                                         className="flex items-center justify-between rounded-lg border border-outline-variant/50 bg-surface-container-low p-2 text-xs dark:border-slate-700 dark:bg-slate-800/50"
                                                     >
                                                         <div>
                                                             <p className="font-semibold text-on-surface dark:text-white">
-                                                                {book?.service
-                                                                    ?.name ??
-                                                                    ''}
+                                                                {book.service}
                                                             </p>
                                                             <p className="font-mono text-[10px] text-on-surface-variant dark:text-slate-500">
-                                                                {new Intl.DateTimeFormat(
-                                                                    'en-GB',
-                                                                    {
-                                                                        weekday:
-                                                                            'short',
-                                                                        month: 'short',
-                                                                        day: 'numeric',
-                                                                        year: 'numeric',
-                                                                    },
-                                                                ).format(
-                                                                    new Date(
-                                                                        book.date,
-                                                                    ),
-                                                                )}{' '}
-                                                                @{' '}
-                                                                {formatTime(
-                                                                    book.start_time,
-                                                                )}{' '}
-                                                                —{' '}
-                                                                {formatTime(
-                                                                    book.end_time,
-                                                                )}
+                                                                {book.date} @{' '}
+                                                                {book.timeSlot}
                                                             </p>
                                                         </div>
                                                         <span
                                                             className={`rounded px-2 py-0.5 text-[9px] font-semibold uppercase ${
                                                                 book.status ===
-                                                                'approved'
+                                                                'Confirmed'
                                                                     ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400'
                                                                     : book.status ===
-                                                                        'completed'
+                                                                        'Completed'
                                                                       ? 'bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-400'
                                                                       : 'bg-yellow-50 text-yellow-700 dark:bg-yellow-950/40 dark:text-yellow-400'
                                                             }`}
@@ -887,8 +827,7 @@ const handleDeleteUser = (userId: number) => {
                                                             {book.status}
                                                         </span>
                                                     </div>
-                                                ),
-                                            )
+                                                ))
                                         )}
                                     </div>
                                 </div>
@@ -902,7 +841,7 @@ const handleDeleteUser = (userId: number) => {
                                     Close Details
                                 </button>
                                 <Link
-                                    href={route('admin.users.details', viewingUser.id)}
+                                    href={route('admin.users.details', 1)}
                                     className="cursor-pointer rounded-lg bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-all hover:bg-primary-container dark:bg-purple-600 dark:hover:bg-purple-700"
                                 >
                                     View Profile Details
@@ -995,17 +934,14 @@ const handleDeleteUser = (userId: number) => {
                                             }
                                             className="w-full rounded-lg border border-outline-variant px-3 py-2 text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
                                         >
-                                            <option value="active">
+                                            <option value="Active">
                                                 Active
                                             </option>
-                                            <option value="inactive">
-                                                Inactive
-                                            </option>
-                                            <option value="suspended">
+                                            <option value="Suspended">
                                                 Suspended
                                             </option>
-                                            <option value="deleted">
-                                                Deleted
+                                            <option value="Pending">
+                                                Pending
                                             </option>
                                         </select>
                                     </div>
@@ -1138,17 +1074,14 @@ const handleDeleteUser = (userId: number) => {
                                             }
                                             className="w-full rounded-lg border border-outline-variant px-3 py-2 text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
                                         >
-                                            <option value="active">
-                                                Active
+                                            <option value="Active">
+                                                Active / Approved
                                             </option>
-                                            <option value="inactive">
-                                                Inactive
-                                            </option>
-                                            <option value="suspended">
+                                            <option value="Suspended">
                                                 Suspended
                                             </option>
-                                            <option value="deleted">
-                                                Deleted
+                                            <option value="Pending">
+                                                Pending Verification
                                             </option>
                                         </select>
                                     </div>

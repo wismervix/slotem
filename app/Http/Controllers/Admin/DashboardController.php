@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\User;
 use App\Models\Booking;
 // use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -27,7 +28,12 @@ class DashboardController extends Controller
     }
     public function users()
     {
-        return inertia('Admin/User/Users');
+        // $users = User::with('bookings')->get();
+        $users = User::with('bookings.service')->withCount('bookings')->get();
+
+        return inertia('Admin/User/Users', [
+            'users' => $users,
+        ]);
     }
     public function userDetails()
     {
