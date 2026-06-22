@@ -21,7 +21,7 @@ Route::group(['prefix' => 'admin'], function () {
             Route::get('/availability', 'availability')->name('admin.availability');
 
             Route::get('/users', 'users')->name('admin.users');
-            Route::get('/users/user-details/{id}', 'userDetails')->name('admin.users.details');
+            Route::get('/users/user-details/{user}', 'userDetails')->name('admin.users.details');
             
             Route::get('/profile')->name('admin.profile');
             Route::get('/settings', 'settings')->name('admin.settings');

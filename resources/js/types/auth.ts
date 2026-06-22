@@ -6,7 +6,7 @@ export type User = {
     id: number;
     name: string;
     email: string;
-    avatar?: string;
+    avatar_url?: string;
     phone?: string;
     bookings_count?: number;
     bookings?: Booking[];

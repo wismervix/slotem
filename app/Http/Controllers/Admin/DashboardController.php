@@ -35,9 +35,14 @@ class DashboardController extends Controller
             'users' => $users,
         ]);
     }
-    public function userDetails()
+    public function userDetails(User $user)
     {
-        return inertia('Admin/User/UserDetails');
+        $user->load('bookings.service', 'notifications');
+
+        return inertia('Admin/User/UserDetails', [
+            'user' => $user,
+            'notifications' => $user->notifications,
+        ]);
     }
     public function settings()
     {

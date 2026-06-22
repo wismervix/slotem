@@ -20,110 +20,62 @@ import {
     Sparkles,
     UserCheck,
     CreditCard,
-    User,
+    // User,
     Info,
 } from 'lucide-react';
 
 import EditProfileModal from '@/components/Admin/EditProfileModal';
-import {
-    CustomerProfile,
-    BookingFour,
-    ActivityLog,
-    BookingStatusFour,
-} from '@/types';
-import {
-    INITIAL_PROFILE,
-    INITIAL_BOOKINGSSS,
-    INITIAL_LOGS,
-} from '@/data/initial-data';
+import { Booking, User, Notification } from '@/types';
 import AdminLayout from '@/layouts/Admin/AdminLayout';
+import { formatTime } from '@/lib/calendar-utils';
+import { serviceIcons } from '@/lib/service-icons';
 
-export default function DashboardView() {
-    const [profile, setProfile] = useState<CustomerProfile>(INITIAL_PROFILE);
-    const [bookings, setBookings] = useState<BookingFour[]>(INITIAL_BOOKINGSSS);
-    const [logs, setLogs] = useState<ActivityLog[]>(INITIAL_LOGS);
+interface UserDetailsProps {
+    user: User;
+    notifications: Notification[];
+}
 
+export default function DashboardView({
+    user,
+    notifications,
+}: UserDetailsProps) {
     const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
 
-    const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+    const [activeMenuId, setActiveMenuId] = useState<number | null>(null);
     const [selectedBookingForDetails, setSelectedBookingForDetails] =
-        useState<BookingFour | null>(null);
+        useState<Booking | null>(null);
 
     // Derive stats dynamically from current master list for responsive updates!
+    const bookings = user?.bookings ?? [];
     const completedCount =
-        bookings.filter((b) => b.status === 'Confirmed').length + 38; // Initial layout had 42
+        bookings.filter((b) => b.status === 'completed').length + 38; // Initial layout had 42
     const cancelledCount = bookings.filter(
-        (b) => b.status === 'Cancelled',
+        (b) => b.status === 'cancelled',
     ).length; // Initial had 3
     const upcomingCount =
-        bookings.filter((b) => b.status === 'Pending').length + 6; // Initial had 8
+        bookings.filter((b) => b.status === 'pending').length + 6; // Initial had 8
 
-    const handleClearLogs = () => {
-        setLogs([]);
+    const handleSaveProfile = (updatedProfile: User) => {
+        console.log("Updated User", updatedProfile);
     };
 
-    const handleUpdateBookingStatus = (
-        id: string,
-        newStatus: BookingStatusFour,
-    ) => {
-        setBookings((prevBookings) =>
-            prevBookings.map((bk) =>
-                bk.id === id ? { ...bk, status: newStatus } : bk,
-            ),
-        );
-    };
-
-    const handleSaveProfile = (updatedProfile: CustomerProfile) => {
-        setProfile(updatedProfile);
-        handleAddLog(
-            'profile',
-            'Profile Updated',
-            `Admin updated profile files, email, and active flags for ${updatedProfile.name}.`,
-        );
-    };
-
-    const handleAddLog = (
-        type: 'rescheduled' | 'payment' | 'profile' | 'email' | 'system',
-        title: string,
-        subtitle: string,
-    ) => {
-        const newLog: ActivityLog = {
-            id: `log-${Date.now()}`,
-            type,
-            title,
-            subtitle,
-            timeText: 'Just now',
-            timestamp: Date.now(),
-        };
-        setLogs((prev) => [newLog, ...prev]);
-    };
-
-    const handleToggleMenu = (id: string, e: React.MouseEvent) => {
+    const handleToggleMenu = (id: number, e: React.MouseEvent) => {
         e.stopPropagation();
         setActiveMenuId(activeMenuId === id ? null : id);
     };
 
     const handleStatusChange = (
-        id: string,
-        status: 'Confirmed' | 'Pending' | 'Cancelled',
+        id: number,
+        status: 'completed' | 'pending' | 'cancelled',
         serviceName: string,
     ) => {
-        handleUpdateBookingStatus(id, status);
+        // handleUpdateBookingStatus(id, status);
         setActiveMenuId(null);
-        handleAddLog(
-            status === 'Cancelled'
-                ? 'system'
-                : status === 'Confirmed'
-                  ? 'payment'
-                  : 'rescheduled',
-            `Status: ${status}`,
-            `"${serviceName}" has been set to ${status}.`,
-        );
     };
 
-    const getLogIcon = (type: string) => {
+    const getNotificationIcon = (type: string) => {
         switch (type) {
-            case 'rescheduled':
+            case 'Bookings':
                 return (
                     <CalendarIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                 );
@@ -146,9 +98,9 @@ export default function DashboardView() {
         }
     };
 
-    const getLogBg = (type: string) => {
+    const getNotificationBg = (type: string) => {
         switch (type) {
-            case 'rescheduled':
+            case 'Bookings':
                 return 'bg-purple-100/70 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400';
             case 'payment':
                 return 'bg-amber-100/70 text-amber-800 dark:bg-amber-950/30 dark:text-amber-400';
@@ -160,6 +112,9 @@ export default function DashboardView() {
                 return 'bg-neutral-100 text-neutral-800 dark:bg-slate-800 dark:text-slate-400';
         }
     };
+
+    console.log('User Prop: ', user);
+    // console.log('Notifications Prop: ', notifications);
 
     return (
         <AdminLayout>
@@ -184,9 +139,9 @@ export default function DashboardView() {
                         <img
                             alt="Customer Profile"
                             className="h-28 w-28 rounded-full border-4 border-surface bg-primary-container object-cover shadow-md dark:border-slate-800 dark:bg-slate-800"
-                            src={profile.avatar}
+                            src={user.avatar_url}
                         />
-                        {profile.active && (
+                        {user.status === 'active' && (
                             <div
                                 className="absolute right-1 bottom-1 h-5 w-5 animate-pulse rounded-full border-2 border-surface bg-emerald-500 dark:border-slate-900"
                                 title="Active Status"
@@ -198,7 +153,7 @@ export default function DashboardView() {
                     <div className="flex-grow pt-2 text-center md:text-left">
                         <div className="mb-1 flex items-center justify-center gap-2.5 md:justify-start">
                             <h2 className="text-2xl font-bold tracking-tight text-on-surface dark:text-white">
-                                {profile.name}
+                                {user.name}
                             </h2>
                             <span className="rounded-full bg-primary-container px-2 py-0.5 text-[10px] font-bold tracking-wide text-on-primary-container uppercase dark:bg-purple-950/50 dark:text-purple-400">
                                 Client Profile
@@ -207,28 +162,34 @@ export default function DashboardView() {
 
                         <p className="mb-4 flex items-center justify-center gap-1.5 text-sm text-on-surface-variant selection:bg-primary-container md:justify-start dark:text-slate-400">
                             <Mail className="h-4 w-4 text-primary dark:text-purple-400" />
-                            <span>{profile.email}</span>
+                            <span>{user.email}</span>
                         </p>
 
                         <div className="flex flex-wrap items-center justify-center gap-3 md:justify-start">
                             <div className="flex items-center gap-1.5 rounded-xl border border-outline-variant/20 bg-primary-container px-3 py-1.5 shadow-xs dark:border-slate-700 dark:bg-slate-800/50">
                                 <CalendarIcon className="h-4 w-4 text-on-primary-container dark:text-purple-400" />
                                 <span className="text-xs font-semibold text-on-primary-container dark:text-slate-500">
-                                    Joined {profile.joinedDate}
+                                    Joined{' '}
+                                    {new Intl.DateTimeFormat('en-GB', {
+                                        weekday: 'short',
+                                        month: 'short',
+                                        day: 'numeric',
+                                        year: 'numeric',
+                                    }).format(new Date(user.created_at))}
                                 </span>
                             </div>
 
                             <div className="flex items-center gap-1.5 rounded-xl border border-outline-variant/20 bg-primary-container px-3 py-1.5 shadow-xs dark:border-slate-700 dark:bg-slate-800/50">
                                 <Award className="h-4 w-4 text-on-primary-container dark:text-purple-400" />
                                 <span className="text-xs font-semibold text-on-primary-container dark:text-slate-500">
-                                    {profile.tier}
+                                    Premium Member
                                 </span>
                             </div>
 
                             <div className="flex items-center gap-1.5 rounded-xl border border-outline-variant/20 bg-primary-container px-3 py-1.5 shadow-xs dark:border-slate-700 dark:bg-slate-800/50">
                                 <MapPin className="h-4 w-4 text-on-primary-container dark:text-purple-400" />
                                 <span className="text-xs font-semibold text-on-primary-container dark:text-slate-500">
-                                    {profile.city}
+                                    Chicago, IL
                                 </span>
                             </div>
                         </div>
@@ -356,124 +317,162 @@ export default function DashboardView() {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-outline-variant dark:divide-slate-700">
-                                        {bookings.slice(0, 5).map((bk) => (
-                                            <tr
-                                                key={bk.id}
-                                                className="group cursor-pointer transition-colors hover:bg-surface-container-low dark:hover:bg-slate-800/30"
-                                                onClick={() =>
-                                                    setSelectedBookingForDetails(
-                                                        bk,
-                                                    )
-                                                }
-                                            >
-                                                <td className="px-6 py-4">
-                                                    <p className="text-sm font-bold text-on-surface dark:text-white">
-                                                        {bk.service}
-                                                    </p>
-                                                    <p className="mt-0.5 font-mono text-[10px] text-on-surface-variant/60 dark:text-slate-500">
-                                                        {bk.ref}
-                                                    </p>
-                                                </td>
-                                                <td className="px-6 py-4 text-xs font-medium whitespace-nowrap text-on-surface/90 dark:text-slate-300">
-                                                    {bk.date}
-                                                    <span className="mt-0.5 block text-[9px] text-on-surface-variant/60 dark:text-slate-500">
-                                                        {
-                                                            bk.timeSlot?.split(
-                                                                ' - ',
-                                                            )[0]
+                                        {user?.bookings
+                                            ?.slice(0, 5)
+                                            .map((bk) => {
+                                                const Icon =
+                                                    serviceIcons[
+                                                        bk?.service?.icon ??
+                                                            'scissors'
+                                                    ];
+                                                return (
+                                                    <tr
+                                                        key={bk.id}
+                                                        className="group cursor-pointer transition-colors hover:bg-surface-container-low dark:hover:bg-slate-800/30"
+                                                        onClick={() =>
+                                                            setSelectedBookingForDetails(
+                                                                bk,
+                                                            )
                                                         }
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 text-sm font-semibold text-on-surface dark:text-white">
-                                                    ${bk.amount.toFixed(2)}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span
-                                                        className={`inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                                                            bk.status ===
-                                                            'Confirmed'
-                                                                ? 'bg-emerald-100/80 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400'
-                                                                : bk.status ===
-                                                                    'Pending'
-                                                                  ? 'bg-amber-100/80 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400'
-                                                                  : 'bg-rose-100/80 text-rose-800 dark:bg-red-950/40 dark:text-red-400'
-                                                        }`}
                                                     >
-                                                        {bk.status}
-                                                    </span>
-                                                </td>
-                                                <td
-                                                    className="px-6 py-4 text-right whitespace-nowrap"
-                                                    onClick={(e) =>
-                                                        e.stopPropagation()
-                                                    }
-                                                >
-                                                    <div className="relative inline-block text-left">
-                                                        <button
-                                                            onClick={(e) =>
-                                                                handleToggleMenu(
-                                                                    bk.id,
-                                                                    e,
-                                                                )
-                                                            }
-                                                            className="cursor-pointer rounded-full p-1 text-on-surface-variant/70 transition-all outline-none hover:bg-surface-container/50 hover:text-primary dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-purple-400"
-                                                        >
-                                                            <MoreVertical className="h-4 w-4" />
-                                                        </button>
+                                                        <td className="px-6 py-4">
+                                                            <p className="flex gap-2 text-sm font-bold text-on-surface dark:text-white">
+                                                                <Icon className="h-5 w-5" />
 
-                                                        {activeMenuId ===
-                                                            bk.id && (
-                                                            <div className="animate-in fade-in absolute right-0 z-20 mt-1.5 w-36 overflow-hidden rounded-xl border border-outline-variant bg-surface shadow-xl dark:border-slate-700 dark:bg-slate-800">
-                                                                <div className="py-1">
-                                                                    <button
-                                                                        onClick={() =>
-                                                                            handleStatusChange(
-                                                                                bk.id,
-                                                                                'Confirmed',
-                                                                                bk.service,
-                                                                            )
-                                                                        }
-                                                                        className="flex w-full cursor-pointer items-center gap-1.5 px-3 py-2 text-left text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-slate-700"
-                                                                    >
-                                                                        <Check className="h-3.5 w-3.5" />{' '}
-                                                                        Confirm
-                                                                        Slot
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() =>
-                                                                            handleStatusChange(
-                                                                                bk.id,
-                                                                                'Pending',
-                                                                                bk.service,
-                                                                            )
-                                                                        }
-                                                                        className="flex w-full cursor-pointer items-center gap-1.5 px-3 py-2 text-left text-xs font-medium text-amber-700 transition-colors hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-slate-700"
-                                                                    >
-                                                                        <RotateCcw className="h-3.5 w-3.5" />{' '}
-                                                                        Set
-                                                                        Pending
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() =>
-                                                                            handleStatusChange(
-                                                                                bk.id,
-                                                                                'Cancelled',
-                                                                                bk.service,
-                                                                            )
-                                                                        }
-                                                                        className="flex w-full cursor-pointer items-center gap-1.5 border-t border-gray-100 px-3 py-2 text-left text-xs font-medium text-rose-700 transition-colors hover:bg-rose-50 dark:border-slate-700 dark:text-red-400 dark:hover:bg-slate-700"
-                                                                    >
-                                                                        <X className="h-3.5 w-3.5" />{' '}
-                                                                        Cancel
-                                                                        Slot
-                                                                    </button>
-                                                                </div>
+                                                                {
+                                                                    bk?.service
+                                                                        ?.name
+                                                                }
+                                                            </p>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-xs font-medium whitespace-nowrap text-on-surface/90 dark:text-slate-300">
+                                                            {new Intl.DateTimeFormat(
+                                                                'en-GB',
+                                                                {
+                                                                    weekday:
+                                                                        'long',
+                                                                    month: 'short',
+                                                                    day: 'numeric',
+                                                                    year: 'numeric',
+                                                                },
+                                                            ).format(
+                                                                new Date(
+                                                                    bk.date,
+                                                                ),
+                                                            )}
+                                                            <span className="mt-0.5 block text-[9px] text-on-surface-variant/60 dark:text-slate-500">
+                                                                {formatTime(
+                                                                    bk.start_time,
+                                                                )}{' '}
+                                                                —{' '}
+                                                                {formatTime(
+                                                                    bk.end_time,
+                                                                )}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm font-semibold text-on-surface dark:text-white">
+                                                            $
+                                                            {bk?.service?.price}
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap">
+                                                            <span
+                                                                className={`inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                                                                    bk.status ===
+                                                                    'completed'
+                                                                        ? 'bg-emerald-100/80 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400'
+                                                                        : bk.status ===
+                                                                            'pending'
+                                                                          ? 'bg-amber-100/80 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400'
+                                                                          : 'bg-rose-100/80 text-rose-800 dark:bg-red-950/40 dark:text-red-400'
+                                                                }`}
+                                                            >
+                                                                {bk.status}
+                                                            </span>
+                                                        </td>
+                                                        <td
+                                                            className="px-6 py-4 text-right whitespace-nowrap"
+                                                            onClick={(e) =>
+                                                                e.stopPropagation()
+                                                            }
+                                                        >
+                                                            <div className="relative inline-block text-left">
+                                                                <button
+                                                                    onClick={(
+                                                                        e,
+                                                                    ) =>
+                                                                        handleToggleMenu(
+                                                                            bk.id,
+                                                                            e,
+                                                                        )
+                                                                    }
+                                                                    className="cursor-pointer rounded-full p-1 text-on-surface-variant/70 transition-all outline-none hover:bg-surface-container/50 hover:text-primary dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-purple-400"
+                                                                >
+                                                                    <MoreVertical className="h-4 w-4" />
+                                                                </button>
+
+                                                                {activeMenuId ===
+                                                                    bk.id && (
+                                                                    <div className="animate-in fade-in absolute right-0 z-20 mt-1.5 w-36 overflow-hidden rounded-xl border border-outline-variant bg-surface shadow-xl dark:border-slate-700 dark:bg-slate-800">
+                                                                        <div className="py-1">
+                                                                            <button
+                                                                                onClick={() =>
+                                                                                    handleStatusChange(
+                                                                                        bk.id,
+                                                                                        'completed',
+                                                                                        bk
+                                                                                            ?.service
+                                                                                            ?.name ??
+                                                                                            '',
+                                                                                    )
+                                                                                }
+                                                                                className="flex w-full cursor-pointer items-center gap-1.5 px-3 py-2 text-left text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-slate-700"
+                                                                            >
+                                                                                <Check className="h-3.5 w-3.5" />{' '}
+                                                                                Confirm
+                                                                                Slot
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={() =>
+                                                                                    handleStatusChange(
+                                                                                        bk.id,
+                                                                                        'pending',
+                                                                                        bk
+                                                                                            ?.service
+                                                                                            ?.name ??
+                                                                                            '',
+                                                                                    )
+                                                                                }
+                                                                                className="flex w-full cursor-pointer items-center gap-1.5 px-3 py-2 text-left text-xs font-medium text-amber-700 transition-colors hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-slate-700"
+                                                                            >
+                                                                                <RotateCcw className="h-3.5 w-3.5" />{' '}
+                                                                                Set
+                                                                                Pending
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={() =>
+                                                                                    handleStatusChange(
+                                                                                        bk.id,
+                                                                                        'cancelled',
+                                                                                        bk
+                                                                                            ?.service
+                                                                                            ?.name ??
+                                                                                            '',
+                                                                                    )
+                                                                                }
+                                                                                className="flex w-full cursor-pointer items-center gap-1.5 border-t border-gray-100 px-3 py-2 text-left text-xs font-medium text-rose-700 transition-colors hover:bg-rose-50 dark:border-slate-700 dark:text-red-400 dark:hover:bg-slate-700"
+                                                                            >
+                                                                                <X className="h-3.5 w-3.5" />{' '}
+                                                                                Cancel
+                                                                                Slot
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
                                                             </div>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
                                     </tbody>
                                 </table>
                             </div>
@@ -500,7 +499,7 @@ export default function DashboardView() {
                             </div>
 
                             <div className="custom-scrollbar max-h-[380px] flex-grow space-y-5 overflow-y-auto p-5">
-                                {logs.length === 0 ? (
+                                {notifications.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center py-10 text-center">
                                         <span className="mb-3 rounded-full bg-gray-50 p-3 text-gray-300 dark:bg-slate-800 dark:text-slate-600">
                                             <Info className="h-6 w-6" />
@@ -514,32 +513,35 @@ export default function DashboardView() {
                                         </p>
                                     </div>
                                 ) : (
-                                    logs.map((log, index) => (
+                                    notifications.map((n, index) => (
                                         <div
-                                            key={log.id}
+                                            key={n.id}
                                             className="relative flex gap-3.5"
                                         >
                                             {/* Line connection */}
-                                            {index < logs.length - 1 && (
+                                            {index <
+                                                notifications.length - 1 && (
                                                 <div className="absolute top-[30px] bottom-[-20px] left-[15px] w-0.5 bg-gray-100 dark:bg-slate-700"></div>
                                             )}
 
                                             {/* Log action icon badge */}
                                             <div
-                                                className={`z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full p-1.5 ${getLogBg(log.type)}`}
+                                                className={`z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full p-1.5 ${getNotificationBg(n.data.category ?? 'email')}`}
                                             >
-                                                {getLogIcon(log.type)}
+                                                {getNotificationIcon(
+                                                    n.data.category ?? 'email',
+                                                )}
                                             </div>
 
                                             <div className="pt-0.5 text-left">
                                                 <p className="text-xs font-bold text-on-surface dark:text-white">
-                                                    {log.title}
+                                                    {n.data.title}
                                                 </p>
                                                 <p className="mt-0.5 text-xs leading-relaxed text-on-surface-variant/85 dark:text-slate-400">
-                                                    {log.subtitle}
+                                                    {n.data.message}
                                                 </p>
                                                 <p className="mt-1 text-[9px] font-bold tracking-wider text-on-surface-variant/50 uppercase dark:text-slate-500">
-                                                    {log.timeText}
+                                                    {n.created_at}
                                                 </p>
                                             </div>
                                         </div>
@@ -549,10 +551,7 @@ export default function DashboardView() {
                         </div>
 
                         <div className="border-t border-outline-variant/20 bg-surface-container-low p-4 dark:border-slate-700 dark:bg-slate-800/30">
-                            <button
-                                onClick={handleClearLogs}
-                                className="w-full cursor-pointer rounded-xl border border-outline-variant py-2 text-xs font-semibold text-on-surface-variant transition-all hover:border-primary hover:bg-neutral-50 hover:text-primary active:scale-98 dark:border-slate-700 dark:text-slate-400 dark:hover:border-purple-500 dark:hover:bg-slate-800 dark:hover:text-purple-400"
-                            >
+                            <button className="w-full cursor-pointer rounded-xl border border-outline-variant py-2 text-xs font-semibold text-on-surface-variant transition-all hover:border-primary hover:bg-neutral-50 hover:text-primary active:scale-98 dark:border-slate-700 dark:text-slate-400 dark:hover:border-purple-500 dark:hover:bg-slate-800 dark:hover:text-purple-400">
                                 Clear All Logs
                             </button>
                         </div>
@@ -584,10 +583,10 @@ export default function DashboardView() {
                             </div>
 
                             <h3 className="text-lg font-bold text-on-surface dark:text-white">
-                                {selectedBookingForDetails.service}
+                                {selectedBookingForDetails.service?.name}
                             </h3>
                             <p className="mt-0.5 mb-4 font-mono text-xs text-on-surface-variant/70 dark:text-slate-500">
-                                Reference: {selectedBookingForDetails.ref}
+                                Reference: {selectedBookingForDetails.id}
                             </p>
 
                             <div className="space-y-3 border-t border-outline-variant pt-3 dark:border-slate-700">
@@ -596,7 +595,7 @@ export default function DashboardView() {
                                         Client Name
                                     </span>
                                     <span className="font-bold text-on-surface dark:text-white">
-                                        {selectedBookingForDetails.customerName}
+                                        {selectedBookingForDetails.client_name}
                                     </span>
                                 </div>
                                 <div className="grid grid-cols-2 gap-2 border-b border-gray-50 py-1.5 dark:border-slate-700">
@@ -606,23 +605,19 @@ export default function DashboardView() {
                                     <span
                                         className="truncate font-medium text-on-surface dark:text-white"
                                         title={
-                                            selectedBookingForDetails.customerEmail
+                                            selectedBookingForDetails.client_email
                                         }
                                     >
-                                        {
-                                            selectedBookingForDetails.customerEmail
-                                        }
+                                        {selectedBookingForDetails.client_email}
                                     </span>
                                 </div>
-                                {selectedBookingForDetails.phoneNumber && (
+                                {user.phone && (
                                     <div className="grid grid-cols-2 gap-2 border-b border-gray-50 py-1.5 dark:border-slate-700">
                                         <span className="text-[10px] font-semibold tracking-wider text-on-surface-variant/70 uppercase dark:text-slate-500">
                                             Phone Number
                                         </span>
                                         <span className="font-medium text-on-surface dark:text-white">
-                                            {
-                                                selectedBookingForDetails.phoneNumber
-                                            }
+                                            {user.phone}
                                         </span>
                                     </div>
                                 )}
@@ -631,7 +626,16 @@ export default function DashboardView() {
                                         Target Date
                                     </span>
                                     <span className="font-semibold text-on-surface dark:text-white">
-                                        {selectedBookingForDetails.date}
+                                        {new Intl.DateTimeFormat('en-US', {
+                                            weekday: 'long',
+                                            month: 'short',
+                                            day: 'numeric',
+                                            year: 'numeric',
+                                        }).format(
+                                            new Date(
+                                                selectedBookingForDetails.date,
+                                            ),
+                                        )}
                                     </span>
                                 </div>
                                 <div className="grid grid-cols-2 gap-2 border-b border-gray-50 py-1.5 dark:border-slate-700">
@@ -639,7 +643,13 @@ export default function DashboardView() {
                                         Time Slot
                                     </span>
                                     <span className="font-semibold text-on-surface dark:text-white">
-                                        {selectedBookingForDetails.timeSlot}
+                                        {formatTime(
+                                            selectedBookingForDetails.start_time,
+                                        )}{' '}
+                                        —{' '}
+                                        {formatTime(
+                                            selectedBookingForDetails.end_time,
+                                        )}
                                     </span>
                                 </div>
                                 <div className="grid grid-cols-2 gap-2 border-b border-gray-50 py-1.5 dark:border-slate-700">
@@ -648,9 +658,10 @@ export default function DashboardView() {
                                     </span>
                                     <span className="text-sm font-bold text-primary dark:text-purple-400">
                                         $
-                                        {selectedBookingForDetails.amount.toFixed(
-                                            2,
-                                        )}
+                                        {
+                                            selectedBookingForDetails.service
+                                                ?.price
+                                        }
                                     </span>
                                 </div>
                                 <div className="grid grid-cols-2 gap-2 border-b border-gray-50 py-1.5 dark:border-slate-700">
@@ -661,10 +672,10 @@ export default function DashboardView() {
                                         <span
                                             className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-extrabold tracking-wide uppercase ${
                                                 selectedBookingForDetails.status ===
-                                                'Confirmed'
+                                                'completed'
                                                     ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400'
                                                     : selectedBookingForDetails.status ===
-                                                        'Pending'
+                                                        'pending'
                                                       ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400'
                                                       : 'bg-rose-100 text-rose-800 dark:bg-red-950/40 dark:text-red-400'
                                             }`}
@@ -680,7 +691,8 @@ export default function DashboardView() {
                                         Administrative Notes
                                     </span>
                                     <p className="max-h-24 overflow-y-auto rounded-lg bg-neutral-50 p-3 text-[11px] leading-relaxed text-neutral-600 italic dark:bg-slate-800 dark:text-slate-400">
-                                        {selectedBookingForDetails.notes ||
+                                        {selectedBookingForDetails.service
+                                            ?.description ||
                                             'No custom remarks annotated for this slot.'}
                                     </p>
                                 </div>
@@ -703,7 +715,7 @@ export default function DashboardView() {
                 <EditProfileModal
                     isOpen={isEditProfileOpen}
                     onClose={() => setIsEditProfileOpen(false)}
-                    profile={profile}
+                    user={user}
                     onSave={handleSaveProfile}
                 />
             </div>

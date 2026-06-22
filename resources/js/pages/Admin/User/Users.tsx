@@ -235,7 +235,7 @@ const handleDeleteUser = (userId: number) => {
         setFormEmail(user.email);
         setFormPhone(user.phone || '');
         setFormStatus(user.status);
-        setFormAvatar(user.avatar || '');
+        setFormAvatar(user.avatar_url || '');
     };
 
     const handleSaveEdit = () => {
@@ -250,7 +250,7 @@ const handleDeleteUser = (userId: number) => {
             email: formEmail,
             phone: formPhone,
             status: formStatus,
-            avatar:
+            avatar_url:
                 formAvatar ||
                 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
         };
@@ -264,7 +264,7 @@ const handleDeleteUser = (userId: number) => {
         setFormEmail('');
         setFormPhone('');
         setFormStatus('active');
-        // Random beautiful placeholder avatar
+        // Random beautiful placeholder avatar_url
         const randId = Math.floor(Math.random() * 100);
         setFormAvatar(
             `https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80`,
@@ -301,7 +301,7 @@ const handleDeleteUser = (userId: number) => {
             }),
             bookingsCount: 0,
             status: formStatus,
-            avatar:
+            avatar_url:
                 formAvatar ||
                 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
         };
@@ -481,7 +481,7 @@ const handleDeleteUser = (userId: number) => {
                                                             alt={user.name}
                                                             referrerPolicy="no-referrer"
                                                             className="h-10 w-10 rounded-full border border-outline-variant/40 object-cover dark:border-slate-700"
-                                                            src={user.avatar}
+                                                            src={user.avatar_url}
                                                         />
                                                         <div>
                                                             <p className="text-xs font-bold text-on-surface dark:text-white">
@@ -742,7 +742,7 @@ const handleDeleteUser = (userId: number) => {
                                     <img
                                         alt={viewingUser.name}
                                         className="h-16 w-16 rounded-full border-2 border-white/40 object-cover shadow-md"
-                                        src={viewingUser.avatar}
+                                        src={viewingUser.avatar_url}
                                     />
                                     <div>
                                         <h3 className="font-sans text-lg font-bold">
@@ -902,7 +902,7 @@ const handleDeleteUser = (userId: number) => {
                                     Close Details
                                 </button>
                                 <Link
-                                    href={route('admin.users.details', viewingUser.id)}
+                                    href={route('admin.users.details', {user: viewingUser.id})}
                                     className="cursor-pointer rounded-lg bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-all hover:bg-primary-container dark:bg-purple-600 dark:hover:bg-purple-700"
                                 >
                                     View Profile Details
