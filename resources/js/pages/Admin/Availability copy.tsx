@@ -7,65 +7,92 @@ import {
     Clock,
     AlertTriangle,
     X,
+    Pencil,
 } from 'lucide-react';
-import { useEffect, useState, FormEvent } from 'react';
+import { useEffect, useState, FormEvent, useMemo } from 'react';
 
 import type { Availability, TimeSlot } from '@/types';
+import { usePage } from '@inertiajs/react';
+import {
+    formatDate,
+    generateCalendarDays,
+    isPastDate,
+} from '@/lib/calendar-utils';
 
 export default function AdminAvailability() {
+    const { availabilities: DatabaseAvailabilities } = usePage<{
+        availabilities: Availability[];
+    }>().props;
+
     // ============================================
     // STATE MANAGEMENT
     // ============================================
-    const [currentYear, setCurrentYear] = useState(2024);
-    const [currentMonth, setCurrentMonth] = useState(8); // September
-    const [selectedDateStr, setSelectedDateStr] = useState('2024-09-06');
+    const today = new Date();
+    const days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+    const [currentMonth, setCurrentMonth] = useState(today.getMonth());
+    const [currentYear, setCurrentYear] = useState(today.getFullYear());
 
-    const [availabilities, setAvailabilities] = useState<Availability[]>([
-        {
-            id: 1,
-            date: '2024-09-06',
-            time_slots: [
-                {
-                    id: 1,
-                    availability_id: 1,
-                    start_time: '09:00',
-                    end_time: '10:00',
-                    is_booked: false,
-                },
-                {
-                    id: 2,
-                    availability_id: 1,
-                    start_time: '10:00',
-                    end_time: '11:00',
-                    is_booked: false,
-                },
-                {
-                    id: 3,
-                    availability_id: 1,
-                    start_time: '11:00',
-                    end_time: '12:00',
-                    is_booked: false,
-                },
-            ],
-        },
-    ]);
+    const [selectedDate, setSelectedDate] = useState(today);
+    const selectedDateStr = formatDate(selectedDate);
+
+    const [availabilities, setAvailabilities] = useState<Availability[]>(
+        DatabaseAvailabilities,
+    );
+
+    const [showQuickAdd, setShowQuickAdd] = useState(false);
+    const [quickStartTime, setQuickStartTime] = useState('');
+    const [quickEndTime, setQuickEndTime] = useState('');
+
+    const [editingSlot, setEditingSlot] = useState<TimeSlot | null>(null);
+    const [editStartTime, setEditStartTime] = useState('');
+    const [editEndTime, setEditEndTime] = useState('');
+
+    const [showCopyModal, setShowCopyModal] = useState(false);
+    const [copyWeekdays, setCopyWeekdays] = useState<number[]>([]);
+    const [copyTargetDate, setCopyTargetDate] = useState('');
+
+    const weekdays = [
+        { label: 'Sunday', value: 0 },
+        { label: 'Monday', value: 1 },
+        { label: 'Tuesday', value: 2 },
+        { label: 'Wednesday', value: 3 },
+        { label: 'Thursday', value: 4 },
+        { label: 'Friday', value: 5 },
+        { label: 'Saturday', value: 6 },
+    ];
 
     const [isSaving, setIsSaving] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [isToastVisible, setIsToastVisible] = useState(false);
+
+    // Presets for form state(s)
+    const [selectedPreset, setSelectedPreset] = useState<
+        'custom' | 'weekdays' | 'weekends'
+    >('custom');
 
     // Form state for bulk slot creation
     const [formDateStart, setFormDateStart] = useState('2024-09-09');
     const [formDateEnd, setFormDateEnd] = useState('2024-09-13');
     const [formTimeStart, setFormTimeStart] = useState('09:00');
     const [formTimeEnd, setFormTimeEnd] = useState('17:00');
-    const [includeWeekends, setIncludeWeekends] = useState(false);
-    const [weekendTimeStart, setWeekendTimeStart] = useState('10:00');
-    const [weekendTimeEnd, setWeekendTimeEnd] = useState('14:00');
-    const [isHoliday, setIsHoliday] = useState(false);
-    const [holidayDate, setHolidayDate] = useState('2024-09-10');
-    const [holidayTimeStart, setHolidayTimeStart] = useState('09:00');
-    const [holidayTimeEnd, setHolidayTimeEnd] = useState('12:00');
+    const [formClosedDates, setFormClosedDates] = useState<string[]>([]);
+    const [formClosedWeekdays, setFormClosedWeekdays] = useState<number[]>([]);
+
+    const applyPreset = (preset: 'weekdays' | 'weekends' | 'custom') => {
+        setSelectedPreset(preset);
+
+        if (preset === 'weekdays') {
+            setFormClosedWeekdays([0, 6]); // Sunday + Saturday closed
+        }
+
+        if (preset === 'weekends') {
+            setFormClosedWeekdays([1, 2, 3, 4, 5]); // Mon–Fri closed
+        }
+
+        if (preset === 'custom') {
+            setFormClosedWeekdays([]);
+        }
+    };
 
     // Toast helper
     const triggerToast = (msg: string) => {
@@ -83,20 +110,20 @@ export default function AdminAvailability() {
     // ============================================
     // CALENDAR LOGIC
     // ============================================
-    const monthNames = [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December',
-    ];
+    function monthLabel() {
+        return new Date(currentYear, currentMonth).toLocaleString('default', {
+            month: 'long',
+            year: 'numeric',
+        });
+    }
+
+    const handleToday = () => {
+        const today = new Date();
+
+        setCurrentMonth(today.getMonth());
+        setCurrentYear(today.getFullYear());
+        setSelectedDate(today);
+    };
 
     const handlePrevMonth = () => {
         if (currentMonth === 0) {
@@ -116,68 +143,64 @@ export default function AdminAvailability() {
         }
     };
 
-    const getDaysInMonth = (year: number, month: number) => {
-        const firstDayIndex = new Date(year, month, 1).getDay();
-        const totalDays = new Date(year, month + 1, 0).getDate();
-        const prevMonthTotalDays = new Date(year, month, 0).getDate();
+    const calendarDays = useMemo(() => {
+        return generateCalendarDays(currentMonth, currentYear);
+    }, [currentMonth, currentYear]);
 
-        const days: Array<{
-            dayNum: number;
-            isCurrentMonth: boolean;
-            dateString: string;
-        }> = [];
+    const isCurrentMonth =
+        currentMonth === today.getMonth() &&
+        currentYear === today.getFullYear();
 
-        // Previous month filler
-        for (let i = firstDayIndex - 1; i >= 0; i--) {
-            const prevMonthDay = prevMonthTotalDays - i;
-            const mStr = month === 0 ? '12' : String(month).padStart(2, '0');
-            const yStr = month === 0 ? String(year - 1) : String(year);
-            const dStr = String(prevMonthDay).padStart(2, '0');
-            days.push({
-                dayNum: prevMonthDay,
-                isCurrentMonth: false,
-                dateString: `${yStr}-${mStr}-${dStr}`,
-            });
-        }
-
-        // Current month
-        const currentMStr = String(month + 1).padStart(2, '0');
-        for (let day = 1; day <= totalDays; day++) {
-            const dayStr = String(day).padStart(2, '0');
-            days.push({
-                dayNum: day,
-                isCurrentMonth: true,
-                dateString: `${year}-${currentMStr}-${dayStr}`,
-            });
-        }
-
-        // Next month filler
-        const remainingSlots = 42 - days.length;
-        for (let i = 1; i <= remainingSlots; i++) {
-            const mStr =
-                month === 11 ? '01' : String(month + 2).padStart(2, '0');
-            const yStr = month === 11 ? String(year + 1) : String(year);
-            const dStr = String(i).padStart(2, '0');
-            days.push({
-                dayNum: i,
-                isCurrentMonth: false,
-                dateString: `${yStr}-${mStr}-${dStr}`,
-            });
-        }
-
-        return days;
-    };
-
-    const calendarDays = getDaysInMonth(currentYear, currentMonth);
-
-    // Get availability for a specific date
     const getAvailabilityForDate = (
-        dateStr: string,
+        dateStr: String,
     ): Availability | undefined => {
         return availabilities.find((a) => a.date === dateStr);
     };
 
     const selectedAvailability = getAvailabilityForDate(selectedDateStr);
+
+    const selectedDayStats = useMemo(() => {
+        const slots = selectedAvailability?.time_slots ?? [];
+
+        const total = slots.length;
+        const booked = slots.filter((s) => s.is_booked).length;
+        const available = total - booked;
+
+        return { total, booked, available };
+    }, [selectedAvailability]);
+
+
+    const isDateClosed = (date: Date) => {
+        const dateStr = formatDate(date);
+        return !availabilities.some((a) => a.date === dateStr);
+    };
+
+    const isClosed = !selectedAvailability;
+
+    const handleCloseDay = (dateStr: string) => {
+        setAvailabilities((prev) => prev.filter((a) => a.date !== dateStr));
+
+        triggerToast('Day marked as closed');
+    };
+
+    const handleReopenDay = (dateStr: string) => {
+        setAvailabilities((prev) => {
+            const exists = prev.some((a) => a.date === dateStr);
+
+            if (exists) return prev;
+
+            return [
+                ...prev,
+                {
+                    id: Math.max(...prev.map((a) => a.id), 0) + 1,
+                    date: dateStr,
+                    time_slots: [],
+                },
+            ];
+        });
+
+        triggerToast('Day reopened');
+    };
 
     // ============================================
     // TIME SLOT OPERATIONS
@@ -267,11 +290,103 @@ export default function AdminAvailability() {
         }
     };
 
+    const copyScheduleToDate = (sourceDate: string, targetDate: string) => {
+        const sourceAvailability = availabilities.find(
+            (a) => a.date === sourceDate,
+        );
+
+        if (!sourceAvailability) return;
+
+        const clonedSlots = sourceAvailability.time_slots.map((slot) => ({
+            ...slot,
+            id: Date.now() + Math.random(),
+            is_booked: false,
+        }));
+
+        handleAddTimeSlot(targetDate, clonedSlots);
+    };
+
+    const handleCopyToDate = () => {
+        copyScheduleToDate(selectedDateStr, copyTargetDate);
+
+        triggerToast('Schedule copied');
+        setShowCopyModal(false);
+    };
+
+    const handleCopyToWeekdays = () => {
+        const sourceAvailability = getAvailabilityForDate(selectedDateStr);
+
+        if (!sourceAvailability) return;
+
+        calendarDays.forEach(({ date, currentMonth }) => {
+            if (!currentMonth) return;
+
+            if (copyWeekdays.includes(date.getDay())) {
+                copyScheduleToDate(selectedDateStr, formatDate(date));
+            }
+        });
+
+        triggerToast('Schedule copied');
+        setShowCopyModal(false);
+    };
+
+    const handleEditSlot = (slot: TimeSlot) => {
+        setEditingSlot(slot);
+
+        setEditStartTime(slot.start_time);
+        setEditEndTime(slot.end_time);
+    };
+
+    const handleSaveSlot = () => {
+        if (!editingSlot) return;
+
+        setAvailabilities((prev) =>
+            prev.map((availability) => ({
+                ...availability,
+                time_slots: availability.time_slots.map((slot) =>
+                    slot.id === editingSlot.id
+                        ? {
+                              ...slot,
+                              start_time: editStartTime,
+                              end_time: editEndTime,
+                          }
+                        : slot,
+                ),
+            })),
+        );
+
+        setEditingSlot(null);
+
+        triggerToast('Slot updated');
+    };
+
+    const handleQuickAddSlot = () => {
+        if (!quickStartTime || !quickEndTime) return;
+
+        const newSlot: TimeSlot = {
+            id: Date.now(),
+            availability_id: 0,
+            start_time: quickStartTime,
+            end_time: quickEndTime,
+            is_booked: false,
+        };
+
+        handleAddTimeSlot(selectedDateStr, [newSlot]);
+
+        setQuickStartTime('');
+        setQuickEndTime('');
+        setShowQuickAdd(false);
+
+        triggerToast('Slot added');
+    };
+
     // ============================================
     // FORM SUBMISSION
     // ============================================
     const handleSubmitBulkForm = (e: FormEvent) => {
         e.preventDefault();
+
+        if (isDateClosed(new Date(selectedDateStr))) return;
 
         const startDate = new Date(formDateStart);
         const endDate = new Date(formDateEnd);
@@ -283,31 +398,23 @@ export default function AdminAvailability() {
             d.setDate(d.getDate() + 1)
         ) {
             const dayOfWeek = d.getDay();
-            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
-            // Skip weekends unless enabled
-            if (isWeekend && !includeWeekends) continue;
+            if (isDateClosed(d)) continue;
 
             const yyyy = d.getFullYear();
             const mm = String(d.getMonth() + 1).padStart(2, '0');
             const dd = String(d.getDate()).padStart(2, '0');
             const dateStr = `${yyyy}-${mm}-${dd}`;
 
-            const slots = generateTimeSlots(
-                isWeekend && includeWeekends ? weekendTimeStart : formTimeStart,
-                isWeekend && includeWeekends ? weekendTimeEnd : formTimeEnd,
-            );
+            const isClosedByRule =
+                formClosedDates.includes(dateStr) ||
+                formClosedWeekdays.includes(d.getDay());
+
+            if (isClosedByRule) continue;
+
+            const slots = generateTimeSlots(formTimeStart, formTimeEnd);
 
             handleAddTimeSlot(dateStr, slots);
-        }
-
-        // Handle holiday if enabled
-        if (isHoliday) {
-            const holidaySlots = generateTimeSlots(
-                holidayTimeStart,
-                holidayTimeEnd,
-            );
-            handleAddTimeSlot(holidayDate, holidaySlots);
         }
 
         triggerToast('Time slots created successfully!');
@@ -348,6 +455,41 @@ export default function AdminAvailability() {
             day: 'numeric',
             year: 'numeric',
         });
+    };
+
+    // console.log('Availabilities: ', DatabaseAvailabilities);
+
+    // ============================================
+    // UI HELPERS
+    // ============================================
+    const getStatusStyles = (
+        status: 'none' | 'available' | 'partial' | 'full',
+    ) => {
+        switch (status) {
+            case 'available':
+                return {
+                    dot: 'bg-green-500',
+                    badge: 'text-green-600 dark:text-green-400',
+                };
+
+            case 'partial':
+                return {
+                    dot: 'bg-amber-500',
+                    badge: 'text-amber-600 dark:text-amber-400',
+                };
+
+            case 'full':
+                return {
+                    dot: 'bg-red-500',
+                    badge: 'text-red-600 dark:text-red-400',
+                };
+
+            default:
+                return {
+                    dot: 'bg-gray-400',
+                    badge: 'text-gray-500 dark:text-gray-400',
+                };
+        }
     };
 
     // ============================================
@@ -401,10 +543,17 @@ export default function AdminAvailability() {
                             {/* Calendar header */}
                             <div className="flex items-center justify-between border-b border-outline-variant bg-surface-container-lowest p-5 dark:border-slate-700 dark:bg-slate-800">
                                 <h2 className="text-lg font-bold text-on-surface dark:text-white">
-                                    {monthNames[currentMonth]} {currentYear}
+                                    {monthLabel()}
                                 </h2>
                                 <div className="flex gap-0.5">
                                     <button
+                                        onClick={handleToday}
+                                        className="rounded rounded-sm border border-on-primary px-3 py-1 text-xs font-semibold hover:bg-white dark:hover:bg-slate-600"
+                                    >
+                                        Today
+                                    </button>
+                                    <button
+                                        disabled={isCurrentMonth}
                                         onClick={handlePrevMonth}
                                         className="cursor-pointer rounded p-1 transition-all hover:bg-white active:scale-90 dark:hover:bg-slate-600"
                                     >
@@ -422,15 +571,7 @@ export default function AdminAvailability() {
                             {/* Calendar grid */}
                             <div className="bg-surface p-4 dark:bg-slate-900">
                                 <div className="grid grid-cols-7 border-b border-l border-outline-variant/30 bg-surface-container-low/20 text-center text-[10px] font-bold text-on-surface-variant dark:border-slate-700 dark:bg-slate-800/30 dark:text-slate-500">
-                                    {[
-                                        'SUN',
-                                        'MON',
-                                        'TUE',
-                                        'WED',
-                                        'THU',
-                                        'FRI',
-                                        'SAT',
-                                    ].map((day) => (
+                                    {days.map((day) => (
                                         <div
                                             key={day}
                                             className="border-t border-r border-outline-variant/30 py-2.5 dark:border-slate-700"
@@ -441,49 +582,105 @@ export default function AdminAvailability() {
                                 </div>
 
                                 <div className="grid grid-cols-7 border-l border-outline-variant/20 dark:border-slate-700">
-                                    {calendarDays.map((day, ix) => {
-                                        const avail = getAvailabilityForDate(
-                                            day.dateString,
-                                        );
-                                        const isSelected =
-                                            selectedDateStr === day.dateString;
-                                        const slotCount =
-                                            avail?.time_slots.length || 0;
+                                    {calendarDays.map(
+                                        (
+                                            {
+                                                date,
+                                                currentMonth: isCurrentMonthDay,
+                                            },
+                                            idx,
+                                        ) => {
+                                            const formattedDate =
+                                                formatDate(date);
 
-                                        return (
-                                            <div
-                                                key={ix}
-                                                onClick={() =>
-                                                    setSelectedDateStr(
-                                                        day.dateString,
-                                                    )
-                                                }
-                                                className={`relative flex min-h-[80px] cursor-pointer flex-col justify-between border-t border-r border-outline-variant/30 p-2 transition-all select-none dark:border-slate-700 ${
-                                                    !day.isCurrentMonth
-                                                        ? 'bg-gray-50/40 opacity-30 dark:bg-slate-800/30'
-                                                        : 'bg-surface dark:bg-slate-900'
-                                                } ${
-                                                    isSelected
-                                                        ? 'bg-primary/5 ring-2 ring-primary ring-inset dark:bg-purple-950/20 dark:ring-purple-500'
-                                                        : 'hover:bg-primary/5 dark:hover:bg-purple-950/10'
-                                                }`}
-                                            >
-                                                <span
-                                                    className={`font-mono text-xs font-bold ${isSelected ? 'text-primary dark:text-purple-400' : 'text-on-surface dark:text-white'}`}
+                                            const isToday =
+                                                formatDate(new Date()) ===
+                                                formattedDate;
+
+                                            const isSelected =
+                                                selectedDateStr ===
+                                                formattedDate;
+                                            // selectedDate === formattedDate;
+
+                                            //Give me the availability record whose date matches.
+                                            const availability =
+                                                getAvailabilityForDate(
+                                                    formattedDate,
+                                                );
+
+                                            const bookedCount =
+                                                availability?.time_slots.filter(
+                                                    (slot) => slot.is_booked,
+                                                ).length ?? 0;
+
+                                            const totalCount =
+                                                availability?.time_slots
+                                                    .length ?? 0;
+
+                                            const closed = !availability;
+
+                                            const status =
+                                                totalCount === 0
+                                                    ? 'none'
+                                                    : bookedCount === totalCount
+                                                      ? 'full'
+                                                      : bookedCount > 0
+                                                        ? 'partial'
+                                                        : 'available';
+
+                                            const statusStyles =
+                                                getStatusStyles(status);
+
+                                            return (
+                                                <div
+                                                    key={idx}
+                                                    onClick={() => {
+                                                        if (isPastDate(date))
+                                                            return;
+                                                        setSelectedDate(date);
+                                                    }}
+                                                    className={`relative flex min-h-[80px] cursor-pointer flex-col justify-between border-t border-r border-outline-variant/30 p-2 transition-all select-none dark:border-slate-700 ${
+                                                        isPastDate(date) ||
+                                                        !isCurrentMonthDay
+                                                            ? 'bg-gray-50/40 opacity-30 dark:bg-slate-800/30'
+                                                            : 'bg-surface dark:bg-slate-900'
+                                                    } ${
+                                                        closed
+                                                            ? 'bg-red-50 opacity-60 dark:bg-red-950/20'
+                                                            : ''
+                                                    } ${
+                                                        isSelected
+                                                            ? 'bg-primary/5 ring-2 ring-primary ring-inset dark:bg-purple-950/20 dark:ring-purple-500'
+                                                            : 'hover:bg-primary/5 dark:hover:bg-purple-950/10'
+                                                    } ${isPastDate(date) ? 'pointer-events-none' : ''}`}
                                                 >
-                                                    {day.dayNum}
-                                                </span>
-                                                {slotCount > 0 && (
-                                                    <div className="flex items-center gap-1">
-                                                        <div className="h-1.5 w-1.5 rounded-full bg-primary dark:bg-purple-500" />
-                                                        <span className="text-[9px] font-semibold text-primary dark:text-purple-400">
-                                                            {slotCount}
+                                                    <span
+                                                        className={`font-mono text-xs font-bold ${isSelected ? 'text-primary dark:text-purple-400' : 'text-on-surface dark:text-white'}`}
+                                                    >
+                                                        {date.getDate()}
+                                                    </span>
+                                                    {closed && (
+                                                        <div className="text-[9px] font-bold text-red-500">
+                                                            CLOSED
+                                                        </div>
+                                                    )}
+                                                    <div
+                                                        className="flex items-center gap-1"
+                                                        title="Total amount of available slots"
+                                                    >
+                                                        <div
+                                                            className={`h-2 w-2 rounded-full ${statusStyles.dot}`}
+                                                        />
+                                                        <span
+                                                            className={`text-[9px] font-semibold ${statusStyles.badge}`}
+                                                        >
+                                                            {totalCount}
                                                         </span>
                                                     </div>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
+                                                </div>
+                                            );
+                                        },
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -496,9 +693,45 @@ export default function AdminAvailability() {
                             {formatDateLabel(selectedDateStr)}
                         </h3>
 
+                        <div className="mb-4 flex flex-col items-center gap-2 sm:flex-row">
+                            <button
+                                onClick={() => handleCloseDay(selectedDateStr)}
+                                className="mt-2 cursor-pointer text-xs font-semibold text-red-500"
+                            >
+                                Mark Closed
+                            </button>
+
+                            <button
+                                onClick={() => handleReopenDay(selectedDateStr)}
+                                className="mt-2 cursor-pointer text-xs font-semibold text-green-500"
+                            >
+                                Reopen Day
+                            </button>
+                        </div>
+
+                        <div className="mb-3 rounded-lg bg-surface-container-low p-3 text-xs dark:bg-slate-800">
+                            <div className="flex justify-between">
+                                <span>{selectedDate.toDateString()}</span>
+                            </div>
+
+                            <div className="mt-2 flex gap-4 font-semibold">
+                                <span>{selectedDayStats.total} slots</span>
+                                <span className="text-red-500">
+                                    {selectedDayStats.booked} booked
+                                </span>
+                                <span className="text-green-500">
+                                    {selectedDayStats.available} available
+                                </span>
+                            </div>
+                        </div>
+
                         <div className="space-y-2.5">
-                            {!selectedAvailability ||
-                            selectedAvailability.time_slots.length === 0 ? (
+                            {isClosed ? (
+                                <p className="py-4 text-center text-xs font-semibold text-red-500">
+                                    This day is marked as closed
+                                </p>
+                            ) : !selectedAvailability ||
+                              selectedAvailability.time_slots.length === 0 ? (
                                 <p className="py-4 text-center text-xs text-on-surface-variant/75 italic dark:text-slate-500">
                                     No slots configured
                                 </p>
@@ -508,20 +741,62 @@ export default function AdminAvailability() {
                                         key={slot.id}
                                         className="flex items-center justify-between rounded-lg border border-outline-variant/20 bg-surface-container-low p-2.5 dark:border-slate-700/50 dark:bg-slate-800/50"
                                     >
+                                        {slot.is_booked && (
+                                            <span className="rounded bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-600 dark:bg-red-950 dark:text-red-300">
+                                                Booked
+                                            </span>
+                                        )}
                                         <span className="font-mono text-xs font-semibold text-on-surface dark:text-white">
                                             {slot.start_time} – {slot.end_time}
                                         </span>
-                                        <button
-                                            onClick={() =>
-                                                handleDeleteTimeSlot(slot.id)
-                                            }
-                                            className="cursor-pointer rounded p-1 text-on-surface-variant transition-colors hover:bg-white/20 dark:hover:bg-slate-700"
-                                        >
-                                            <X className="h-3.5 w-3.5" />
-                                        </button>
+                                        <div className="flex items-center gap-1">
+                                            <button
+                                                onClick={() =>
+                                                    handleEditSlot(slot)
+                                                }
+                                                className="cursor-pointer rounded p-1 text-on-surface-variant transition-colors hover:bg-white/20 dark:hover:bg-slate-700"
+                                            >
+                                                <Pencil className="h-3.5 w-3.5" />
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    if (slot.is_booked) return;
+                                                    handleDeleteTimeSlot(
+                                                        slot.id,
+                                                    );
+                                                }}
+                                                className={` ${
+                                                    slot.is_booked
+                                                        ? 'cursor-not-allowed opacity-40'
+                                                        : 'hover:bg-white/20 dark:hover:bg-slate-700'
+                                                } cursor-pointer rounded p-1 text-on-surface-variant transition-colors hover:bg-white/20 dark:hover:bg-slate-700`}
+                                            >
+                                                <X className="h-3.5 w-3.5" />
+                                            </button>
+                                        </div>
                                     </div>
                                 ))
                             )}
+                        </div>
+
+                        <div className="mt-4 flex flex-col items-center gap-2 sm:flex-row">
+                            <button
+                                onClick={() => setShowQuickAdd(true)}
+                                className="w-full rounded-lg border border-outline px-4 py-2 text-xs font-semibold hover:bg-surface-container/5 dark:border-slate-700 dark:text-white"
+                            >
+                                + Add Slot
+                            </button>
+
+                            <button
+                                onClick={() => setShowCopyModal(true)}
+                                disabled={
+                                    !selectedAvailability ||
+                                    selectedAvailability.time_slots.length === 0
+                                }
+                                className="w-full rounded-lg border border-primary px-4 py-2 text-xs font-semibold text-primary transition-colors hover:bg-primary/5 disabled:cursor-not-allowed disabled:opacity-50 dark:border-purple-500 dark:text-purple-400"
+                            >
+                                Copy Schedule
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -534,6 +809,50 @@ export default function AdminAvailability() {
                     </h3>
 
                     <form onSubmit={handleSubmitBulkForm} className="space-y-5">
+                        <div>
+                            <label className="mb-2 block text-xs font-bold text-on-surface-variant uppercase dark:text-slate-400">
+                                Presets
+                            </label>
+
+                            <div className="flex flex-wrap gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => applyPreset('weekdays')}
+                                    className={`rounded border px-3 py-1 text-xs font-semibold ${
+                                        selectedPreset === 'weekdays'
+                                            ? 'bg-primary text-white'
+                                            : 'border-outline-variant dark:border-slate-700'
+                                    }`}
+                                >
+                                    Weekdays Only
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => applyPreset('weekends')}
+                                    className={`rounded border px-3 py-1 text-xs font-semibold ${
+                                        selectedPreset === 'weekends'
+                                            ? 'bg-primary text-white'
+                                            : 'border-outline-variant dark:border-slate-700'
+                                    }`}
+                                >
+                                    Weekends Only
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => applyPreset('custom')}
+                                    className={`rounded border px-3 py-1 text-xs font-semibold ${
+                                        selectedPreset === 'custom'
+                                            ? 'bg-primary text-white'
+                                            : 'border-outline-variant dark:border-slate-700'
+                                    }`}
+                                >
+                                    Custom
+                                </button>
+                            </div>
+                        </div>
+
                         {/* Date Range */}
                         <div>
                             <label className="mb-2 block text-xs font-bold tracking-wider text-on-surface-variant uppercase dark:text-slate-400">
@@ -594,123 +913,88 @@ export default function AdminAvailability() {
                             </div>
                         </div>
 
-                        {/* Weekends Toggle */}
-                        <div className="rounded-lg border border-outline-variant/30 p-4 dark:border-slate-700">
-                            <div className="flex items-center justify-between">
-                                <label className="text-xs font-semibold text-on-surface dark:text-white">
-                                    Include weekends?
-                                </label>
-                                <input
-                                    type="checkbox"
-                                    checked={includeWeekends}
-                                    onChange={(e) =>
-                                        setIncludeWeekends(e.target.checked)
-                                    }
-                                    className="h-4 w-4 cursor-pointer rounded text-primary dark:text-purple-600"
-                                />
-                            </div>
+                        {/* Exclude Dates (Closed Days) */}
+                        <div>
+                            <label className="mb-2 block text-xs font-bold uppercase">
+                                Closed Dates
+                            </label>
 
-                            {includeWeekends && (
-                                <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                                    <div>
-                                        <label className="mb-1 block text-[11px] text-on-surface-variant dark:text-slate-500">
-                                            From
-                                        </label>
-                                        <input
-                                            type="time"
-                                            value={weekendTimeStart}
-                                            onChange={(e) =>
-                                                setWeekendTimeStart(
-                                                    e.target.value,
+                            <input
+                                type="date"
+                                onChange={(e) => {
+                                    if (!e.target.value) return;
+
+                                    setFormClosedDates((prev) => [
+                                        ...prev,
+                                        e.target.value,
+                                    ]);
+                                }}
+                                className="w-full rounded border p-2"
+                            />
+
+                            <div className="mt-2 flex flex-wrap gap-2">
+                                {formClosedDates.map((d) => (
+                                    <span
+                                        key={d}
+                                        className="rounded bg-red-100 px-2 py-1 text-xs"
+                                    >
+                                        {d}
+                                        <button
+                                            onClick={() =>
+                                                setFormClosedDates((prev) =>
+                                                    prev.filter((x) => x !== d),
                                                 )
                                             }
-                                            className="w-full rounded-lg border border-outline-variant bg-surface p-2.5 font-mono text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="mb-1 block text-[11px] text-on-surface-variant dark:text-slate-500">
-                                            To
-                                        </label>
-                                        <input
-                                            type="time"
-                                            value={weekendTimeEnd}
-                                            onChange={(e) =>
-                                                setWeekendTimeEnd(
-                                                    e.target.value,
-                                                )
-                                            }
-                                            className="w-full rounded-lg border border-outline-variant bg-surface p-2.5 font-mono text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                                        />
-                                    </div>
-                                </div>
-                            )}
+                                            className="ml-2"
+                                        >
+                                            ×
+                                        </button>
+                                    </span>
+                                ))}
+                            </div>
                         </div>
 
-                        {/* Holiday Toggle */}
-                        <div className="rounded-lg border border-outline-variant/30 p-4 dark:border-slate-700">
-                            <div className="flex items-center justify-between">
-                                <label className="text-xs font-semibold text-on-surface dark:text-white">
-                                    Set a holiday?
-                                </label>
-                                <input
-                                    type="checkbox"
-                                    checked={isHoliday}
-                                    onChange={(e) =>
-                                        setIsHoliday(e.target.checked)
-                                    }
-                                    className="h-4 w-4 cursor-pointer rounded text-primary dark:text-purple-600"
-                                />
-                            </div>
+                        {/* Closed Weekdays */}
+                        <div>
+                            <label className="mb-2 block text-xs font-bold uppercase">
+                                Closed Weekdays
+                            </label>
 
-                            {isHoliday && (
-                                <div className="mt-3 space-y-2">
-                                    <div>
-                                        <label className="mb-1 block text-[11px] text-on-surface-variant dark:text-slate-500">
-                                            Holiday Date
-                                        </label>
+                            <div className="grid grid-cols-2 gap-2">
+                                {weekdays.map((day) => (
+                                    <label
+                                        key={day.value}
+                                        className="flex items-center gap-2 text-xs"
+                                    >
                                         <input
-                                            type="date"
-                                            value={holidayDate}
-                                            onChange={(e) =>
-                                                setHolidayDate(e.target.value)
-                                            }
-                                            className="w-full rounded-lg border border-outline-variant bg-surface p-2.5 font-mono text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                                            type="checkbox"
+                                            checked={formClosedWeekdays.includes(
+                                                day.value,
+                                            )}
+                                            onChange={(e) => {
+                                                if (e.target.checked) {
+                                                    setFormClosedWeekdays(
+                                                        (prev) => [
+                                                            ...prev,
+                                                            day.value,
+                                                        ],
+                                                    );
+                                                } else {
+                                                    setFormClosedWeekdays(
+                                                        (prev) =>
+                                                            prev.filter(
+                                                                (v) =>
+                                                                    v !==
+                                                                    day.value,
+                                                            ),
+                                                    );
+                                                }
+                                            }}
                                         />
-                                    </div>
-                                    <div className="grid gap-2 sm:grid-cols-2">
-                                        <div>
-                                            <label className="mb-1 block text-[11px] text-on-surface-variant dark:text-slate-500">
-                                                From
-                                            </label>
-                                            <input
-                                                type="time"
-                                                value={holidayTimeStart}
-                                                onChange={(e) =>
-                                                    setHolidayTimeStart(
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                className="w-full rounded-lg border border-outline-variant bg-surface p-2.5 font-mono text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="mb-1 block text-[11px] text-on-surface-variant dark:text-slate-500">
-                                                To
-                                            </label>
-                                            <input
-                                                type="time"
-                                                value={holidayTimeEnd}
-                                                onChange={(e) =>
-                                                    setHolidayTimeEnd(
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                className="w-full rounded-lg border border-outline-variant bg-surface p-2.5 font-mono text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
+                                        {day.label}
+                                    </label>
+                                ))}
+                            </div>
                         </div>
 
                         {/* Submit button */}
@@ -723,6 +1007,221 @@ export default function AdminAvailability() {
                     </form>
                 </div>
             </div>
+
+            {showQuickAdd && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                    <div className="w-full max-w-sm rounded-xl bg-white p-6 dark:bg-slate-900">
+                        <h3 className="mb-4 text-lg font-semibold text-on-surface dark:text-white">
+                            Add Time Slot
+                        </h3>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-xs">Start Time</label>
+                                <input
+                                    type="time"
+                                    value={quickStartTime}
+                                    onChange={(e) =>
+                                        setQuickStartTime(e.target.value)
+                                    }
+                                    className="w-full rounded border p-2"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="text-xs">End Time</label>
+                                <input
+                                    type="time"
+                                    value={quickEndTime}
+                                    onChange={(e) =>
+                                        setQuickEndTime(e.target.value)
+                                    }
+                                    className="w-full rounded border p-2"
+                                />
+                            </div>
+
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={handleQuickAddSlot}
+                                    className="flex-1 rounded bg-primary px-3 py-2 text-xs text-white"
+                                >
+                                    Add
+                                </button>
+
+                                <button
+                                    onClick={() => setShowQuickAdd(false)}
+                                    className="flex-1 rounded border px-3 py-2 text-xs"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {editingSlot && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                    <div className="w-full max-w-sm rounded-xl bg-white p-6 dark:bg-slate-900">
+                        <h3 className="mb-4 text-lg font-semibold">
+                            Edit Time Slot
+                        </h3>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label>Start Time</label>
+                                <input
+                                    type="time"
+                                    value={editStartTime}
+                                    onChange={(e) =>
+                                        setEditStartTime(e.target.value)
+                                    }
+                                />
+                            </div>
+
+                            <div>
+                                <label>End Time</label>
+                                <input
+                                    type="time"
+                                    value={editEndTime}
+                                    onChange={(e) =>
+                                        setEditEndTime(e.target.value)
+                                    }
+                                />
+                            </div>
+
+                            <div className="flex gap-2">
+                                <button onClick={handleSaveSlot}>Save</button>
+
+                                <button onClick={() => setEditingSlot(null)}>
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showCopyModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <div className="w-full max-w-lg rounded-xl border border-outline-variant bg-surface shadow-xl dark:border-slate-700 dark:bg-slate-900">
+                        {/* Header */}
+                        <div className="border-b border-outline-variant p-5 dark:border-slate-700">
+                            <h3 className="text-lg font-bold text-on-surface dark:text-white">
+                                Copy Schedule
+                            </h3>
+
+                            <p className="mt-1 text-xs text-on-surface-variant dark:text-slate-400">
+                                Copy all time slots from{' '}
+                                <span className="font-semibold">
+                                    {formatDateLabel(selectedDateStr)}
+                                </span>
+                            </p>
+                        </div>
+
+                        {/* Body */}
+                        <div className="space-y-6 p-5">
+                            {/* Weekdays */}
+                            <div>
+                                <label className="mb-3 block text-xs font-bold tracking-wider text-on-surface-variant uppercase dark:text-slate-400">
+                                    Apply To Weekdays
+                                </label>
+
+                                <div className="grid grid-cols-2 gap-2">
+                                    {weekdays.map((day) => (
+                                        <label
+                                            key={day.value}
+                                            className="flex cursor-pointer items-center gap-2 rounded-lg border border-outline-variant p-2 dark:border-slate-700"
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={copyWeekdays.includes(
+                                                    day.value,
+                                                )}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) {
+                                                        setCopyWeekdays(
+                                                            (prev) => [
+                                                                ...prev,
+                                                                day.value,
+                                                            ],
+                                                        );
+                                                    } else {
+                                                        setCopyWeekdays(
+                                                            (prev) =>
+                                                                prev.filter(
+                                                                    (v) =>
+                                                                        v !==
+                                                                        day.value,
+                                                                ),
+                                                        );
+                                                    }
+                                                }}
+                                            />
+
+                                            <span className="text-xs dark:text-white">
+                                                {day.label}
+                                            </span>
+                                        </label>
+                                    ))}
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={handleCopyToWeekdays}
+                                    disabled={copyWeekdays.length === 0}
+                                    className="mt-3 w-full rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white disabled:opacity-50 dark:bg-purple-600"
+                                >
+                                    Copy To Selected Weekdays
+                                </button>
+                            </div>
+
+                            {/* Divider */}
+                            <div className="border-t border-outline-variant dark:border-slate-700" />
+
+                            {/* Specific Date */}
+                            <div>
+                                <label className="mb-2 block text-xs font-bold tracking-wider text-on-surface-variant uppercase dark:text-slate-400">
+                                    Copy To Specific Date
+                                </label>
+
+                                <input
+                                    type="date"
+                                    value={copyTargetDate}
+                                    onChange={(e) =>
+                                        setCopyTargetDate(e.target.value)
+                                    }
+                                    className="w-full rounded-lg border border-outline-variant bg-surface p-2.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                                />
+
+                                <button
+                                    type="button"
+                                    onClick={handleCopyToDate}
+                                    disabled={!copyTargetDate}
+                                    className="mt-3 w-full rounded-lg border border-primary px-4 py-2 text-xs font-semibold text-primary disabled:opacity-50 dark:border-purple-500 dark:text-purple-400"
+                                >
+                                    Copy To Date
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="flex justify-end gap-2 border-t border-outline-variant p-4 dark:border-slate-700">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setShowCopyModal(false);
+                                    setCopyTargetDate('');
+                                    setCopyWeekdays([]);
+                                }}
+                                className="rounded-lg border border-outline px-4 py-2 text-xs font-semibold dark:border-slate-700 dark:text-white"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Toast notification */}
             {isToastVisible && (
