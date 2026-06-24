@@ -1,4 +1,4 @@
-import { createInertiaApp } from '@inertiajs/react';
+import { router, createInertiaApp } from '@inertiajs/react';
 import { createRoot } from 'react-dom/client';
 import { route as ziggyRoute } from 'ziggy-js';
 import type { route as ZiggyRouteType } from 'ziggy-js';
@@ -7,9 +7,11 @@ import { ComponentType } from 'react';
 
 declare global {
     var route: typeof ZiggyRouteType;
+    var inertiaRouter: typeof router;
 }
 
 globalThis.route = ziggyRoute;
+globalThis.inertiaRouter = router;
 
 const appName = import.meta.env.VITE_APP_NAME || 'Slotem';
 

@@ -20,7 +20,7 @@ import {
 } from '@/lib/calendar-utils';
 
 export default function AdminAvailability() {
-    const { availabilities: DatabaseAvailabilities } = usePage<{
+    const { availabilities } = usePage<{
         availabilities: Availability[];
     }>().props;
 
@@ -34,10 +34,6 @@ export default function AdminAvailability() {
 
     const [selectedDate, setSelectedDate] = useState(today);
     const selectedDateStr = formatDate(selectedDate);
-
-    const [availabilities, setAvailabilities] = useState<Availability[]>(
-        DatabaseAvailabilities,
-    );
 
     const [showQuickAdd, setShowQuickAdd] = useState(false);
     const [quickStartTime, setQuickStartTime] = useState('');
@@ -169,7 +165,6 @@ export default function AdminAvailability() {
         return { total, booked, available };
     }, [selectedAvailability]);
 
-
     const isDateClosed = (date: Date) => {
         const dateStr = formatDate(date);
         return !availabilities.some((a) => a.date === dateStr);
@@ -177,26 +172,22 @@ export default function AdminAvailability() {
 
     const isClosed = !selectedAvailability;
 
-    const handleCloseDay = (dateStr: string) => {
-        setAvailabilities((prev) => prev.filter((a) => a.date !== dateStr));
+    const handleCloseDay = () => {
+        inertiaRouter.delete(
+            route('admin.availability.destroy', selectedAvailability?.id),
+            {
+                preserveScroll: true,
 
-        triggerToast('Day marked as closed');
+                onSuccess: () => {
+                    triggerToast('Day marked as closed');
+                },
+            },
+        );
     };
 
     const handleReopenDay = (dateStr: string) => {
-        setAvailabilities((prev) => {
-            const exists = prev.some((a) => a.date === dateStr);
-
-            if (exists) return prev;
-
-            return [
-                ...prev,
-                {
-                    id: Math.max(...prev.map((a) => a.id), 0) + 1,
-                    date: dateStr,
-                    time_slots: [],
-                },
-            ];
+        inertiaRouter.post(route('admin.availability.store'), {
+            date: dateStr,
         });
 
         triggerToast('Day reopened');
@@ -205,105 +196,15 @@ export default function AdminAvailability() {
     // ============================================
     // TIME SLOT OPERATIONS
     // ============================================
-    const generateTimeSlots = (
-        startTime: string,
-        endTime: string,
-    ): TimeSlot[] => {
-        const slots: TimeSlot[] = [];
-        const [startHour, startMin] = startTime.split(':').map(Number);
-        const [endHour, endMin] = endTime.split(':').map(Number);
-
-        let currentHour = startHour;
-        let currentMin = startMin;
-        let id =
-            Math.max(
-                ...availabilities.flatMap((a) =>
-                    a.time_slots.map((ts) => ts.id),
-                ),
-                0,
-            ) + 1;
-
-        while (
-            currentHour < endHour ||
-            (currentHour === endHour && currentMin < endMin)
-        ) {
-            const nextHour = currentHour + 1;
-            const nextMin = currentMin;
-
-            if (nextHour <= endHour) {
-                slots.push({
-                    id: id++,
-                    availability_id: 0, // Will be set when saved
-                    start_time: `${String(currentHour).padStart(2, '0')}:${String(currentMin).padStart(2, '0')}`,
-                    end_time: `${String(nextHour).padStart(2, '0')}:${String(nextMin).padStart(2, '0')}`,
-                    is_booked: false,
-                });
-            }
-
-            currentHour = nextHour;
-            currentMin = nextMin;
-        }
-
-        return slots;
-    };
-
     const handleDeleteTimeSlot = (slotId: number) => {
-        setAvailabilities(
-            availabilities.map((a) => {
-                if (a.date === selectedDateStr) {
-                    return {
-                        ...a,
-                        time_slots: a.time_slots.filter(
-                            (ts) => ts.id !== slotId,
-                        ),
-                    };
-                }
-                return a;
-            }),
-        );
-    };
-
-    const handleAddTimeSlot = (dateStr: string, timeSlots: TimeSlot[]) => {
-        const existing = availabilities.find((a) => a.date === dateStr);
-
-        if (existing) {
-            setAvailabilities(
-                availabilities.map((a) => {
-                    if (a.date === dateStr) {
-                        return {
-                            ...a,
-                            time_slots: [...a.time_slots, ...timeSlots],
-                        };
-                    }
-                    return a;
-                }),
-            );
-        } else {
-            setAvailabilities([
-                ...availabilities,
-                {
-                    id: Math.max(...availabilities.map((a) => a.id), 0) + 1,
-                    date: dateStr,
-                    time_slots: timeSlots,
-                },
-            ]);
-        }
+        inertiaRouter.delete(route('admin.time-slots.destroy', slotId));
     };
 
     const copyScheduleToDate = (sourceDate: string, targetDate: string) => {
-        const sourceAvailability = availabilities.find(
-            (a) => a.date === sourceDate,
-        );
-
-        if (!sourceAvailability) return;
-
-        const clonedSlots = sourceAvailability.time_slots.map((slot) => ({
-            ...slot,
-            id: Date.now() + Math.random(),
-            is_booked: false,
-        }));
-
-        handleAddTimeSlot(targetDate, clonedSlots);
+        inertiaRouter.post(route('admin.availability.copy'), {
+            source_date: selectedDateStr,
+            target_date: copyTargetDate,
+        });
     };
 
     const handleCopyToDate = () => {
@@ -330,30 +231,20 @@ export default function AdminAvailability() {
         setShowCopyModal(false);
     };
 
-    const handleEditSlot = (slot: TimeSlot) => {
+    const handleOpenEditSlotModal = (slot: TimeSlot) => {
         setEditingSlot(slot);
 
         setEditStartTime(slot.start_time);
         setEditEndTime(slot.end_time);
     };
 
-    const handleSaveSlot = () => {
+    const handleEditSlot = () => {
         if (!editingSlot) return;
 
-        setAvailabilities((prev) =>
-            prev.map((availability) => ({
-                ...availability,
-                time_slots: availability.time_slots.map((slot) =>
-                    slot.id === editingSlot.id
-                        ? {
-                              ...slot,
-                              start_time: editStartTime,
-                              end_time: editEndTime,
-                          }
-                        : slot,
-                ),
-            })),
-        );
+        inertiaRouter.put(route('admin.time-slots.update', editingSlot.id), {
+            start_time: editStartTime,
+            end_time: editEndTime,
+        });
 
         setEditingSlot(null);
 
@@ -363,15 +254,11 @@ export default function AdminAvailability() {
     const handleQuickAddSlot = () => {
         if (!quickStartTime || !quickEndTime) return;
 
-        const newSlot: TimeSlot = {
-            id: Date.now(),
-            availability_id: 0,
+        inertiaRouter.post(route('admin.time-slots.store'), {
+            availability_id: selectedAvailability?.id,
             start_time: quickStartTime,
             end_time: quickEndTime,
-            is_booked: false,
-        };
-
-        handleAddTimeSlot(selectedDateStr, [newSlot]);
+        });
 
         setQuickStartTime('');
         setQuickEndTime('');
@@ -386,36 +273,14 @@ export default function AdminAvailability() {
     const handleSubmitBulkForm = (e: FormEvent) => {
         e.preventDefault();
 
-        if (isDateClosed(new Date(selectedDateStr))) return;
-
-        const startDate = new Date(formDateStart);
-        const endDate = new Date(formDateEnd);
-        const datesInRange: string[] = [];
-
-        for (
-            let d = new Date(startDate);
-            d <= endDate;
-            d.setDate(d.getDate() + 1)
-        ) {
-            const dayOfWeek = d.getDay();
-
-            if (isDateClosed(d)) continue;
-
-            const yyyy = d.getFullYear();
-            const mm = String(d.getMonth() + 1).padStart(2, '0');
-            const dd = String(d.getDate()).padStart(2, '0');
-            const dateStr = `${yyyy}-${mm}-${dd}`;
-
-            const isClosedByRule =
-                formClosedDates.includes(dateStr) ||
-                formClosedWeekdays.includes(d.getDay());
-
-            if (isClosedByRule) continue;
-
-            const slots = generateTimeSlots(formTimeStart, formTimeEnd);
-
-            handleAddTimeSlot(dateStr, slots);
-        }
+        inertiaRouter.post(route('admin.availability.bulk'), {
+            start_date: formDateStart,
+            end_date: formDateEnd,
+            start_time: formTimeStart,
+            end_time: formTimeEnd,
+            closed_dates: formClosedDates,
+            closed_weekdays: formClosedWeekdays,
+        });
 
         triggerToast('Time slots created successfully!');
     };
@@ -695,7 +560,7 @@ export default function AdminAvailability() {
 
                         <div className="mb-4 flex flex-col items-center gap-2 sm:flex-row">
                             <button
-                                onClick={() => handleCloseDay(selectedDateStr)}
+                                onClick={handleCloseDay}
                                 className="mt-2 cursor-pointer text-xs font-semibold text-red-500"
                             >
                                 Mark Closed
@@ -752,7 +617,9 @@ export default function AdminAvailability() {
                                         <div className="flex items-center gap-1">
                                             <button
                                                 onClick={() =>
-                                                    handleEditSlot(slot)
+                                                    handleOpenEditSlotModal(
+                                                        slot,
+                                                    )
                                                 }
                                                 className="cursor-pointer rounded p-1 text-on-surface-variant transition-colors hover:bg-white/20 dark:hover:bg-slate-700"
                                             >
@@ -1091,7 +958,7 @@ export default function AdminAvailability() {
                             </div>
 
                             <div className="flex gap-2">
-                                <button onClick={handleSaveSlot}>Save</button>
+                                <button onClick={handleEditSlot}>Save</button>
 
                                 <button onClick={() => setEditingSlot(null)}>
                                     Cancel

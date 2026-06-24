@@ -18,10 +18,6 @@ class DashboardController extends Controller
             'bookings' => $bookings,
         ]);
     }
-    public function availability()
-    {
-        return inertia('Admin/Availability');
-    }
     public function services()
     {
         return inertia('Admin/Services');
