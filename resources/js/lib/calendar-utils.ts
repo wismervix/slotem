@@ -69,11 +69,8 @@ export function isPastDate(date: Date): boolean {
 
 export function generateCalendarDays(month: number, year: number) {
     const firstDayOfMonth = new Date(year, month, 1);
-
     const lastDayOfMonth = new Date(year, month + 1, 0);
-
     const daysInMonth = lastDayOfMonth.getDate();
-
     const startingDayIndex = (firstDayOfMonth.getDay() + 6) % 7;
 
     const calendarDays: {
@@ -81,17 +78,15 @@ export function generateCalendarDays(month: number, year: number) {
         currentMonth: boolean;
     }[] = [];
 
-    // previous month padding
+    // Previous month padding
     for (let i = startingDayIndex; i > 0; i--) {
-        const date = new Date(year, month, 1 - i);
-
         calendarDays.push({
-            date,
+            date: new Date(year, month, 1 - i),
             currentMonth: false,
         });
     }
 
-    // current month
+    // Current month
     for (let day = 1; day <= daysInMonth; day++) {
         calendarDays.push({
             date: new Date(year, month, day),
@@ -99,10 +94,13 @@ export function generateCalendarDays(month: number, year: number) {
         });
     }
 
-    // next month padding
-    const remaining = 42 - calendarDays.length;
+    // Only pad to the next multiple of 7 — don't blindly go to 42.
+    // This means months that fit in 5 rows (35 cells) won't get a ghost 6th row.
+    const totalSoFar = calendarDays.length;
+    const remainder = totalSoFar % 7;
+    const trailingDays = remainder === 0 ? 0 : 7 - remainder;
 
-    for (let i = 1; i <= remaining; i++) {
+    for (let i = 1; i <= trailingDays; i++) {
         calendarDays.push({
             date: new Date(year, month + 1, i),
             currentMonth: false,

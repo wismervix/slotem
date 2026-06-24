@@ -30,11 +30,11 @@ export default function CalendarView({
 }: CalendarViewProps) {
     const today = new Date();
 
+    const days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+
     const [currentMonth, setCurrentMonth] = useState(today.getMonth());
 
     const [currentYear, setCurrentYear] = useState(today.getFullYear());
-
-    const days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
     const calendarDays = useMemo(() => {
         return generateCalendarDays(currentMonth, currentYear);
@@ -212,11 +212,9 @@ export default function CalendarView({
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                openModal(
-                                                    formattedDate
-                                                );
+                                                openModal(formattedDate);
                                             }}
-                                            className="cursor-pointer shrink-0 text-[10px] font-extrabold text-primary uppercase opacity-0 transition-opacity group-hover:opacity-100"
+                                            className="shrink-0 cursor-pointer text-[10px] font-extrabold text-primary uppercase opacity-0 transition-opacity group-hover:opacity-100"
                                         >
                                             + Book
                                         </button>
