@@ -47,8 +47,8 @@ Route::group(['prefix' => 'admin'], function () {
         //TIME-SLOT CONTROLLER
         Route::controller(TimeSlotController::class)->prefix('time-slots')->group(function () {
             Route::post('/', 'store')->name('admin.time-slots.store');
-            Route::put('/{timeSlots}', 'update')->name('admin.time-slots.update');
-            Route::delete('/{timeSlots}', 'destroy')->name('admin.time-slots.destroy');
+            Route::put('/{timeSlot}', 'update')->name('admin.time-slots.update');
+            Route::delete('/{timeSlot}', 'destroy')->name('admin.time-slots.destroy');
 
             Route::post('/bulk', 'bulkCreate')->name('admin.time-slots.bulk-create');
             Route::post('/copy', 'copySchedule')->name('admin.time-slots.copy-schedule');

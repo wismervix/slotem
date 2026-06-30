@@ -67,8 +67,8 @@ export default function AdminAvailability() {
     >('custom');
 
     // Form state for bulk slot creation
-    const [formDateStart, setFormDateStart] = useState('2024-09-09');
-    const [formDateEnd, setFormDateEnd] = useState('2024-09-13');
+    const [formDateStart, setFormDateStart] = useState('2027-01-01');
+    const [formDateEnd, setFormDateEnd] = useState('2027-01-13');
     const [formTimeStart, setFormTimeStart] = useState('09:00');
     const [formTimeEnd, setFormTimeEnd] = useState('17:00');
     const [formClosedDates, setFormClosedDates] = useState<string[]>([]);
@@ -186,9 +186,11 @@ export default function AdminAvailability() {
     };
 
     const handleReopenDay = (dateStr: string) => {
-        inertiaRouter.post(route('admin.availability.store'), {
-            date: dateStr,
-        });
+        // inertiaRouter.post(route('admin.availability.store'), {
+        //     date: dateStr,
+        // });
+
+        setShowQuickAdd(true);
 
         triggerToast('Day reopened');
     };
@@ -200,15 +202,11 @@ export default function AdminAvailability() {
         inertiaRouter.delete(route('admin.time-slots.destroy', slotId));
     };
 
-    const copyScheduleToDate = (sourceDate: string, targetDate: string) => {
-        inertiaRouter.post(route('admin.availability.copy'), {
-            source_date: selectedDateStr,
-            target_date: copyTargetDate,
-        });
-    };
-
     const handleCopyToDate = () => {
-        copyScheduleToDate(selectedDateStr, copyTargetDate);
+        inertiaRouter.post(route('admin.availability.copy-schedule'), {
+            source_date: selectedDateStr,
+            target_dates: [copyTargetDate],
+        });
 
         triggerToast('Schedule copied');
         setShowCopyModal(false);
@@ -219,12 +217,17 @@ export default function AdminAvailability() {
 
         if (!sourceAvailability) return;
 
-        calendarDays.forEach(({ date, currentMonth }) => {
-            if (!currentMonth) return;
+        const targetDates = calendarDays
+            .filter(
+                ({ date, currentMonth }) =>
+                    currentMonth && copyWeekdays.includes(date.getDay()),
+            )
+            .map(({ date }) => formatDate(date))
+            .filter((date) => date !== selectedDateStr);
 
-            if (copyWeekdays.includes(date.getDay())) {
-                copyScheduleToDate(selectedDateStr, formatDate(date));
-            }
+        inertiaRouter.post(route('admin.availability.copy-schedule'), {
+            source_date: selectedDateStr,
+            target_dates: targetDates,
         });
 
         triggerToast('Schedule copied');
@@ -255,7 +258,7 @@ export default function AdminAvailability() {
         if (!quickStartTime || !quickEndTime) return;
 
         inertiaRouter.post(route('admin.time-slots.store'), {
-            availability_id: selectedAvailability?.id,
+            date: selectedDateStr,
             start_time: quickStartTime,
             end_time: quickEndTime,
         });
@@ -273,7 +276,7 @@ export default function AdminAvailability() {
     const handleSubmitBulkForm = (e: FormEvent) => {
         e.preventDefault();
 
-        inertiaRouter.post(route('admin.availability.bulk'), {
+        inertiaRouter.post(route('admin.time-slots.bulk-create'), {
             start_date: formDateStart,
             end_date: formDateEnd,
             start_time: formTimeStart,
@@ -881,6 +884,11 @@ export default function AdminAvailability() {
                         <h3 className="mb-4 text-lg font-semibold text-on-surface dark:text-white">
                             Add Time Slot
                         </h3>
+
+                        {/* Add this line to show the date */}
+                        <p className="mb-4 text-sm text-on-surface-variant dark:text-slate-400">
+                            For {formatDateLabel(selectedDateStr)}
+                        </p>
 
                         <div className="space-y-4">
                             <div>

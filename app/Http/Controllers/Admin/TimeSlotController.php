@@ -3,17 +3,72 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\TimeSlot;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Models\Availability;
 use Carbon\CarbonPeriod;
+use App\Models\Availability;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreTimeSlotRequest;
+use App\Http\Requests\UpdateTimeSlotRequest;
+use App\Services\AvailabilityService;
+
+use Illuminate\Http\Request;
 
 class TimeSlotController extends Controller
 {
-    public function store(Request $request)
+    private function hasOverlap(
+        int $availabilityId,
+        string $startTime,
+        string $endTime,
+        ?int $ignoreSlotId = null
+    ): bool {
+        return TimeSlot::where(
+            'availability_id',
+            $availabilityId
+        )
+            ->when(
+                $ignoreSlotId,
+                fn($q) => $q->where('id', '!=', $ignoreSlotId)
+            )
+            ->where(function ($query) use (
+                $startTime,
+                $endTime
+            ) {
+                $query
+                    ->where('start_time', '<', $endTime)
+                    ->where('end_time', '>', $startTime);
+            })
+            ->exists();
+    }
+
+    public function store(StoreTimeSlotRequest $request)
     {
+        $availability = Availability::firstOrCreate([
+            'date' => $request->date,
+        ]);
+
+        $exists = TimeSlot::where(
+            'availability_id',
+            $availability->id
+        )
+            ->where('start_time', $request->start_time)
+            ->where('end_time', $request->end_time)
+            ->exists();
+
+        if ($exists) {
+            abort(422, 'This slot already exists.');
+        }
+
+        if (
+            $this->hasOverlap(
+                $availability->id,
+                $request->start_time,
+                $request->end_time
+            )
+        ) {
+            abort(422, 'Slot overlaps with another slot.');
+        }
+
         TimeSlot::create([
-            'availability_id' => $request->availability_id,
+            'availability_id' => $availability->id,
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,
             'is_booked' => false,
@@ -22,8 +77,19 @@ class TimeSlotController extends Controller
         return back();
     }
 
-    public function update(Request $request, TimeSlot $timeSlot) 
+    public function update(UpdateTimeSlotRequest $request, TimeSlot $timeSlot)
     {
+        if (
+            $this->hasOverlap(
+                $timeSlot->availability_id,
+                $request->start_time,
+                $request->end_time,
+                $timeSlot->id
+            )
+        ) {
+            abort(422, 'Slot overlaps with another slot.');
+        }
+
         $timeSlot->update([
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,
@@ -40,10 +106,16 @@ class TimeSlotController extends Controller
 
         $timeSlot->delete();
 
+        $availability = $timeSlot->availability;
+
+        if ($availability->timeSlots()->count() === 0) {
+            $availability->delete();
+        }
+
         return back();
     }
 
-    public function bulkCreate(Request $request)
+    public function bulkCreate(Request $request, AvailabilityService $availabilityService)
     {
         $period = CarbonPeriod::create(
             $request->start_date,
@@ -75,7 +147,11 @@ class TimeSlotController extends Controller
                     'date' => $date->format('Y-m-d'),
                 ]);
 
-            // generate slots here
+            $availabilityService->generateSlots(
+                $availability,
+                $request->start_time,
+                $request->end_time
+            );
         }
 
         return back();
