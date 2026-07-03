@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
     Download,
     UserPlus,
@@ -17,52 +17,35 @@ import {
     BarChart,
     AlertTriangle,
     TrendingUp,
+    Camera,
 } from 'lucide-react';
-import { User, UserStatus } from '@/types';
-import AdminLayout from '@/layouts/Admin/AdminLayout';
-import { Link } from '@inertiajs/react';
-import { extractAndFormatDate, extractAndFormatTime, formatDateAndTime, formatTime } from '@/lib/calendar-utils';
+import { Link, useForm } from '@inertiajs/react';
 
+// ─── Layouts & Components ───────────────────────────────────────────────
+import AdminLayout from '@/layouts/Admin/AdminLayout';
+
+// ─── Types & Utilities ───────────────────────────────────────────────
+import { User, UserStatus } from '@/types';
+import {
+    extractAndFormatDate,
+    extractAndFormatTime,
+    formatTime,
+} from '@/lib/calendar-utils';
+
+// ─── Types ────────────────────────────────────────────────────────────
 interface AdminUsersProps {
     users: User[];
+    flash?: {
+        success?: string;
+    };
 }
 
-export default function AdminUsers({ users }: AdminUsersProps) {
+// ─── Component ───────────────────────────────────────────────────────
+export default function AdminUsers({ users, flash }: AdminUsersProps) {
+    // ─── 1. STATE ──────────────────────────────────────────────────
+
+    // 📋 Table Filters & Sorting
     const [searchQuery, setSearchQuery] = useState<string>('');
-
-
-    // State Action Handlers
-    const handleAddUser = (newUser: User) => {
-        const updated = [newUser, ...users];
-        // setUsers(updated);
-        console.log("Added new user", updated)
-    };
-    
-    const handleUpdateUser = (updatedUser: User) => {
-        const updated = users.map((u) =>
-            u.id === updatedUser.id ? updatedUser : u,
-    );
-    // setUsers(updated);
-    console.log("Updated new user", updated)
-};
-
-const handleDeleteUser = (userId: number) => {
-        const updated = users.filter((u) => u.id !== userId);
-        // setUsers(updated);
-        console.log("Deleted new user", updated)
-        // Also cancel bookings associated with deleted profiles
-        const updatedBookings = users.flatMap((u) =>
-            (u.bookings ?? []).map((b) => ({
-                ...b,
-                status: 'cancelled' as const,
-            }))
-        );
-        
-        // setBookings(updatedBookings);
-        console.log("Cancelled all bookings ass. w this user", updatedBookings)
-    };
-
-    // Filters & Sorting state
     const [statusFilter, setStatusFilter] = useState<
         'All Statuses' | 'Active' | 'Inactive' | 'Suspended' | 'Deleted'
     >('All Statuses');
@@ -72,26 +55,104 @@ const handleDeleteUser = (userId: number) => {
     const [dateFilter, setDateFilter] = useState('');
     const [isRefreshing, setIsRefreshing] = useState(false);
 
-    // Pagination states
+    // 📄 Pagination
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
 
-    // Selected User Modal States
+    // 👤 User Modals
     const [viewingUser, setViewingUser] = useState<User | null>(null);
     const [editingUser, setEditingUser] = useState<User | null>(null);
-    const [isAddingUser, setIsAddingUser] = useState(false);
 
-    // Form states for Add/Edit
-    const [formName, setFormName] = useState('');
-    const [formEmail, setFormEmail] = useState('');
-    const [formPhone, setFormPhone] = useState('');
-    const [formStatus, setFormStatus] = useState<UserStatus>('active');
-    const [formAvatar, setFormAvatar] = useState('');
+    // 🖼️ Avatar Preview
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
-    // CSV Export animation/feedback
+    // 💬 Toast Notifications
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
     const [showExportSuccess, setShowExportSuccess] = useState(false);
 
-    // Refresh trigger handler
+    // ─── 2. INERTIA FORM ──────────────────────────────────────────
+
+    // 📝 Edit User Form
+    const { data, setData, post, processing, errors, reset } = useForm({
+        name: '',
+        email: '',
+        phone: '',
+        status: 'active' as UserStatus,
+        avatar_url: null as File | null,
+        _method: 'put',
+    });
+
+    // ─── 3. EFFECTS ────────────────────────────────────────────────
+
+    // 💬 Toast: Auto-hide after 4 seconds
+    useEffect(() => {
+        if (flash?.success) {
+            setToastMessage(flash.success);
+            setShowToast(true);
+            const timer = setTimeout(() => setShowToast(false), 4000);
+            return () => clearTimeout(timer);
+        }
+    }, [flash]);
+
+    // 👤 Edit Form: Populate when user is selected for editing
+    useEffect(() => {
+        if (editingUser) {
+            console.log('📝 Edit form opened for user:', {
+                id: editingUser.id,
+                name: editingUser.name,
+                email: editingUser.email,
+                status: editingUser.status,
+                phone: editingUser.phone,
+                bookings: editingUser.bookings_count,
+                avatar_url: editingUser.avatar_url,
+                openedAt: new Date().toISOString(),
+            });
+
+            // Populate form with user data
+            setData({
+                name: editingUser.name || '',
+                email: editingUser.email || '',
+                phone: editingUser.phone || '',
+                status: editingUser.status || 'active',
+                avatar_url: null as File | null,
+                _method: 'put',
+            });
+
+            // Set avatar preview
+            setAvatarPreview(editingUser.avatar_url || null);
+        }
+    }, [editingUser]);
+
+    // 🖼️ Cleanup: Revoke blob URLs to prevent memory leaks
+    useEffect(() => {
+        return () => {
+            if (avatarPreview && avatarPreview.startsWith('blob:')) {
+                URL.revokeObjectURL(avatarPreview);
+            }
+        };
+    }, [avatarPreview]);
+
+    // 📄 Pagination: Reset to page 1 when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [statusFilter, sortBy, dateFilter, searchQuery]);
+
+    // ─── 4. EVENT HANDLERS ────────────────────────────────────────
+
+    // 🖼️ Handle avatar file selection
+    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+
+        if (!file) return;
+
+        setData('avatar_url', file);
+
+        const preview = URL.createObjectURL(file);
+        setAvatarPreview(preview);
+    };
+
+    // 🔄 Refresh filters
     const handleRefresh = () => {
         setIsRefreshing(true);
         setTimeout(() => {
@@ -102,100 +163,7 @@ const handleDeleteUser = (userId: number) => {
         }, 600);
     };
 
-    const doesStatusMatch = (
-        statuses: UserStatus | null | undefined,
-        filter:
-            | 'All Statuses'
-            | 'Active'
-            | 'Inactive'
-            | 'Suspended'
-            | 'Deleted',
-    ) => {
-        if (filter === 'All Statuses') return true;
-
-        if (!statuses?.length) return false;
-
-        switch (filter) {
-            case 'Active':
-                return statuses.includes('active')
-            case 'Inactive':
-                return statuses.includes('inactive')
-            case 'Suspended':
-                return statuses.includes('suspended')
-            case 'Deleted':
-                return statuses.includes('deleted')
-        }
-        
-        // return filter === 'All Statuses' || statuses === filter;
-    };
-
-    // Filtered & Sorted users list
-    const processedUsers = useMemo(() => {
-        return users
-            .filter((user) => {
-                // Search Query filter
-                const query = searchQuery.toLowerCase().trim();
-                const matchesSearch =
-                    !query ||
-                    user.name.toLowerCase().includes(query) ||
-                    user.email.toLowerCase().includes(query) ||
-                    user.id.toString().includes(query);
-
-                // Status filter
-                // const matchesStatus =
-                //     statusFilter === 'All Statuses' ||
-                //     user.status === statusFilter;
-                const matchesStatus = doesStatusMatch(user.status, statusFilter);
-
-                // Custom Date filter (e.g. Month name or date string)
-                const matchesDate =
-                    !dateFilter ||
-                    user.created_at
-                        .toLowerCase()
-                        .includes(dateFilter.toLowerCase().trim());
-
-                return matchesSearch && matchesStatus && matchesDate;
-            })
-            .sort((a, b) => {
-                if (sortBy === 'Name (A-Z)') {
-                    return a.name.localeCompare(b.name);
-                }
-                if (sortBy === 'Most Bookings') {
-                    return (b.bookings_count ?? 0) - (a.bookings_count ?? 0);
-                }
-                // Default Sort by Date (assume ID order correlates to registration order for simplicity, or reverse chronological)
-                return b.id - a.id;
-            });
-    }, [users, searchQuery, statusFilter, sortBy, dateFilter]);
-
-
-    // Paginated partition
-    const totalItems = processedUsers.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedUsers = useMemo(() => {
-        return processedUsers.slice(startIndex, startIndex + itemsPerPage);
-    }, [processedUsers, startIndex]);
-
-    // Adjust page boundary on filter change
-    React.useEffect(() => {
-        setCurrentPage(1);
-    }, [statusFilter, sortBy, dateFilter, searchQuery]);
-
-    // Computed stats for quick insight cards
-    const totalActiveCount = useMemo(
-        () => users.filter((u) => u.status === 'active').length,
-        [users],
-    );
-    const reportsPendingCount = useMemo(
-        () =>
-            users.filter(
-                (u) => u.status === 'suspended' || u.status === 'inactive',
-            ).length,
-        [users],
-    );
-
-    // Export CSV simulation
+    // 📤 Export users to CSV
     const handleExportCSV = () => {
         const headers = [
             'ID',
@@ -207,6 +175,7 @@ const handleDeleteUser = (userId: number) => {
             'Bookings',
             'Status',
         ].join(',');
+
         const rows = processedUsers
             .map(
                 (u) =>
@@ -228,98 +197,185 @@ const handleDeleteUser = (userId: number) => {
         setTimeout(() => setShowExportSuccess(false), 3000);
     };
 
-    // Setup form with current user values for editing
-    const handleStartEdit = (user: User) => {
-        setEditingUser(user);
-        setFormName(user.name);
-        setFormEmail(user.email);
-        setFormPhone(user.phone || '');
-        setFormStatus(user.status);
-        setFormAvatar(user.avatar_url || '');
-    };
+    // 💾 Save edited user
+    const handleSaveEdit = (e: React.FormEvent) => {
+        e.preventDefault();
 
-    const handleSaveEdit = () => {
-        if (!editingUser) return;
-        if (!formName.trim() || !formEmail.trim()) {
-            alert('Name and Email are required.');
+        if (!editingUser) {
+            console.error('❌ No user being edited');
             return;
         }
-        const updated: User = {
-            ...editingUser,
-            name: formName,
-            email: formEmail,
-            phone: formPhone,
-            status: formStatus,
-            avatar_url:
-                formAvatar ||
-                'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-        };
-        handleUpdateUser(updated);
-        setEditingUser(null);
+
+        // Log form data for debugging
+        console.log('📤 Submitting form data:', {
+            id: editingUser.id,
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+            status: data.status,
+            hasAvatar: !!data.avatar_url,
+        });
+
+        post(route('admin.users.update', editingUser.id), {
+            forceFormData: true, // Required for file uploads
+            preserveScroll: true,
+            onSuccess: () => {
+                console.log('✅ Update successful');
+                reset();
+                setEditingUser(null);
+                setAvatarPreview(null);
+            },
+            onError: (errors) => {
+                console.error('❌ Validation errors:', errors);
+            },
+        });
     };
 
-    const handleStartAdd = () => {
-        setIsAddingUser(true);
-        setFormName('');
-        setFormEmail('');
-        setFormPhone('');
-        setFormStatus('active');
-        // Random beautiful placeholder avatar_url
-        const randId = Math.floor(Math.random() * 100);
-        setFormAvatar(
-            `https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80`,
+    // 🔄 Toggle user status (Active ↔ Suspended)
+    const handleToggleStatus = (user: User) => {
+        const nextStatus = user.status === 'active' ? 'suspended' : 'active';
+        const verb = nextStatus === 'suspended' ? 'suspend' : 'reactivate';
+
+        if (!confirm(`Are you sure you want to ${verb} ${user.name}?`)) {
+            return;
+        }
+
+        inertiaRouter.patch(
+            route('admin.users.status', user.id),
+            { status: nextStatus },
+            {
+                preserveScroll: true,
+                onError: (errors) => {
+                    console.error('❌ Failed to update status:', errors);
+                },
+            },
         );
     };
 
-    const handleSaveAdd = () => {
-        if (!formName.trim() || !formEmail.trim()) {
-            alert('Name and Email are required.');
-            return;
+    // 🗑️ Delete user
+    const handleDeleteUser = (userId: number) => {
+        if (
+            confirm(
+                'Are you absolutely sure you want to delete this client? All history will be archived.',
+            )
+        ) {
+            inertiaRouter.delete(route('admin.users.destroy', userId), {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setEditingUser(null);
+                    setViewingUser(null);
+                },
+            });
         }
-        // Generate novel ID
-        const newIdNum = 49200 + users.length + 1;
-        const newUser: User = {
-            // id: `SL-${newIdNum}`,
-            id: newIdNum,
-            name: formName,
-            email: formEmail,
-            phone: formPhone || '+1 (555) 000-0000',
-            created_at: new Date().toLocaleDateString('en-US', {
-                month: 'short',
-                day: '2-digit',
-                year: 'numeric',
-            }),
-            updated_at: new Date().toLocaleDateString('en-US', {
-                month: 'short',
-                day: '2-digit',
-                year: 'numeric',
-            }),
-            email_verified_at: new Date().toLocaleDateString('en-US', {
-                month: 'short',
-                day: '2-digit',
-                year: 'numeric',
-            }),
-            bookingsCount: 0,
-            status: formStatus,
-            avatar_url:
-                formAvatar ||
-                'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-        };
-        handleAddUser(newUser);
-        setIsAddingUser(false);
     };
 
-    const handleToggleStatus = (user: User) => {
-        const nextStatus = user.status === 'active' ? 'suspended' : 'active';
-        handleUpdateUser({ ...user, status: nextStatus });
+    // ─── 5. HELPER FUNCTIONS ──────────────────────────────────────
+
+    // ✅ Check if user status matches the current filter
+    const doesStatusMatch = (
+        statuses: UserStatus | null | undefined,
+        filter:
+            | 'All Statuses'
+            | 'Active'
+            | 'Inactive'
+            | 'Suspended'
+            | 'Deleted',
+    ) => {
+        if (filter === 'All Statuses') return true;
+        if (!statuses?.length) return false;
+
+        switch (filter) {
+            case 'Active':
+                return statuses.includes('active');
+            case 'Inactive':
+                return statuses.includes('inactive');
+            case 'Suspended':
+                return statuses.includes('suspended');
+            case 'Deleted':
+                return statuses.includes('deleted');
+            default:
+                return false;
+        }
     };
 
-    console.log('Users Prop: ', users);
+    // ─── 6. COMPUTED VALUES ──────────────────────────────────────
+
+    // 📊 Filtered & Sorted Users
+    const processedUsers = useMemo(() => {
+        return users
+            .filter((user) => {
+                // 🔍 Search query filter
+                const query = searchQuery.toLowerCase().trim();
+                const matchesSearch =
+                    !query ||
+                    user.name.toLowerCase().includes(query) ||
+                    user.email.toLowerCase().includes(query) ||
+                    user.id.toString().includes(query);
+
+                // 🏷️ Status filter
+                const matchesStatus = doesStatusMatch(
+                    user.status,
+                    statusFilter,
+                );
+
+                // 📅 Date filter
+                const matchesDate =
+                    !dateFilter ||
+                    user.created_at
+                        .toLowerCase()
+                        .includes(dateFilter.toLowerCase().trim());
+
+                return matchesSearch && matchesStatus && matchesDate;
+            })
+            .sort((a, b) => {
+                if (sortBy === 'Name (A-Z)') {
+                    return a.name.localeCompare(b.name);
+                }
+                if (sortBy === 'Most Bookings') {
+                    return (b.bookings_count ?? 0) - (a.bookings_count ?? 0);
+                }
+                // Default: Sort by registration date (newest first)
+                return b.id - a.id;
+            });
+    }, [users, searchQuery, statusFilter, sortBy, dateFilter]);
+
+    // 📄 Paginated Users
+    const totalItems = processedUsers.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+    const startIndex = (currentPage - 1) * itemsPerPage;
+
+    const paginatedUsers = useMemo(() => {
+        return processedUsers.slice(startIndex, startIndex + itemsPerPage);
+    }, [processedUsers, startIndex]);
+
+    // 📊 Stats
+    const totalActiveCount = useMemo(
+        () => users.filter((u) => u.status === 'active').length,
+        [users],
+    );
+
+    const reportsPendingCount = useMemo(
+        () =>
+            users.filter(
+                (u) => u.status === 'suspended' || u.status === 'inactive',
+            ).length,
+        [users],
+    );
+
+    // ─── 7. RENDER ─────────────────────────────────────────────────
 
     return (
         <AdminLayout>
             <div className="space-y-6">
-                {/* Top Title Bar */}
+                {/* ─── Toast Notification ────────────────────────── */}
+                {showToast && toastMessage && (
+                    <div className="animate-slide-in fixed right-6 bottom-6 z-50 flex items-center gap-3 rounded-xl border border-emerald-500/30 bg-emerald-600 px-5 py-3 text-white shadow-2xl">
+                        <CheckCircle className="h-5 w-5 shrink-0" />
+                        <p className="text-xs font-bold">{toastMessage}</p>
+                    </div>
+                )}
+
+                {/* ─── Header ────────────────────────────────────── */}
                 <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
                     <div>
                         <h2 className="text-2xl font-bold text-on-surface dark:text-white">
@@ -339,7 +395,11 @@ const handleDeleteUser = (userId: number) => {
                             <span>Export CSV</span>
                         </button>
                         <button
-                            onClick={handleStartAdd}
+                            onClick={() =>
+                                console.log(
+                                    "Add new user feature isn't available yet.",
+                                )
+                            }
                             className="flex cursor-pointer items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary shadow-sm shadow-primary/20 transition-all hover:bg-primary-container dark:bg-purple-600 dark:hover:bg-purple-700"
                         >
                             <UserPlus className="h-4 w-4" />
@@ -348,20 +408,20 @@ const handleDeleteUser = (userId: number) => {
                     </div>
                 </div>
 
-                {/* CSV Export Success Toast/indicator */}
+                {/* ─── Export Success Toast ──────────────────────── */}
                 {showExportSuccess && (
                     <div className="animate-fade-in flex items-center gap-2 rounded-xl border border-green-200 bg-green-100 px-4 py-2 text-xs text-green-800 dark:border-green-900/50 dark:bg-green-950/30 dark:text-green-400">
                         <Check className="h-4 w-4 text-green-700 dark:text-green-400" />
                         <span>
-                            User roster successfully exported to local download
-                            directory as CSV.
+                            ✅ User roster successfully exported to local
+                            download directory as CSV.
                         </span>
                     </div>
                 )}
 
-                {/* Filter Toolbar controls */}
+                {/* ─── Filter Toolbar ────────────────────────────── */}
                 <div className="flex flex-wrap items-center gap-4 rounded-xl border border-outline-variant bg-surface p-4 dark:border-slate-700 dark:bg-slate-900">
-                    {/* Status drop filter */}
+                    {/* Status filter */}
                     <div className="flex min-w-[190px] flex-1 items-center gap-2 rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 dark:border-slate-700 dark:bg-slate-800">
                         <Filter className="h-4 w-4 text-outline dark:text-slate-600" />
                         <select
@@ -380,7 +440,7 @@ const handleDeleteUser = (userId: number) => {
                         </select>
                     </div>
 
-                    {/* Custom date range simple search */}
+                    {/* Date filter */}
                     <div className="flex min-w-[190px] flex-1 items-center gap-2 rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 dark:border-slate-700 dark:bg-slate-800">
                         <Calendar className="h-4 w-4 text-outline dark:text-slate-600" />
                         <input
@@ -392,7 +452,7 @@ const handleDeleteUser = (userId: number) => {
                         />
                     </div>
 
-                    {/* Sort drop filter */}
+                    {/* Sort filter */}
                     <div className="flex min-w-[200px] flex-1 items-center gap-2 rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 dark:border-slate-700 dark:bg-slate-800">
                         <ArrowUpDown className="h-4 w-4 text-outline dark:text-slate-600" />
                         <select
@@ -412,7 +472,7 @@ const handleDeleteUser = (userId: number) => {
                         </select>
                     </div>
 
-                    {/* Refresh clean triggers */}
+                    {/* Refresh button */}
                     <button
                         onClick={handleRefresh}
                         className="cursor-pointer rounded-lg border border-outline-variant/60 bg-surface-container-low p-2.5 text-outline transition-colors hover:bg-surface-container-high dark:border-slate-700 dark:bg-slate-800 dark:text-slate-600 dark:hover:bg-slate-700"
@@ -424,7 +484,7 @@ const handleDeleteUser = (userId: number) => {
                     </button>
                 </div>
 
-                {/* Main Table Segment */}
+                {/* ─── Users Table ────────────────────────────────── */}
                 <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface shadow-sm dark:border-slate-700 dark:bg-slate-900">
                     <div className="overflow-x-auto">
                         <table className="w-full border-collapse text-left">
@@ -457,13 +517,12 @@ const handleDeleteUser = (userId: number) => {
                                             colSpan={6}
                                             className="px-6 py-12 text-center text-sm text-on-surface-variant/80 dark:text-slate-500"
                                         >
-                                            No users matching your filter inputs
-                                            found. Try resetting filters.
+                                            🔍 No users matching your filter
+                                            inputs found. Try resetting filters.
                                         </td>
                                     </tr>
                                 ) : (
                                     paginatedUsers.map((user) => {
-                                        // Bookings relative bar (let's assume out of 30 max Bookings list scale for design styling)
                                         const relativeProgress = Math.min(
                                             ((user.bookings_count ?? 0) / 30) *
                                                 100,
@@ -475,13 +534,16 @@ const handleDeleteUser = (userId: number) => {
                                                 key={user.id}
                                                 className="group transition-colors hover:bg-surface-container/60 dark:hover:bg-slate-800/50"
                                             >
+                                                {/* User Info */}
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center gap-3">
                                                         <img
                                                             alt={user.name}
                                                             referrerPolicy="no-referrer"
                                                             className="h-10 w-10 rounded-full border border-outline-variant/40 object-cover dark:border-slate-700"
-                                                            src={user.avatar_url}
+                                                            src={
+                                                                user.avatar_url
+                                                            }
                                                         />
                                                         <div>
                                                             <p className="text-xs font-bold text-on-surface dark:text-white">
@@ -493,6 +555,8 @@ const handleDeleteUser = (userId: number) => {
                                                         </div>
                                                     </div>
                                                 </td>
+
+                                                {/* Contact Info */}
                                                 <td className="px-6 py-4">
                                                     <p className="text-xs font-medium text-on-surface dark:text-white">
                                                         {user.email}
@@ -501,6 +565,8 @@ const handleDeleteUser = (userId: number) => {
                                                         {user.phone}
                                                     </p>
                                                 </td>
+
+                                                {/* Registration Date */}
                                                 <td className="px-6 py-4">
                                                     <p className="text-xs font-medium text-on-surface dark:text-white">
                                                         {extractAndFormatDate(
@@ -513,6 +579,8 @@ const handleDeleteUser = (userId: number) => {
                                                         )}
                                                     </p>
                                                 </td>
+
+                                                {/* Bookings */}
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center gap-2">
                                                         <span className="w-4 text-xs font-bold text-on-surface dark:text-white">
@@ -526,10 +594,12 @@ const handleDeleteUser = (userId: number) => {
                                                                 style={{
                                                                     width: `${relativeProgress}%`,
                                                                 }}
-                                                            ></span>
+                                                            />
                                                         </span>
                                                     </div>
                                                 </td>
+
+                                                {/* Status Badge */}
                                                 <td className="px-6 py-4">
                                                     {user.status ===
                                                     'active' ? (
@@ -547,9 +617,11 @@ const handleDeleteUser = (userId: number) => {
                                                         </span>
                                                     )}
                                                 </td>
+
+                                                {/* Actions */}
                                                 <td className="px-6 py-4 text-right">
-                                                    {/* Inline actions fade in on hover */}
                                                     <div className="flex items-center justify-end gap-1.5 transition-opacity group-hover:opacity-100 md:opacity-0">
+                                                        {/* View */}
                                                         <button
                                                             onClick={() =>
                                                                 setViewingUser(
@@ -561,9 +633,11 @@ const handleDeleteUser = (userId: number) => {
                                                         >
                                                             <Eye className="h-4 w-4" />
                                                         </button>
+
+                                                        {/* Edit */}
                                                         <button
                                                             onClick={() =>
-                                                                handleStartEdit(
+                                                                setEditingUser(
                                                                     user,
                                                                 )
                                                             }
@@ -572,6 +646,8 @@ const handleDeleteUser = (userId: number) => {
                                                         >
                                                             <Edit className="h-4 w-4" />
                                                         </button>
+
+                                                        {/* Toggle Status */}
                                                         <button
                                                             onClick={() =>
                                                                 handleToggleStatus(
@@ -587,7 +663,7 @@ const handleDeleteUser = (userId: number) => {
                                                             title={
                                                                 user.status ===
                                                                 'active'
-                                                                    ? 'Toggle Suspend'
+                                                                    ? 'Suspend User'
                                                                     : 'Activate User'
                                                             }
                                                         >
@@ -608,7 +684,7 @@ const handleDeleteUser = (userId: number) => {
                         </table>
                     </div>
 
-                    {/* Footer with Pagination selectors */}
+                    {/* ─── Pagination ────────────────────────────────── */}
                     <div className="flex items-center justify-between border-t border-outline-variant/60 bg-surface-container-low px-6 py-4 dark:border-slate-700 dark:bg-slate-800">
                         <p className="flex gap-2 text-xs font-medium text-on-surface-variant dark:text-slate-500">
                             <span>Showing</span>
@@ -643,6 +719,7 @@ const handleDeleteUser = (userId: number) => {
                                     Prev
                                 </span>
                             </button>
+
                             <div className="flex gap-1">
                                 {Array.from({ length: totalPages }).map(
                                     (_, idx) => {
@@ -665,6 +742,7 @@ const handleDeleteUser = (userId: number) => {
                                     },
                                 )}
                             </div>
+
                             <button
                                 onClick={() =>
                                     setCurrentPage((prev) =>
@@ -682,8 +760,9 @@ const handleDeleteUser = (userId: number) => {
                     </div>
                 </div>
 
-                {/* Insight Bento row underneath */}
+                {/* ─── Stats Cards ────────────────────────────────── */}
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+                    {/* Active Users */}
                     <div className="flex items-center gap-4 rounded-2xl border border-outline-variant bg-surface-container-low p-5 dark:border-slate-700 dark:bg-slate-800">
                         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-purple-950/30 dark:text-purple-400">
                             <CheckCircle className="h-6 w-6 text-primary dark:text-purple-400" />
@@ -698,6 +777,7 @@ const handleDeleteUser = (userId: number) => {
                         </div>
                     </div>
 
+                    {/* New Registrations */}
                     <div className="flex items-center gap-4 rounded-2xl border border-outline-variant bg-surface-container-low p-5 dark:border-slate-700 dark:bg-slate-800">
                         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary-container text-on-secondary-container dark:bg-slate-700 dark:text-purple-400">
                             <TrendingUp className="h-6 w-6 text-primary dark:text-purple-400" />
@@ -712,6 +792,7 @@ const handleDeleteUser = (userId: number) => {
                         </div>
                     </div>
 
+                    {/* Pending Issues */}
                     <div className="flex items-center gap-4 rounded-2xl border border-outline-variant bg-surface-container-low p-5 dark:border-slate-700 dark:bg-slate-800">
                         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-error-container text-on-error-container dark:bg-red-950/30 dark:text-red-400">
                             <AlertTriangle className="h-6 w-6 text-red-700 dark:text-red-400" />
@@ -727,10 +808,11 @@ const handleDeleteUser = (userId: number) => {
                     </div>
                 </div>
 
-                {/* view_file detail dialog */}
+                {/* ─── View User Modal ──────────────────────────────── */}
                 {viewingUser && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-xs dark:bg-black/60">
                         <div className="animate-scale-up w-full max-w-lg overflow-hidden rounded-2xl border border-outline-variant bg-surface shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+                            {/* Header */}
                             <div className="relative bg-gradient-to-r from-primary to-primary-container p-6 text-white dark:from-purple-600 dark:to-purple-700">
                                 <button
                                     onClick={() => setViewingUser(null)}
@@ -767,6 +849,7 @@ const handleDeleteUser = (userId: number) => {
                                 </div>
                             </div>
 
+                            {/* Body */}
                             <div className="space-y-5 p-6">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="flex items-center gap-2.5 text-xs">
@@ -780,6 +863,7 @@ const handleDeleteUser = (userId: number) => {
                                             </p>
                                         </div>
                                     </div>
+
                                     <div className="flex items-center gap-2.5 text-xs">
                                         <Phone className="h-4 w-4 text-outline dark:text-slate-600" />
                                         <div>
@@ -791,6 +875,7 @@ const handleDeleteUser = (userId: number) => {
                                             </p>
                                         </div>
                                     </div>
+
                                     <div className="flex items-center gap-2.5 text-xs">
                                         <CalendarDays className="h-4 w-4 text-outline dark:text-slate-600" />
                                         <div>
@@ -805,10 +890,10 @@ const handleDeleteUser = (userId: number) => {
                                                 {extractAndFormatTime(
                                                     viewingUser.created_at,
                                                 )}
-                                                {/* {viewingUser.registeredTime} */}
                                             </p>
                                         </div>
                                     </div>
+
                                     <div className="flex items-center gap-2.5 text-xs">
                                         <BarChart className="h-4 w-4 text-outline dark:text-slate-600" />
                                         <div>
@@ -823,7 +908,7 @@ const handleDeleteUser = (userId: number) => {
                                     </div>
                                 </div>
 
-                                {/* Connected User Bookings Schedule */}
+                                {/* Bookings Feed */}
                                 <div className="border-t border-outline-variant/60 pt-4 dark:border-slate-700">
                                     <h4 className="mb-2.5 text-xs font-bold tracking-wide text-on-surface uppercase dark:text-white">
                                         Schedule Feed (
@@ -894,6 +979,7 @@ const handleDeleteUser = (userId: number) => {
                                 </div>
                             </div>
 
+                            {/* Footer */}
                             <div className="flex justify-end gap-2.5 bg-surface-container p-4 dark:bg-slate-800">
                                 <button
                                     onClick={() => setViewingUser(null)}
@@ -902,95 +988,169 @@ const handleDeleteUser = (userId: number) => {
                                     Close Details
                                 </button>
                                 <Link
-                                    href={route('admin.users.details', {user: viewingUser.id})}
+                                    href={route('admin.users.details', {
+                                        user: viewingUser.id,
+                                    })}
                                     className="cursor-pointer rounded-lg bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-all hover:bg-primary-container dark:bg-purple-600 dark:hover:bg-purple-700"
                                 >
-                                    View Profile Details
+                                    View Full Profile
                                 </Link>
                                 <button
                                     onClick={() => {
                                         const toEdit = viewingUser;
                                         setViewingUser(null);
-                                        handleStartEdit(toEdit);
+                                        setEditingUser(toEdit);
                                     }}
                                     className="cursor-pointer rounded-lg bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-all hover:bg-primary-container dark:bg-purple-600 dark:hover:bg-purple-700"
                                 >
-                                    Modify profile
+                                    Edit Profile
                                 </button>
                             </div>
                         </div>
                     </div>
                 )}
 
-                {/* Edit User Form Modal */}
+                {/* ─── Edit User Modal ────────────────────────────────── */}
                 {editingUser && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-xs dark:bg-black/60">
-                        <div className="w-full max-w-md overflow-hidden rounded-2xl border border-outline-variant bg-surface shadow-2xl dark:border-slate-700 dark:bg-slate-900">
-                            <div className="flex items-center justify-between border-b border-outline-variant bg-surface-container-low px-6 py-4 dark:border-slate-700 dark:bg-slate-800">
-                                <h3 className="text-sm font-bold text-on-surface dark:text-white">
-                                    Edit User: {editingUser.name}
-                                </h3>
-                                <button
-                                    onClick={() => setEditingUser(null)}
-                                    className="cursor-pointer text-on-surface-variant hover:text-on-surface dark:text-slate-500 dark:hover:text-slate-300"
-                                >
-                                    <X className="h-5 w-5" />
-                                </button>
-                            </div>
-
-                            <div className="space-y-4 p-6 text-xs">
-                                <div>
-                                    <label className="mb-1.5 block font-bold tracking-wider text-outline uppercase dark:text-slate-400">
-                                        Full Name
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formName}
-                                        onChange={(e) =>
-                                            setFormName(e.target.value)
-                                        }
-                                        className="w-full rounded-lg border border-outline-variant px-3 py-2 text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
-                                    />
+                        <form onSubmit={handleSaveEdit}>
+                            <div className="w-full max-w-md overflow-hidden rounded-2xl border border-outline-variant bg-surface shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+                                {/* Header */}
+                                <div className="flex items-center justify-between border-b border-outline-variant bg-surface-container-low px-6 py-4 dark:border-slate-700 dark:bg-slate-800">
+                                    <h3 className="text-sm font-bold text-on-surface dark:text-white">
+                                        ✏️ Edit User: {editingUser.name}
+                                    </h3>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            reset();
+                                            setEditingUser(null);
+                                            if (
+                                                avatarPreview &&
+                                                avatarPreview.startsWith(
+                                                    'blob:',
+                                                )
+                                            ) {
+                                                URL.revokeObjectURL(
+                                                    avatarPreview,
+                                                );
+                                            }
+                                            setAvatarPreview(null);
+                                        }}
+                                        className="cursor-pointer text-on-surface-variant hover:text-on-surface dark:text-slate-500 dark:hover:text-slate-300"
+                                    >
+                                        <X className="h-5 w-5" />
+                                    </button>
                                 </div>
 
-                                <div>
-                                    <label className="mb-1.5 block font-bold tracking-wider text-outline uppercase dark:text-slate-400">
-                                        Email Address
-                                    </label>
-                                    <input
-                                        type="email"
-                                        value={formEmail}
-                                        onChange={(e) =>
-                                            setFormEmail(e.target.value)
-                                        }
-                                        className="w-full rounded-lg border border-outline-variant px-3 py-2 text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
-                                    />
-                                </div>
+                                {/* Body */}
+                                <div className="space-y-4 p-6 text-xs">
+                                    {/* Avatar Upload */}
+                                    <div className="flex flex-col items-center">
+                                        <div className="relative">
+                                            <label
+                                                htmlFor="avatar-upload"
+                                                className="cursor-pointer"
+                                            >
+                                                <img
+                                                    alt="Profile Avatar"
+                                                    src={
+                                                        avatarPreview ||
+                                                        'https://lh3.googleusercontent.com/aida-public/AB6AXuAtVMphqG2HwCuaIrB4haHvMou6Onk-SPAyRxnDFm8WRuq5ME7KiRi3ytevgPfpkRRZxe3mLlpXSqnh9oU4L5XJ5RMFEEpCKN3lEgkhwQWqWkkKdMVdVL3Uf_r9PlEFISYU42RXZcT5Lr6mtqWSigRmtKqX02fCAUKnvCKti8ZhZcxgwbiiM1PTSM4mWNlfir_Otm85KpkRTyM9DVdxSvd--rCJ6wupTHptzEDMQXTMx_2wzbxGFT4-RPZ0GD8QrUSBc9vhh62tHE8'
+                                                    }
+                                                    className="h-24 w-24 rounded-full border-4 border-primary-container object-cover shadow-md"
+                                                />
+                                                <div className="absolute right-0 bottom-0 rounded-full bg-primary p-2 text-white shadow-lg transition-transform hover:scale-110">
+                                                    <Camera size={16} />
+                                                </div>
+                                            </label>
+                                            <input
+                                                id="avatar-upload"
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={handleAvatarChange}
+                                            />
+                                        </div>
+                                        {errors.avatar_url && (
+                                            <p className="mt-2 text-xs text-red-500">
+                                                {errors.avatar_url}
+                                            </p>
+                                        )}
+                                        <p className="mt-2 text-[10px] text-on-surface-variant dark:text-slate-500">
+                                            Click the camera to upload a new
+                                            avatar
+                                        </p>
+                                    </div>
 
-                                <div>
-                                    <label className="mb-1.5 block font-bold tracking-wider text-outline uppercase dark:text-slate-400">
-                                        Phone Number
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formPhone}
-                                        onChange={(e) =>
-                                            setFormPhone(e.target.value)
-                                        }
-                                        className="w-full rounded-lg border border-outline-variant px-3 py-2 text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
-                                    />
-                                </div>
+                                    {/* Form Fields */}
+                                    <div>
+                                        <label className="mb-1.5 block font-bold tracking-wider text-outline uppercase dark:text-slate-400">
+                                            Full Name
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={data.name}
+                                            onChange={(e) =>
+                                                setData('name', e.target.value)
+                                            }
+                                            className="w-full rounded-lg border border-outline-variant px-3 py-2 text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
+                                        />
+                                        {errors.name && (
+                                            <p className="mt-1 text-xs text-red-500">
+                                                {errors.name}
+                                            </p>
+                                        )}
+                                    </div>
 
-                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="mb-1.5 block font-bold tracking-wider text-outline uppercase dark:text-slate-400">
+                                            Email Address
+                                        </label>
+                                        <input
+                                            type="email"
+                                            value={data.email}
+                                            onChange={(e) =>
+                                                setData('email', e.target.value)
+                                            }
+                                            className="w-full rounded-lg border border-outline-variant px-3 py-2 text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
+                                        />
+                                        {errors.email && (
+                                            <p className="mt-1 text-xs text-red-500">
+                                                {errors.email}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <label className="mb-1.5 block font-bold tracking-wider text-outline uppercase dark:text-slate-400">
+                                            Phone Number
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={data.phone}
+                                            onChange={(e) =>
+                                                setData('phone', e.target.value)
+                                            }
+                                            className="w-full rounded-lg border border-outline-variant px-3 py-2 text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
+                                        />
+                                        {errors.phone && (
+                                            <p className="mt-1 text-xs text-red-500">
+                                                {errors.phone}
+                                            </p>
+                                        )}
+                                    </div>
+
                                     <div>
                                         <label className="mb-1.5 block font-bold tracking-wider text-outline uppercase dark:text-slate-400">
                                             Operational Status
                                         </label>
                                         <select
-                                            value={formStatus}
+                                            value={data.status}
                                             onChange={(e) =>
-                                                setFormStatus(
-                                                    e.target.value as any,
+                                                setData(
+                                                    'status',
+                                                    e.target.value as UserStatus,
                                                 )
                                             }
                                             className="w-full rounded-lg border border-outline-variant px-3 py-2 text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
@@ -1008,193 +1168,70 @@ const handleDeleteUser = (userId: number) => {
                                                 Deleted
                                             </option>
                                         </select>
-                                    </div>
-
-                                    <div>
-                                        <label className="mb-1.5 block font-bold tracking-wider text-outline uppercase dark:text-slate-400">
-                                            Avatar Image URL
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={formAvatar}
-                                            onChange={(e) =>
-                                                setFormAvatar(e.target.value)
-                                            }
-                                            className="w-full rounded-lg border border-outline-variant px-3 py-2 font-mono text-[10px] text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
-                                            placeholder="https://..."
-                                        />
+                                        {errors.status && (
+                                            <p className="mt-1 text-xs text-red-500">
+                                                {errors.status}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
-                            </div>
 
-                            <div className="flex justify-between bg-surface-container px-6 py-4 dark:bg-slate-800">
-                                <button
-                                    onClick={() => {
-                                        if (
-                                            confirm(
-                                                `Are you absolutely sure you want to delete client ${editingUser.name}? All history will be archived.`,
-                                            )
-                                        ) {
-                                            handleDeleteUser(editingUser.id);
-                                            setEditingUser(null);
-                                        }
-                                    }}
-                                    className="cursor-pointer rounded-lg border border-red-200 px-3.5 py-2 text-xs font-bold text-red-600 transition-all hover:bg-red-50 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-950/30"
-                                >
-                                    Delete Client Profile
-                                </button>
-                                <div className="flex gap-2">
+                                {/* Footer */}
+                                <div className="flex justify-between bg-surface-container px-6 py-4 dark:bg-slate-800">
                                     <button
-                                        onClick={() => setEditingUser(null)}
-                                        className="cursor-pointer rounded-lg px-4 py-2 text-xs font-bold text-on-surface-variant hover:bg-surface-container-low dark:text-slate-500 dark:hover:bg-slate-700"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onClick={handleSaveEdit}
-                                        className="cursor-pointer rounded-lg bg-primary px-4 py-2 text-xs font-bold text-on-primary shadow-sm shadow-primary/20 hover:bg-primary-container dark:bg-purple-600 dark:hover:bg-purple-700"
-                                    >
-                                        Save Changes
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Add User Form Dialog */}
-                {isAddingUser && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-xs dark:bg-black/60">
-                        <div className="animate-scale-up w-full max-w-md overflow-hidden rounded-2xl border border-outline-variant bg-surface shadow-2xl dark:border-slate-700 dark:bg-slate-900">
-                            <div className="flex items-center justify-between border-b border-outline-variant bg-surface-container-low px-6 py-4 dark:border-slate-700 dark:bg-slate-800">
-                                <h3 className="text-sm font-bold text-on-surface dark:text-white">
-                                    Register New User
-                                </h3>
-                                <button
-                                    onClick={() => setIsAddingUser(false)}
-                                    className="cursor-pointer text-on-surface-variant hover:text-on-surface dark:text-slate-500 dark:hover:text-slate-300"
-                                >
-                                    <X className="h-5 w-5" />
-                                </button>
-                            </div>
-
-                            <div className="space-y-4 p-6 text-xs">
-                                <div>
-                                    <label className="mb-1.5 block font-bold tracking-wider text-outline uppercase dark:text-slate-400">
-                                        Client Full Name *
-                                    </label>
-                                    <input
-                                        type="text"
-                                        placeholder="e.g. Samantha Vance"
-                                        value={formName}
-                                        onChange={(e) =>
-                                            setFormName(e.target.value)
-                                        }
-                                        className="w-full rounded-lg border border-outline-variant px-3 py-2 text-on-surface placeholder-outline/65 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-600 dark:focus:border-purple-500 dark:focus:ring-purple-500"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="mb-1.5 block font-bold tracking-wider text-outline uppercase dark:text-slate-400">
-                                        Official Email *
-                                    </label>
-                                    <input
-                                        type="email"
-                                        placeholder="name@company.com"
-                                        value={formEmail}
-                                        onChange={(e) =>
-                                            setFormEmail(e.target.value)
-                                        }
-                                        className="w-full rounded-lg border border-outline-variant px-3 py-2 text-on-surface placeholder-outline/65 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-600 dark:focus:border-purple-500 dark:focus:ring-purple-500"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="mb-1.5 block font-bold tracking-wider text-outline uppercase dark:text-slate-400">
-                                        Mobile Phone
-                                    </label>
-                                    <input
-                                        type="text"
-                                        placeholder="+1 (555) 000-0000"
-                                        value={formPhone}
-                                        onChange={(e) =>
-                                            setFormPhone(e.target.value)
-                                        }
-                                        className="w-full rounded-lg border border-outline-variant px-3 py-2 text-on-surface placeholder-outline/65 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-600 dark:focus:border-purple-500 dark:focus:ring-purple-500"
-                                    />
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="mb-1.5 block font-bold tracking-wider text-outline uppercase dark:text-slate-400">
-                                            Initial Status
-                                        </label>
-                                        <select
-                                            value={formStatus}
-                                            onChange={(e) =>
-                                                setFormStatus(
-                                                    e.target.value as any,
+                                        type="button"
+                                        disabled={processing}
+                                        onClick={() => {
+                                            if (
+                                                confirm(
+                                                    `Are you absolutely sure you want to delete client ${editingUser.name}? All history will be archived.`,
                                                 )
+                                            ) {
+                                                handleDeleteUser(
+                                                    editingUser.id,
+                                                );
                                             }
-                                            className="w-full rounded-lg border border-outline-variant px-3 py-2 text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
+                                        }}
+                                        className="cursor-pointer rounded-lg border border-red-200 px-3.5 py-2 text-xs font-bold text-red-600 transition-all hover:bg-red-50 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-950/30"
+                                    >
+                                        Delete Client
+                                    </button>
+                                    <div className="flex gap-2">
+                                        <button
+                                            type="button"
+                                            disabled={processing}
+                                            onClick={() => {
+                                                reset();
+                                                setEditingUser(null);
+                                                if (
+                                                    avatarPreview &&
+                                                    avatarPreview.startsWith(
+                                                        'blob:',
+                                                    )
+                                                ) {
+                                                    URL.revokeObjectURL(
+                                                        avatarPreview,
+                                                    );
+                                                }
+                                                setAvatarPreview(null);
+                                            }}
+                                            className="cursor-pointer rounded-lg px-4 py-2 text-xs font-bold text-on-surface-variant hover:bg-surface-container-low dark:text-slate-500 dark:hover:bg-slate-700"
                                         >
-                                            <option value="active">
-                                                Active
-                                            </option>
-                                            <option value="inactive">
-                                                Inactive
-                                            </option>
-                                            <option value="suspended">
-                                                Suspended
-                                            </option>
-                                            <option value="deleted">
-                                                Deleted
-                                            </option>
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label className="mb-1.5 block font-bold tracking-wider text-outline uppercase dark:text-slate-400">
-                                            Headshot Preset
-                                        </label>
-                                        <select
-                                            onChange={(e) =>
-                                                setFormAvatar(e.target.value)
-                                            }
-                                            className="w-full rounded-lg border border-outline-variant px-3 py-2 text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={processing}
+                                            className="cursor-pointer rounded-lg bg-primary px-4 py-2 text-xs font-bold text-on-primary shadow-sm shadow-primary/20 transition-all hover:bg-primary-container disabled:opacity-50 dark:bg-purple-600 dark:hover:bg-purple-700"
                                         >
-                                            <option value="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150">
-                                                Professional Female A
-                                            </option>
-                                            <option value="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150">
-                                                Professional Male A
-                                            </option>
-                                            <option value="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150">
-                                                Professional Female B
-                                            </option>
-                                            <option value="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150">
-                                                Professional Male B
-                                            </option>
-                                        </select>
+                                            {processing
+                                                ? '💾 Saving...'
+                                                : '💾 Save Changes'}
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-
-                            <div className="flex justify-end gap-2.5 bg-surface-container px-6 py-4 dark:bg-slate-800">
-                                <button
-                                    onClick={() => setIsAddingUser(false)}
-                                    className="cursor-pointer rounded-lg px-4 py-2 text-xs font-bold text-on-surface-variant hover:bg-surface-container-low dark:text-slate-500 dark:hover:bg-slate-700"
-                                >
-                                    Abandon
-                                </button>
-                                <button
-                                    onClick={handleSaveAdd}
-                                    className="cursor-pointer rounded-lg bg-primary px-5 py-2.5 text-xs font-bold text-on-primary shadow-sm shadow-primary/20 transition-all hover:bg-primary-container dark:bg-purple-600 dark:hover:bg-purple-700"
-                                >
-                                    Register User
-                                </button>
-                            </div>
-                        </div>
+                        </form>
                     </div>
                 )}
             </div>

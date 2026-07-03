@@ -18,28 +18,6 @@ class DashboardController extends Controller
             'bookings' => $bookings,
         ]);
     }
-    public function services()
-    {
-        return inertia('Admin/Services');
-    }
-    public function users()
-    {
-        // $users = User::with('bookings')->get();
-        $users = User::with('bookings.service')->withCount('bookings')->get();
-
-        return inertia('Admin/User/Users', [
-            'users' => $users,
-        ]);
-    }
-    public function userDetails(User $user)
-    {
-        $user->load('bookings.service', 'notifications');
-
-        return inertia('Admin/User/UserDetails', [
-            'user' => $user,
-            'notifications' => $user->notifications,
-        ]);
-    }
     public function settings()
     {
         return inertia('Admin/Settings');

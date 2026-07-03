@@ -22,4 +22,6 @@ export interface Service {
     active: boolean;
     badges?: ServiceBadge[] | null;
     created_at: string;
+    image_public_id?: string | null;
+    [key: string]: unknown; // This allows for additional properties...
 }

@@ -22,12 +22,13 @@ import {
     CreditCard,
     // User,
     Info,
+    Phone,
 } from 'lucide-react';
 
 import EditProfileModal from '@/components/Admin/EditProfileModal';
 import { Booking, User, Notification } from '@/types';
 import AdminLayout from '@/layouts/Admin/AdminLayout';
-import { formatTime } from '@/lib/calendar-utils';
+import { formatDateAndTime, formatTime } from '@/lib/calendar-utils';
 import { serviceIcons } from '@/lib/service-icons';
 
 interface UserDetailsProps {
@@ -54,10 +55,6 @@ export default function DashboardView({
     ).length; // Initial had 3
     const upcomingCount =
         bookings.filter((b) => b.status === 'pending').length + 6; // Initial had 8
-
-    const handleSaveProfile = (updatedProfile: User) => {
-        console.log("Updated User", updatedProfile);
-    };
 
     const handleToggleMenu = (id: number, e: React.MouseEvent) => {
         e.stopPropagation();
@@ -160,9 +157,14 @@ export default function DashboardView({
                             </span>
                         </div>
 
-                        <p className="mb-4 flex items-center justify-center gap-1.5 text-sm text-on-surface-variant selection:bg-primary-container md:justify-start dark:text-slate-400">
+                        <p className="mb-1 flex items-center justify-center gap-1.5 text-sm text-on-surface-variant selection:bg-primary-container md:justify-start dark:text-slate-400">
                             <Mail className="h-4 w-4 text-primary dark:text-purple-400" />
                             <span>{user.email}</span>
+                        </p>
+
+                        <p className="mb-4 flex items-center justify-center gap-1.5 text-sm text-on-surface-variant selection:bg-primary-container md:justify-start dark:text-slate-400">
+                            <Phone className="h-4 w-4 text-primary dark:text-purple-400" />
+                            <span>{user.phone}</span>
                         </p>
 
                         <div className="flex flex-wrap items-center justify-center gap-3 md:justify-start">
@@ -541,7 +543,7 @@ export default function DashboardView({
                                                     {n.data.message}
                                                 </p>
                                                 <p className="mt-1 text-[9px] font-bold tracking-wider text-on-surface-variant/50 uppercase dark:text-slate-500">
-                                                    {n.created_at}
+                                                    {formatDateAndTime(n.created_at)}
                                                 </p>
                                             </div>
                                         </div>
@@ -716,7 +718,6 @@ export default function DashboardView({
                     isOpen={isEditProfileOpen}
                     onClose={() => setIsEditProfileOpen(false)}
                     user={user}
-                    onSave={handleSaveProfile}
                 />
             </div>
         </AdminLayout>

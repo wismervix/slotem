@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Booking;
 use Illuminate\Database\Eloquent\Model;
 
 class Service extends Model
@@ -11,6 +12,7 @@ class Service extends Model
         'icon',
         'description',
         'image',
+        'image_public_id',
         'price',
         'variant',
         'duration',

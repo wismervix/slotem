@@ -11,47 +11,70 @@ import {
     Award,
     User as UserIcon,
     Sparkles,
+    Camera,
+    Phone,
 } from 'lucide-react';
-import { User } from '@/types';
+import { User, UserStatus } from '@/types';
+import { useForm } from '@inertiajs/react';
 
 interface EditProfileModalProps {
     isOpen: boolean;
     onClose: () => void;
     user: User;
-    onSave: (updated: User) => void;
 }
 
 export default function EditProfileModal({
     isOpen,
     onClose,
     user,
-    onSave,
 }: EditProfileModalProps) {
-    const [name, setName] = useState(user.name);
-    const [email, setEmail] = useState(user.email);
-    const [status, setStatus] = useState(user.status);
-    const [avatarUrl, setAvatarUrl] = useState(user.avatar_url);
+    const { data, setData, post, processing, errors, reset } = useForm({
+        name: user.name ?? '',
+        email: user.email ?? '',
+        phone: user.phone ?? '',
+        status: user.status as UserStatus,
+        password: '',
+        avatar_url: null as File | null,
+        _method: 'put',
+    });
+
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(
+        user.avatar_url ?? null,
+    );
+
+    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+
+        if (!file) return;
+
+        setData('avatar_url', file);
+
+        const preview = URL.createObjectURL(file);
+
+        setAvatarPreview(preview);
+    };
 
     useEffect(() => {
-        if (isOpen) {
-            setName(user.name);
-            setEmail(user.email);
-            setStatus(user.status);
-            setAvatarUrl(user.avatar_url);
-        }
-    }, [isOpen, user]);
+        return () => {
+            if (avatarPreview && avatarPreview.startsWith('blob:')) {
+                URL.revokeObjectURL(avatarPreview);
+            }
+        };
+    }, [avatarPreview]);
 
     if (!isOpen) return null;
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!name.trim() || !email.trim()) return;
-        onSave({
-            ...user,
-            name,
-            email,
-            status,
-            avatarUrl,
+
+        // console.log('Form data: ', data);
+
+        post(route('user.profile.update'), {
+            forceFormData: true,
+
+            onSuccess: () => {
+                reset('password');
+            },
         });
         onClose();
     };
@@ -85,25 +108,41 @@ export default function EditProfileModal({
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-4 p-6">
-                    {/* Avatar simulation preview */}
-                    <div className="flex items-center gap-4 border-b border-[#f3ebfa] py-2">
-                        <img
-                            src={avatarUrl}
-                            alt="Avatar Previews"
-                            className={`h-16 w-16 rounded-full border-2 ${status === 'active' ? 'border-emerald-500' : 'border-neutral-300'} object-cover shadow-sm`}
-                        />
-                        <div className="flex-grow">
-                            <label className="mb-1 block text-xs font-semibold tracking-wider text-[#4a4455] uppercase">
-                                Avatar Image URL
+                    {/* Avatar Upload */}
+                    <div className="flex flex-col items-center">
+                        <div className="relative">
+                            <label
+                                htmlFor="avatar-upload"
+                                className="cursor-pointer"
+                            >
+                                <img
+                                    alt="Profile Avatar"
+                                    src={
+                                        avatarPreview ||
+                                        'https://lh3.googleusercontent.com/aida-public/AB6AXuAtVMphqG2HwCuaIrB4haHvMou6Onk-SPAyRxnDFm8WRuq5ME7KiRi3ytevgPfpkRRZxe3mLlpXSqnh9oU4L5XJ5RMFEEpCKN3lEgkhwQWqWkkKdMVdVL3Uf_r9PlEFISYU42RXZcT5Lr6mtqWSigRmtKqX02fCAUKnvCKti8ZhZcxgwbiiM1PTSM4mWNlfir_Otm85KpkRTyM9DVdxSvd--rCJ6wupTHptzEDMQXTMx_2wzbxGFT4-RPZ0GD8QrUSBc9vhh62tHE8'
+                                    }
+                                    className="h-24 w-24 rounded-full border-4 border-primary-container object-cover shadow-md"
+                                />
+                                <div className="absolute right-0 bottom-0 rounded-full bg-primary p-2 text-white shadow-lg transition-transform hover:scale-110">
+                                    <Camera size={16} />
+                                </div>
                             </label>
                             <input
-                                type="text"
-                                value={avatarUrl}
-                                onChange={(e) => setAvatarUrl(e.target.value)}
-                                className="w-full rounded-lg border border-[#ccc3d8] bg-neutral-50 px-3 py-1.5 font-mono text-xs focus:border-[#630ed4] focus:ring-1 focus:ring-[#630ed4]"
-                                placeholder="https://..."
+                                id="avatar-upload"
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleAvatarChange}
                             />
                         </div>
+                        {errors.avatar_url && (
+                            <p className="mt-2 text-xs text-red-500">
+                                {errors.avatar_url}
+                            </p>
+                        )}
+                        <p className="mt-2 text-[10px] text-on-surface-variant dark:text-slate-500">
+                            Click the camera to upload a new avatar
+                        </p>
                     </div>
 
                     <div>
@@ -113,11 +152,16 @@ export default function EditProfileModal({
                         </label>
                         <input
                             type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            value={data.name}
+                            onChange={(e) => setData('name', e.target.value)}
                             className="w-full rounded-xl border border-[#ccc3d8] bg-white px-4 py-2.5 text-sm text-[#1d1a24] focus:border-[#630ed4] focus:ring-2 focus:ring-[#630ed4]/20"
                             required
                         />
+                        {errors.name && (
+                            <p className="mt-1 text-xs text-red-500">
+                                {errors.name}
+                            </p>
+                        )}
                     </div>
 
                     <div>
@@ -127,40 +171,58 @@ export default function EditProfileModal({
                         </label>
                         <input
                             type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            value={data.email}
+                            onChange={(e) => setData('email', e.target.value)}
                             className="w-full rounded-xl border border-[#ccc3d8] bg-white px-4 py-2.5 text-sm text-[#1d1a24] focus:border-[#630ed4] focus:ring-2 focus:ring-[#630ed4]/20"
                             required
                         />
+                        {errors.email && (
+                            <p className="mt-1 text-xs text-red-500">
+                                {errors.email}
+                            </p>
+                        )}
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="mb-1.5 block flex items-center gap-1 text-xs font-semibold tracking-wider text-[#4a4455] uppercase">
-                                <Award className="h-3.5 w-3.5 text-[#630ed4]" />{' '}
-                                Member Tier
-                            </label>
-                            <select
-                                value={status}
-                                onChange={(e) =>
-                                    setStatus(
-                                        e.target.value as
-                                            | 'active'
-                                            | 'inactive'
-                                            | 'suspended'
-                                            | 'deleted',
-                                    )
-                                }
-                                className="w-full rounded-xl border border-[#ccc3d8] bg-white px-3 py-2.5 text-sm text-[#1d1a24] focus:border-[#630ed4] focus:ring-2 focus:ring-[#630ed4]/20"
-                            >
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                                <option value="suspended">Suspended</option>
-                                <option value="deleted">Deleted</option>
-                            </select>
-                        </div>
+                    <div>
+                        <label className="mb-1.5 block flex items-center gap-1 text-xs font-semibold tracking-wider text-[#4a4455] uppercase">
+                            <Phone className="h-3.5 w-3.5 text-[#630ed4]" />{' '}
+                            Phone Number
+                        </label>
+                        <input
+                            type="text"
+                            value={data.phone}
+                            onChange={(e) => setData('phone', e.target.value)}
+                            className="w-full rounded-xl border border-[#ccc3d8] bg-white px-4 py-2.5 text-sm text-[#1d1a24] focus:border-[#630ed4] focus:ring-2 focus:ring-[#630ed4]/20"
+                            required
+                        />
+                        {errors.phone && (
+                            <p className="mt-1 text-xs text-red-500">
+                                {errors.phone}
+                            </p>
+                        )}
+                    </div>
 
-                        {/* <div>
+                    <div>
+                        <label className="mb-1.5 block flex items-center gap-1 text-xs font-semibold tracking-wider text-[#4a4455] uppercase">
+                            <Award className="h-3.5 w-3.5 text-[#630ed4]" />{' '}
+                            Operational Status
+                        </label>
+                        <select
+                            value={data.status}
+                            onChange={(e) =>
+                                setData('status', e.target.value as UserStatus)
+                            }
+                            className="w-full rounded-xl border border-[#ccc3d8] bg-white px-3 py-2.5 text-sm text-[#1d1a24] focus:border-[#630ed4] focus:ring-2 focus:ring-[#630ed4]/20"
+                        >
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="suspended">Suspended</option>
+                            <option value="deleted">Deleted</option>
+                        </select>
+                    </div>
+
+                    {/* <div className="grid grid-cols-2 gap-4">
+                        <div>
                             <label className="mb-1.5 block flex items-center gap-1 text-xs font-semibold tracking-wider text-[#4a4455] uppercase">
                                 <MapPin className="h-3.5 w-3.5 text-[#630ed4]" />{' '}
                                 City / Location
@@ -172,9 +234,8 @@ export default function EditProfileModal({
                                 className="w-full rounded-xl border border-[#ccc3d8] bg-white px-3 py-2.5 text-sm text-[#1d1a24] focus:border-[#630ed4] focus:ring-2 focus:ring-[#630ed4]/20"
                                 placeholder="Chicago, IL"
                             />
-                        </div> */}
-                    </div>
-
+                        </div>
+                    </div> */}
 
                     {/* Footer buttons */}
                     <div className="flex justify-end gap-3 pt-5">
@@ -186,10 +247,11 @@ export default function EditProfileModal({
                             Cancel
                         </button>
                         <button
+                            disabled={processing}
                             type="submit"
                             className="cursor-pointer rounded-xl bg-[#630ed4] px-5 py-2 text-sm font-semibold text-white shadow-md transition-all hover:bg-[#7c3aed] active:scale-95"
                         >
-                            Save Changes
+                            {processing ? '💾 Saving...' : '💾 Save Changes'}
                         </button>
                     </div>
                 </form>

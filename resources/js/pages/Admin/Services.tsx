@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Service, ServiceBadge, ServiceIcon } from '@/types';
 import {
     Eye,
@@ -15,11 +15,14 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import AdminLayout from '@/layouts/Admin/AdminLayout';
 import { serviceIcons } from '@/lib/service-icons';
-import { usePage } from '@inertiajs/react';
+import { useForm, usePage } from '@inertiajs/react';
 import { formatDateAndTime } from '@/lib/calendar-utils';
 
 export default function ServicesView() {
-    const { services } = usePage<{ services: Service[] }>().props;
+    const { services, flash } = usePage<{
+        services: Service[];
+        flash?: { success?: string };
+    }>().props;
 
     // Tabs for Quick Filters
     const [activeFilter, setActiveFilter] = useState<
@@ -33,7 +36,6 @@ export default function ServicesView() {
     // Global adaptive search string
     const [searchQuery, setSearchQuery] = useState('');
 
-
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 3; // EXACTLY 3 rows to match design aesthetics on page 1!
@@ -45,19 +47,32 @@ export default function ServicesView() {
         null,
     );
 
-    // Form states
-    const [formData, setFormData] = useState({
+    // Form using Inertia
+    const { data, setData, post, put, processing, errors, reset } = useForm({
         name: '',
         description: '',
-        icon: 'sparkles' as ServiceIcon, // NEW - service icon
-        // image: '', // Changed from imageUrl
-        price: '0.00', // Changed to string (was number)
-        variant: 'standard' as 'standard' | 'featured', // NEW - variant type
+        icon: 'sparkles' as ServiceIcon,
+        price: '0.00',
+        variant: 'standard' as 'standard' | 'featured',
         duration: 60,
-        active: true, // Changed from status string to boolean
-        badges: [] as ServiceBadge[], // NEW - badges array
-        image: 'https://picsum.photos/seed/default/300/300',
+        active: true,
+        badges: [] as ServiceBadge[],
+        image: null as File | null,
     });
+
+    // Toast state
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
+
+    // Watch for flash messages
+    useEffect(() => {
+        if (flash?.success) {
+            setToastMessage(flash.success);
+            setShowToast(true);
+            const timer = setTimeout(() => setShowToast(false), 4000);
+            return () => clearTimeout(timer);
+        }
+    }, [flash]);
 
     // Modal for Delete Confirmation
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -67,6 +82,10 @@ export default function ServicesView() {
 
     // Modal for Viewing Detail
     const [viewingService, setViewingService] = useState<Service | null>(null);
+
+    // Image preview
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const formInitializedRef = useRef<number | null>(null);
 
     // Categories helper to match filter
     const doesBadgeMatch = (
@@ -128,35 +147,34 @@ export default function ServicesView() {
         return filteredServices.slice(startIdx, startIdx + itemsPerPage);
     }, [filteredServices, currentPage, totalPages]);
 
-    // Service Handlers
-    const handleAddService = (
-        newServiceData: Omit<Service, 'id' | 'createdAt' | 'bookingsCount'>,
-    ) => {
-        console.log('Add new Service Here!');
-    };
+    // Handle image file selection
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
 
-    const handleUpdateService = (updatedService: Service) => {
-        console.log('Handle Update Service!');
-    };
-
-    const handleDeleteService = (id: number) => {
-        console.log('Handle Delete Service!');
+        setData('image', file);
+        const preview = URL.createObjectURL(file);
+        setImagePreview(preview);
     };
 
     // Handle Create click
     const handleOpenCreate = () => {
         setDrawerMode('create');
         setEditingServiceId(null);
-        setFormData({
+        formInitializedRef.current = null;
+        reset();
+        setImagePreview(null);
+        setData({
             name: '',
             description: '',
-            icon: 'sparkles' as ServiceIcon, // NEW - service icon
-            price: '0.00', // Changed to string (was number)
-            variant: 'standard' as 'standard' | 'featured', // NEW - variant type
+            icon: 'sparkles',
+            price: '0.00',
+            variant: 'standard',
             duration: 60,
-            image: 'https://picsum.photos/seed/default/300/300',
             active: true,
-            badges: [] as ServiceBadge[],
+            badges: [],
+            image: null,
+            // image: 'https://picsum.photos/seed/default/300/300',
         });
         setIsDrawerOpen(true);
     };
@@ -165,33 +183,118 @@ export default function ServicesView() {
     const handleOpenEdit = (service: Service) => {
         setDrawerMode('edit');
         setEditingServiceId(service.id);
-        setFormData({
-            name: service.name,
-            description: service.description || '',
-            icon: service.icon as ServiceIcon,
-            price: service.price,
-            variant: service.variant,
-            duration: service.duration,
-            image:
-                service.image || 'https://picsum.photos/seed/default/300/300',
-            active: service.active,
-            badges: service.badges as ServiceBadge[],
-        });
-        console.log('Form Data (Edit info):', formData);
+
+        if (formInitializedRef.current !== service.id) {
+            formInitializedRef.current = service.id;
+            const timer = setTimeout(() => {
+                setData({
+                    name: service.name,
+                    description: service.description || '',
+                    icon: service.icon as ServiceIcon,
+                    price: service.price,
+                    variant: service.variant,
+                    duration: service.duration,
+                    active: service.active,
+                    badges: (service.badges as ServiceBadge[]) || [],
+                    image: null,
+                });
+                setImagePreview(service.image || null);
+            }, 0);
+            return () => clearTimeout(timer);
+        }
+
         setIsDrawerOpen(true);
     };
 
-    // Handle Form Submit
+    // Handle Form Submit (Create or Update)
     const handleFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Form Data:', formData);
-        setIsDrawerOpen(false);
+
+        const hasImageFile = data.image instanceof File;
+
+        if (drawerMode === 'create') {
+            post(route('admin.services.store'), {
+                forceFormData: hasImageFile,
+                preserveScroll: true,
+                onSuccess: () => {
+                    reset();
+                    setIsDrawerOpen(false);
+                    setImagePreview(null);
+                    formInitializedRef.current = null;
+                },
+                onError: (errors) => {
+                    console.error('Validation errors:', errors);
+                },
+            });
+        } else if (editingServiceId) {
+            put(route('admin.services.update', editingServiceId), {
+                forceFormData: hasImageFile,
+                preserveScroll: true,
+                onSuccess: () => {
+                    reset();
+                    setIsDrawerOpen(false);
+                    setImagePreview(null);
+                    formInitializedRef.current = null;
+                },
+                onError: (errors) => {
+                    console.error('Validation errors:', errors);
+                },
+            });
+        }
     };
 
-    // Toggle active/inactive instantly in row click
+    // Toggle active/inactive
     const handleToggleStatus = (service: Service) => {
-        console.log('Toggle Active Status');
+        if (editingServiceId !== service.id) {
+            setEditingServiceId(service.id);
+            setData({
+                name: service.name,
+                description: service.description || '',
+                icon: service.icon as ServiceIcon,
+                price: service.price,
+                variant: service.variant,
+                duration: service.duration,
+                active: !service.active,
+                badges: (service.badges as ServiceBadge[]) || [],
+                image: null,
+            });
+
+            // Update via PUT
+            put(route('admin.services.update', service.id), {
+                preserveScroll: true,
+                onError: (errors) => {
+                    console.error('Error toggling status:', errors);
+                },
+            });
+        }
     };
+
+    const confirmDelete = () => {
+        if (serviceToDelete) {
+            // // Using Inertia's delete method
+            // const { router } = require('@inertiajs/react');
+            inertiaRouter.delete(route('admin.services.destroy', serviceToDelete.id), {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setIsDeleteModalOpen(false);
+                    setServiceToDelete(null);
+                },
+                onError: (errors: any) => {
+                    console.error('Error deleting service:', errors);
+                },
+            });
+        }
+    };
+
+    // Cleanup preview URL
+    useEffect(() => {
+        return () => {
+            if (imagePreview && imagePreview.startsWith('blob:')) {
+                URL.revokeObjectURL(imagePreview);
+            }
+        };
+    }, [imagePreview]);
+
 
     // Handle Delete Confirmation
     const triggerDelete = (service: Service) => {
@@ -199,17 +302,17 @@ export default function ServicesView() {
         setIsDeleteModalOpen(true);
     };
 
-    const confirmDelete = () => {
-        if (serviceToDelete) {
-            handleDeleteService(serviceToDelete.id);
-            setIsDeleteModalOpen(false);
-            setServiceToDelete(null);
-        }
-    };
-
     return (
         <AdminLayout>
             <div className="space-y-6">
+                {/* Toast Notification */}
+                {showToast && toastMessage && (
+                    <div className="animate-slide-in fixed right-6 bottom-6 z-50 flex items-center gap-3 rounded-xl border border-emerald-500/30 bg-emerald-600 px-5 py-3 text-white shadow-2xl">
+                        <Check className="h-5 w-5 shrink-0" />
+                        <p className="text-xs font-bold">{toastMessage}</p>
+                    </div>
+                )}
+
                 {/* Catalog Title Header */}
                 <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
                     <div>
@@ -581,16 +684,21 @@ export default function ServicesView() {
                                             <input
                                                 required
                                                 type="text"
-                                                value={formData.name}
+                                                value={data.name}
                                                 onChange={(e) =>
-                                                    setFormData({
-                                                        ...formData,
-                                                        name: e.target.value,
-                                                    })
+                                                    setData(
+                                                        'name',
+                                                        e.target.value,
+                                                    )
                                                 }
                                                 className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-2.5 text-sm font-medium transition-all outline-none focus:border-primary focus:ring-1 focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500 dark:focus:border-purple-500 dark:focus:ring-purple-500"
                                                 placeholder="e.g., Executive Styling"
                                             />
+                                            {errors.name && (
+                                                <p className="mt-1 text-xs text-red-500">
+                                                    {errors.name}
+                                                </p>
+                                            )}
                                         </div>
 
                                         {/* Description */}
@@ -601,17 +709,21 @@ export default function ServicesView() {
                                             <textarea
                                                 required
                                                 rows={3}
-                                                value={formData.description}
+                                                value={data.description}
                                                 onChange={(e) =>
-                                                    setFormData({
-                                                        ...formData,
-                                                        description:
-                                                            e.target.value,
-                                                    })
+                                                    setData(
+                                                        'description',
+                                                        e.target.value,
+                                                    )
                                                 }
                                                 className="w-full resize-none rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-2.5 text-sm font-medium transition-all outline-none focus:border-primary focus:ring-1 focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500 dark:focus:border-purple-500 dark:focus:ring-purple-500"
                                                 placeholder="Briefly describe what the service includes..."
                                             />
+                                            {errors.description && (
+                                                <p className="mt-1 text-xs text-red-500">
+                                                    {errors.description}
+                                                </p>
+                                            )}
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-4">
@@ -621,13 +733,13 @@ export default function ServicesView() {
                                                     Service Icon
                                                 </label>
                                                 <select
-                                                    value={formData.icon}
+                                                    value={data.icon}
                                                     onChange={(e) =>
-                                                        setFormData({
-                                                            ...formData,
-                                                            icon: e.target
+                                                        setData(
+                                                            'icon',
+                                                            e.target
                                                                 .value as ServiceIcon,
-                                                        })
+                                                        )
                                                     }
                                                     className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-2.5 text-sm font-medium transition-all outline-none focus:border-primary focus:ring-1 focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
                                                 >
@@ -647,6 +759,11 @@ export default function ServicesView() {
                                                         Shield Check
                                                     </option>
                                                 </select>
+                                                {errors.icon && (
+                                                    <p className="mt-1 text-xs text-red-500">
+                                                        {errors.icon}
+                                                    </p>
+                                                )}
                                             </div>
                                             {/* Price */}
                                             <div className="space-y-1">
@@ -662,17 +779,21 @@ export default function ServicesView() {
                                                         type="number"
                                                         min={0}
                                                         step="0.01"
-                                                        value={formData.price}
+                                                        value={data.price}
                                                         onChange={(e) =>
-                                                            setFormData({
-                                                                ...formData,
-                                                                price: e.target
-                                                                    .value,
-                                                            })
+                                                            setData(
+                                                                'price',
+                                                                e.target.value,
+                                                            )
                                                         }
                                                         className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest py-2.5 pr-4 pl-8 text-sm font-medium transition-all outline-none focus:border-primary focus:ring-1 focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500 dark:focus:border-purple-500 dark:focus:ring-purple-500"
                                                     />
                                                 </div>
+                                                {errors.price && (
+                                                    <p className="mt-1 text-xs text-red-500">
+                                                        {errors.price}
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
 
@@ -683,15 +804,14 @@ export default function ServicesView() {
                                                     Variant
                                                 </label>
                                                 <select
-                                                    value={formData.variant}
+                                                    value={data.variant}
                                                     onChange={(e) =>
-                                                        setFormData({
-                                                            ...formData,
-                                                            variant: e.target
-                                                                .value as
+                                                        setData(
+                                                            'variant',
+                                                            e.target.value as
                                                                 | 'standard'
                                                                 | 'featured',
-                                                        })
+                                                        )
                                                     }
                                                     className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-2.5 text-sm font-medium transition-all outline-none focus:border-primary focus:ring-1 focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
                                                 >
@@ -702,6 +822,11 @@ export default function ServicesView() {
                                                         Featured
                                                     </option>
                                                 </select>
+                                                {errors.variant && (
+                                                    <p className="mt-1 text-xs text-red-500">
+                                                        {errors.variant}
+                                                    </p>
+                                                )}
                                             </div>
                                             <div className="space-y-1">
                                                 <label className="text-xs font-semibold text-on-surface-variant dark:text-slate-400">
@@ -712,17 +837,22 @@ export default function ServicesView() {
                                                     type="number"
                                                     min={5}
                                                     max={480}
-                                                    value={formData.duration}
+                                                    value={data.duration}
                                                     onChange={(e) =>
-                                                        setFormData({
-                                                            ...formData,
-                                                            duration: Number(
+                                                        setData(
+                                                            'duration',
+                                                            Number(
                                                                 e.target.value,
                                                             ),
-                                                        })
+                                                        )
                                                     }
                                                     className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-2.5 text-sm font-medium transition-all outline-none focus:border-primary focus:ring-1 focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500 dark:focus:border-purple-500 dark:focus:ring-purple-500"
                                                 />
+                                                {errors.duration && (
+                                                    <p className="mt-1 text-xs text-red-500">
+                                                        {errors.duration}
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
 
@@ -745,7 +875,7 @@ export default function ServicesView() {
                                                     >
                                                         <input
                                                             type="checkbox"
-                                                            checked={formData.badges.includes(
+                                                            checked={data.badges.includes(
                                                                 badge,
                                                             )}
                                                             onChange={(e) => {
@@ -753,27 +883,23 @@ export default function ServicesView() {
                                                                     e.target
                                                                         .checked
                                                                 ) {
-                                                                    setFormData(
-                                                                        {
-                                                                            ...formData,
-                                                                            badges: [
-                                                                                ...formData.badges,
-                                                                                badge,
-                                                                            ],
-                                                                        },
+                                                                    setData(
+                                                                        'badges',
+                                                                        [
+                                                                            ...data.badges,
+                                                                            badge,
+                                                                        ],
                                                                     );
                                                                 } else {
-                                                                    setFormData(
-                                                                        {
-                                                                            ...formData,
-                                                                            badges: formData.badges.filter(
-                                                                                (
-                                                                                    b,
-                                                                                ) =>
-                                                                                    b !==
-                                                                                    badge,
-                                                                            ),
-                                                                        },
+                                                                    setData(
+                                                                        'badges',
+                                                                        data.badges.filter(
+                                                                            (
+                                                                                b,
+                                                                            ) =>
+                                                                                b !==
+                                                                                badge,
+                                                                        ),
                                                                     );
                                                                 }
                                                             }}
@@ -788,68 +914,11 @@ export default function ServicesView() {
                                                     </label>
                                                 ))}
                                             </div>
-                                        </div>
-
-                                        {/* Preselected Image Options to simplify mockup reference */}
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-semibold text-on-surface-variant dark:text-slate-400">
-                                                Service Image Match
-                                            </label>
-                                            <div className="grid grid-cols-4 gap-2">
-                                                {[
-                                                    {
-                                                        name: 'Style',
-                                                        url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBicmcvzjjNBK-MBSl34LEJ6mAvxKjjn5aOHpSE7YCvSLSjV3T6ZHx-TRTRCVvOw5cg1Cw2QneammzouwtRnsGqMzQMVAImdHQdN_CzsUDylFa2dk1oIEUcG1B13kVK11pq5esGnDYS-DOKuK85139Rf_mlsSm_CD92-S-P07DM_YK0cKTMMFlKHZQijHRNLrUzAX_CoDstAQ3c2PWZj_isW7Y4SbQBqlFdRwryg-9kf-e-ESaAGzB8wGUAQpcjam8LhW48p9UtPzE',
-                                                    },
-                                                    {
-                                                        name: 'Strategy',
-                                                        url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDqqmz0dAZnKIQmuSXoSR5fIone3QDD2Wc1_mh4dT8nneEzrxrXuEHWuF19CwZ-0GjEZUvhCbc0n0KK2LaIfqJHFBdTJWBs-voKhLROT-SQEJxEU4idKebqO50AM1YykU_Jd3aLD_Bz87QfiJhh-HuBK_jBMgmjK59UN1d9EdJeYz6AgI56wyzTI3SviOCOKIOueikZIZZVy1vCspSOpzp0_zo8SsniqcNnV6t5JoBfzJRkDEERWWGMij0FH1t23s1j-bT0KgPP1cE',
-                                                    },
-                                                    {
-                                                        name: 'Portfolio',
-                                                        url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDKlVZlxX-pa15-5M3_4gLEbY6IU2AdJjvsJ3TuUthmLgG2XIs0qBQvuDLi_8EnwzyO48suah5RkXTN78aHRlehiL7avq-JwTN3MnK-VK5H9gACOn_Ptiajgv7eOISX8JAq0k5fK3j2JFk0vJnThjdKaLu_KyNUz1_cwEEzLoGfsI3mwBN_dmp4w0whe_q_D3WvLLaVCYtzKQdrZLEdy4iDDMCsvie1Pt6zvE4HUFWz35gPZ1nxyaxOd_tEr1pMylIaJZ8yQUCL_Ac',
-                                                    },
-                                                    {
-                                                        name: 'Abstract',
-                                                        url: 'https://picsum.photos/seed/service/300/300',
-                                                    },
-                                                ].map((item) => (
-                                                    <button
-                                                        key={item.name}
-                                                        type="button"
-                                                        onClick={() =>
-                                                            setFormData({
-                                                                ...formData,
-                                                                image: item.url,
-                                                            })
-                                                        }
-                                                        className={`relative aspect-square cursor-pointer overflow-hidden rounded-md border-2 ${
-                                                            formData.image ===
-                                                            item.url
-                                                                ? 'border-primary dark:border-purple-500'
-                                                                : 'border-transparent'
-                                                        }`}
-                                                    >
-                                                        <img
-                                                            src={item.url}
-                                                            alt={item.name}
-                                                            className="h-full w-full object-cover"
-                                                            referrerPolicy="no-referrer"
-                                                        />
-                                                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-[10px] font-bold text-white">
-                                                            {item.name}
-                                                        </div>
-                                                        {formData.image ===
-                                                            item.url && (
-                                                            <div className="absolute top-1 right-1 rounded-full bg-primary p-0.5 text-on-primary dark:bg-purple-600">
-                                                                <Check
-                                                                    size={8}
-                                                                />
-                                                            </div>
-                                                        )}
-                                                    </button>
-                                                ))}
-                                            </div>
+                                            {errors.badges && (
+                                                <p className="mt-1 text-xs text-red-500">
+                                                    {errors.badges}
+                                                </p>
+                                            )}
                                         </div>
 
                                         {/* Status selection in drawer */}
@@ -861,48 +930,68 @@ export default function ServicesView() {
                                             <label className="relative inline-flex cursor-pointer items-center">
                                                 <input
                                                     type="checkbox"
-                                                    checked={formData.active}
+                                                    checked={data.active}
                                                     onChange={(e) =>
-                                                        setFormData({
-                                                            ...formData,
-                                                            active: e.target
-                                                                .checked,
-                                                        })
+                                                        setData(
+                                                            'active',
+                                                            e.target.checked,
+                                                        )
                                                     }
                                                     className="peer sr-only"
                                                 />
                                                 <div className="peer h-6 w-11 rounded-full bg-outline-variant/65 peer-checked:bg-primary after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full dark:bg-slate-700 dark:peer-checked:bg-purple-600 dark:after:border-slate-600"></div>
                                                 <span className="ml-3 text-xs font-medium text-on-surface-variant dark:text-slate-400">
-                                                    {formData.active
+                                                    {data.active
                                                         ? 'Active'
                                                         : 'Inactive'}
                                                 </span>
                                             </label>
                                         </div>
 
-                                        {/* Drag and drop upload zone representation */}
-                                        <div className="space-y-1">
+                                        {/* Image Upload */}
+                                        <div className="space-y-2">
                                             <label className="text-xs font-semibold text-on-surface-variant dark:text-slate-400">
-                                                Image Upload Area
+                                                Service Image
                                             </label>
-                                            <div className="group flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-outline-variant bg-surface-container-low p-6 text-center transition-all duration-200 hover:border-primary dark:border-slate-700 dark:bg-slate-800 dark:hover:border-purple-500">
+                                            {imagePreview && (
+                                                <div className="relative mb-2 h-32 overflow-hidden rounded-lg">
+                                                    <img
+                                                        src={imagePreview}
+                                                        alt="Preview"
+                                                        className="h-full w-full object-cover"
+                                                    />
+                                                </div>
+                                            )}
+                                            <label className="group flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-outline-variant bg-surface-container-low p-6 text-center transition-all duration-200 hover:border-primary dark:border-slate-700 dark:bg-slate-800 dark:hover:border-purple-500">
                                                 <Upload
                                                     className="mb-2 text-outline transition-colors group-hover:text-primary dark:text-slate-600 dark:group-hover:text-purple-400"
                                                     size={28}
                                                 />
                                                 <p className="text-xs font-semibold text-on-surface dark:text-white">
-                                                    Click or drag custom files
+                                                    Click to upload image
                                                 </p>
                                                 <p className="mt-1 text-center text-[10px] tracking-widest text-outline uppercase dark:text-slate-500">
                                                     JPG, PNG, WebP up to 5MB
                                                 </p>
-                                            </div>
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleImageChange}
+                                                    className="hidden"
+                                                />
+                                            </label>
+                                            {errors.image && (
+                                                <p className="mt-1 text-xs text-red-500">
+                                                    {errors.image}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
 
                                     <div className="flex gap-3 border-t border-outline-variant bg-surface p-6 dark:border-slate-700 dark:bg-slate-900">
                                         <button
                                             type="button"
+                                            // disabled={processing}
                                             onClick={() =>
                                                 setIsDrawerOpen(false)
                                             }
@@ -912,9 +1001,12 @@ export default function ServicesView() {
                                         </button>
                                         <button
                                             type="submit"
+                                            disabled={processing}
                                             className="hover:bg-opacity-90 flex-1 cursor-pointer rounded-lg bg-primary py-3 text-sm font-semibold text-on-primary shadow-md shadow-primary/20 transition-all active:scale-95 dark:bg-purple-600 dark:shadow-purple-600/20 dark:hover:bg-purple-700"
                                         >
-                                            Save Service
+                                            {processing
+                                                ? 'Saving...'
+                                                : 'Save Service'}
                                         </button>
                                     </div>
                                 </form>
