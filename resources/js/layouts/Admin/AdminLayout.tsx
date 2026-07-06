@@ -4,8 +4,12 @@ import Footer from '@/components/Admin/Footer';
 import Sidebar from '@/components/Admin/Sidebar';
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { WebsiteSettings, AdminProfile } from '@/types';
-import { WEBSITE_SETTINGS, INITIAL_ADMIN_PROFILE } from '@/data/initial-data';
+import {
+    WebsiteSettings,
+    AdminProfile,
+    WEBSITE_SETTINGS,
+    INITIAL_ADMIN_PROFILE,
+} from '@/data/initial-data';
 import { HelpCircle, Bell, Search, Menu, X } from 'lucide-react';
 
 interface Toast {

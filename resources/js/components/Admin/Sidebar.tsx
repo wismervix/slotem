@@ -90,12 +90,12 @@ export default function Sidebar({
             menuKey: 'settings',
             children: [
                 {
-                    name: 'General',
+                    name: 'General Settings',
                     route: 'admin.settings',
                 },
                 {
-                    name: 'Profile',
-                    route: 'admin.profile',
+                    name: 'Website Settings',
+                    route: 'admin.website-settings',
                 },
             ],
         },

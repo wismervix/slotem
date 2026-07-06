@@ -22,7 +22,9 @@ Route::group(['prefix' => 'admin'], function () {
         Route::controller(DashboardController::class)->group(function () {
             Route::get('/dashboard', 'index')->name('admin.dashboard');
             Route::get('/settings', 'settings')->name('admin.settings');
-            Route::get('/profile')->name('admin.profile');
+            Route::put('/settings', 'updateSettings')->name('admin.settings.update');
+            Route::get('/website-settings', 'websiteSettings')->name('admin.website-settings');
+            Route::put('/website-settings', 'updateWebsiteSettings')->name('admin.website-settings.update');
         });
 
         //USER CONTROLLER
@@ -45,6 +47,11 @@ Route::group(['prefix' => 'admin'], function () {
         //BOOKING CONTROLLER
         Route::controller(BookingController::class)->prefix('bookings')->group(function () {
             Route::get('/', 'index')->name('admin.bookings');
+            Route::put('/{booking}/approve', 'approve')->name('admin.bookings.approve');
+            Route::put('/{booking}/reject', 'reject')->name('admin.bookings.reject');
+            Route::put('/{booking}/complete', 'complete')->name('admin.bookings.complete');
+            Route::put('/{booking}/restore', 'restore')->name('admin.bookings.restore');
+            Route::put('/{booking}/cancel', 'cancel')->name('admin.bookings.cancel');
         });
 
         //AVAILABILITY CONTROLLER

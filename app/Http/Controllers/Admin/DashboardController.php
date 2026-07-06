@@ -22,4 +22,16 @@ class DashboardController extends Controller
     {
         return inertia('Admin/Settings');
     }
+    public function updateSettings()
+    {
+        // update settings logic
+    }
+    public function websiteSettings()
+    {
+        return inertia('Admin/WebsiteSettings');
+    }
+    public function updateWebsiteSettings()
+    {
+        // update website settings logic
+    }
 }

@@ -1,31 +1,45 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
+export interface WebsiteSettings {
+    name: string;
+    managerName: string;
+    email: string;
+    phone: string;
+    address: string;
+    description: string;
+    websiteUrl: string;
+    logoUrl: string;
+    faviconUrl: string;
+}
 
-import {
-    UserThree,
-    BookingThree,
-    AdminBooking,
-    AdminProfile,
-    ServiceTwo,
-    WebsiteSettings,
-    BusinessHours,
-    BookingRules,
-    TeamMember,
-    CustomerProfile,
-    BookingFour,
-    ActivityLog,
-} from '@/types';
+export interface BookingRules {
+    minimumLeadTime: string;
+    bookingWindow: string;
+    cancellationPolicyEnabled: boolean;
+    cancellationPolicyText: string;
+}
 
+export interface TeamMember {
+    id: string;
+    name: string;
+    email: string;
+    role: 'Admin' | 'Staff';
+    status: 'Active' | 'Pending Invite';
+    avatarInitials: string;
+}
+
+export interface AdminProfile {
+    name: string;
+    phone: string;
+    email: string;
+    avatarUrl: string;
+}
+
+// Initial Admin Profile to be replaced with real data from the backend
 export const INITIAL_ADMIN_PROFILE: AdminProfile = {
     name: 'Admin User',
-    title: 'Super Admin',
     email: 'admin@slotem.com',
+    phone: '+1 (555) 124-7890',
     avatarUrl:
         'https://lh3.googleusercontent.com/aida-public/AB6AXuABzFFmj9Azf-OKguonlWJbM-mTIDI5pnlpLXB069Q5wPGwb2v4ibxbEEm3V6YTHQptXoDC_s3Nj68XNZSX7gJcA-i7O_BvNL74Z8ND0Z4yTyLpsQiUCM8NUKdTsyplCEq2yprxrYAyxj0gGS6QfHQ8d2qVhdvFvgnKHplJGkL-SXgybR1NIzqFx3TgqlASuFtojpyKu9sKL1pq4_aczMKEfjEv3BDLGGlEGi08mmryNNUADbSfdYp-6vCDwBVOy_ct2YqgXxePVV0',
-    notificationsEnabled: true,
-    currency: 'USD',
 };
 
 export const WEBSITE_SETTINGS: WebsiteSettings = {
@@ -33,319 +47,15 @@ export const WEBSITE_SETTINGS: WebsiteSettings = {
     managerName: 'Admin  Manager',
     email: 'manager@slotem.com',
     phone: '+1 (555) 124-7890',
-    role: 'System Administrator',
+    address: '123 Main Street, City, State 12345',
+    description:
+        'Slotem is a modern booking platform that helps businesses manage appointments and reservations efficiently.',
     websiteUrl: 'https://slotem.design',
     logoUrl:
         'https://lh3.googleusercontent.com/aida-public/AB6AXuC1rP8O-hKV-IMgURs4PoVY9K0CmDPbRU41joJp_l23yeKaWxXAbDePLHsiw-qTEcFI2YGm54EU5vl5sy4NKq7f39BDoyFTzRK5wIi9dUXP7sf4DeOX2rHqSJMlUATco37WzvAh_JYt1tnHqChw1yCFGEM4OSbKOIh83qpmJOuMvVCmw95xjFVIKnHqw6aynPwW-3W0Neg4OTRPYVoHD98-LfPWfY6xQLdESm_9IXZYRuG4DpiprU2_5Ck0ajhO_ow3eJ3iYQI_5-U',
+    faviconUrl:
+        'https://lh3.googleusercontent.com/aida-public/AB6AXuC1rP8O-hKV-IMgURs4PoVY9K0CmDPbRU41joJp_l23yeKaWxXAbDePLHsiw-qTEcFI2YGm54EU5vl5sy4NKq7f39BDoyFTzRK5wIi9dUXP7sf4DeOX2rHqSJMlUATco37WzvAh_JYt1tnHqChw1yCFGEM4OSbKOIh83qpmJOuMvVCmw95xjFVIKnHqw6aynPwW-3W0Neg4OTRPYVoHD98-LfPWfY6xQLdESm_9IXZYRuG4DpiprU2_5Ck0ajhO_ow3eJ3iYQI_5-U',
 };
-
-export const INITIAL_SERVICES: ServiceTwo[] = [
-    {
-        id: 's1',
-        name: 'Executive Styling',
-        description:
-            'A high-level corporate strategy style alignment for leaders and executives who want to build a refined personal brand. Includes exclusive wardrobing, color strategy, and executive portfolio review.',
-        category: 'Personal Branding',
-        duration: 90,
-        price: 250.0,
-        status: 'Active',
-        bookingsCount: 1240,
-        imageUrl:
-            'https://lh3.googleusercontent.com/aida-public/AB6AXuBicmcvzjjNBK-MBSl34LEJ6mAvxKjjn5aOHpSE7YCvSLSjV3T6ZHx-TRTRCVvOw5cg1Cw2QneammzouwtRnsGqMzQMVAImdHQdN_CzsUDylFa2dk1oIEUcG1B13kVK11pq5esGnDYS-DOKuK85139Rf_mlsSm_CD92-S-P07DM_YK0cKTMMFlKHZQijHRNLrUzAX_CoDstAQ3c2PWZj_isW7Y4SbQBqlFdRwryg-9kf-e-ESaAGzB8wGUAQpcjam8LhW48p9UtPzE',
-        createdAt: 'Jan 12, 2024',
-    },
-    {
-        id: 's2',
-        name: 'Strategy Session',
-        description:
-            'A brightly lit, modern layout conference experience where professional groups engage in active, high-intensity strategy planning. Includes clean diagramming and direct execution blueprints.',
-        category: 'Consulting',
-        duration: 60,
-        price: 180.0,
-        status: 'Active',
-        bookingsCount: 856,
-        imageUrl:
-            'https://lh3.googleusercontent.com/aida-public/AB6AXuDqqmz0dAZnKIQmuSXoSR5fIone3QDD2Wc1_mh4dT8nneEzrxrXuEHWuF19CwZ-0GjEZUvhCbc0n0KK2LaIfqJHFBdTJWBs-voKhLROT-SQEJxEU4idKebqO50AM1YykU_Jd3aLD_Bz87QfiJhh-HuBK_jBMgmjK59UN1d9EdJeYz6AgI56wyzTI3SviOCOKIOueikZIZZVy1vCspSOpzp0_zo8SsniqcNnV6t5JoBfzJRkDEERWWGMij0FH1t23s1j-bT0KgPP1cE',
-        createdAt: 'Feb 04, 2024',
-    },
-    {
-        id: 's3',
-        name: 'Portfolio Review',
-        description:
-            'Close-up assessment of high-quality leather workbooks and digital layouts resting on a minimalist marble background. Designed to elevate design proposals, UI structures, and premium typography.',
-        category: 'Design',
-        duration: 45,
-        price: 120.0,
-        status: 'Inactive',
-        bookingsCount: 312,
-        imageUrl:
-            'https://lh3.googleusercontent.com/aida-public/AB6AXuDKlVZlxX-pa15-5M3_4gLEbY6IU2AdJjvsJ3TuUthmLgG2XIs0qBQvuDLi_8EnwzyO48suah5RkXTN78aHRlehiL7avq-JwTN3MnK-VK5H9gACOn_Ptiajgv7eOISX8JAq0k5fK3j2JFk0vJnThjdKaLu_KyNUz1_cwEEzLoGfsI3mwBN_dmp4w0whe_q_D3WvLLaVCYtzKQdrZLEdy4iDDMCsvie1Pt6zvE4HUFWz35gPZ1nxyaxOd_tEr1pMylIaJZ8yQUCL_Ac',
-        createdAt: 'Mar 20, 2024',
-    },
-    {
-        id: 's4',
-        name: 'Brand Architecture Workshop',
-        description:
-            'Deep dive into brand messaging foundations, identity guidelines, and target positioning matrixes for small-to-medium enterprise startups.',
-        category: 'Workshops',
-        duration: 120,
-        price: 320.0,
-        status: 'Active',
-        bookingsCount: 418,
-        imageUrl: 'https://picsum.photos/seed/brand/300/300',
-        createdAt: 'Apr 05, 2024',
-    },
-    {
-        id: 's5',
-        name: 'UX Strategy Consulting',
-        description:
-            'Expert audit of customer journeys, dropoff funnels, usability blockages, and interactive layouts to double convert-rates.',
-        category: 'Consulting',
-        duration: 75,
-        price: 210.0,
-        status: 'Active',
-        bookingsCount: 529,
-        imageUrl: 'https://picsum.photos/seed/ux/300/300',
-        createdAt: 'May 16, 2024',
-    },
-    {
-        id: 's6',
-        name: 'Design Sprint Facilitation',
-        description:
-            'Five-day compressed rapid-prototyping sprint format to compress months of work requirements into mere days of co-created magic.',
-        category: 'Workshops',
-        duration: 180,
-        price: 450.0,
-        status: 'Active',
-        bookingsCount: 198,
-        imageUrl: 'https://picsum.photos/seed/sprint/300/300',
-        createdAt: 'Jun 11, 2024',
-    },
-    {
-        id: 's7',
-        name: 'Product Discovery Audit',
-        description:
-            'Structured alignment to define minimum lovable scopes, interactive map milestones, technical viability plans, and clean architectures.',
-        category: 'Consulting',
-        duration: 90,
-        price: 280.0,
-        status: 'Inactive',
-        bookingsCount: 124,
-        imageUrl: 'https://picsum.photos/seed/audit/300/300',
-        createdAt: 'Jul 22, 2024',
-    },
-];
-
-export const INITIAL_BUSINESS_HOURS: BusinessHours[] = [
-    {
-        day: 'Sunday',
-        dayIndex: 0,
-        isOpen: false,
-        openTime: '09:00',
-        closeTime: '17:00',
-    },
-    {
-        day: 'Monday',
-        dayIndex: 1,
-        isOpen: true,
-        openTime: '09:00',
-        closeTime: '17:00',
-    },
-    {
-        day: 'Tuesday',
-        dayIndex: 2,
-        isOpen: true,
-        openTime: '09:00',
-        closeTime: '17:00',
-    },
-    {
-        day: 'Wednesday',
-        dayIndex: 3,
-        isOpen: true,
-        openTime: '09:00',
-        closeTime: '17:00',
-    },
-    {
-        day: 'Thursday',
-        dayIndex: 4,
-        isOpen: true,
-        openTime: '09:00',
-        closeTime: '17:00',
-    },
-    {
-        day: 'Friday',
-        dayIndex: 5,
-        isOpen: true,
-        openTime: '09:00',
-        closeTime: '17:00',
-    },
-    {
-        day: 'Saturday',
-        dayIndex: 6,
-        isOpen: false,
-        openTime: '10:00',
-        closeTime: '15:00',
-    },
-];
-
-export const INITIAL_BOOKINGS: AdminBooking[] = [
-    {
-        id: 'b1',
-        clientName: 'Jane Doe',
-        clientEmail: 'jane.doe@email.com',
-        serviceId: 'srv1',
-        serviceName: 'Professional Consultation',
-        date: '2024-10-28',
-        startTime: '10:00 AM',
-        endTime: '11:00 AM',
-        status: 'Pending',
-        notes: 'Needs guidance on team alignment and initial onboarding steps.',
-        price: 150,
-    },
-    {
-        id: 'b2',
-        clientName: 'Marcus Smith',
-        clientEmail: 'm.smith@webnet.io',
-        serviceId: 'srv2',
-        serviceName: 'Annual Review',
-        date: '2024-10-29',
-        startTime: '02:30 PM',
-        endTime: '03:30 PM',
-        status: 'Confirmed',
-        notes: 'Year-end performance assessment and architectural recommendations.',
-        price: 200,
-    },
-    {
-        id: 'b3',
-        clientName: 'Elena Lopez',
-        clientEmail: 'elena.l@design.co',
-        serviceId: 'srv3',
-        serviceName: 'Strategy Workshop',
-        date: '2024-10-28',
-        startTime: '09:00 AM',
-        endTime: '10:30 AM',
-        status: 'Completed',
-        notes: 'Discussed brand strategy and asset restructuring. Action plan delivered.',
-        price: 350,
-    },
-    {
-        id: 'b4',
-        clientName: 'Thomas H.',
-        clientEmail: 'th@startup.biz',
-        serviceId: 'srv4',
-        serviceName: 'Technical Audit',
-        date: '2024-10-30',
-        startTime: '04:00 PM',
-        endTime: '05:00 PM',
-        status: 'Cancelled',
-        notes: 'Postponed due to server emergency. Will reschedule next month.',
-        price: 400,
-    },
-    {
-        id: 'b5',
-        clientName: 'Sophia Loren',
-        clientEmail: 'sophia@cinematique.org',
-        serviceId: 'srv5',
-        serviceName: 'Design Sprint',
-        date: '2024-10-24',
-        startTime: '01:00 PM',
-        endTime: '03:00 PM',
-        status: 'Completed',
-        notes: 'Reviewed mobile mockups. Highly successful session.',
-        price: 500,
-    },
-    {
-        id: 'b6',
-        clientName: 'David Miller',
-        clientEmail: 'miller.d@techstack.io',
-        serviceId: 'srv1',
-        serviceName: 'Professional Consultation',
-        date: '2024-10-24',
-        startTime: '09:30 AM',
-        endTime: '10:30 AM',
-        status: 'Completed',
-        notes: 'Answered infrastructure scaling inquiries.',
-        price: 150,
-    },
-    {
-        id: 'b7',
-        clientName: 'Olivia Wilde',
-        clientEmail: 'olivia@creativepulse.agency',
-        serviceId: 'srv3',
-        serviceName: 'Strategy Workshop',
-        date: '2024-10-31',
-        startTime: '11:00 AM',
-        endTime: '12:30 PM',
-        status: 'Confirmed',
-        notes: 'Quarterly brainstorm.',
-        price: 350,
-    },
-    {
-        id: 'b8',
-        clientName: 'Liam Neeson',
-        clientEmail: 'liam@actionstar.co.uk',
-        serviceId: 'srv6',
-        serviceName: 'Custom UX Review',
-        date: '2024-10-24',
-        startTime: '03:30 PM',
-        endTime: '04:15 PM',
-        status: 'Completed',
-        notes: 'Reviewed workflow navigation speed.',
-        price: 180,
-    },
-    {
-        id: 'b9',
-        clientName: 'Grace Hopper',
-        clientEmail: 'grace@compiler.net',
-        serviceId: 'srv4',
-        serviceName: 'Technical Audit',
-        date: '2024-11-01',
-        startTime: '10:00 AM',
-        endTime: '11:00 AM',
-        status: 'Pending',
-        notes: 'Code base analysis and validation steps.',
-        price: 400,
-    },
-    {
-        id: 'b10',
-        clientName: 'Alan Turing',
-        clientEmail: 'turing@enigma.org',
-        serviceId: 'srv2',
-        serviceName: 'Annual Review',
-        date: '2024-10-24',
-        startTime: '04:00 PM',
-        endTime: '05:00 PM',
-        status: 'Completed',
-        notes: 'Detailed evaluation of security architecture.',
-        price: 200,
-    },
-    {
-        id: 'b11',
-        clientName: 'Ada Lovelace',
-        clientEmail: 'ada@analyticalengine.io',
-        serviceId: 'srv3',
-        serviceName: 'Strategy Workshop',
-        date: '2024-11-04',
-        startTime: '02:00 PM',
-        endTime: '03:30 PM',
-        status: 'Confirmed',
-        notes: 'Algorithm visualization pipeline design.',
-        price: 350,
-    },
-    {
-        id: 'b12',
-        clientName: 'Charles Babbage',
-        clientEmail: 'babbage@difference.com',
-        serviceId: 'srv5',
-        serviceName: 'Design Sprint',
-        date: '2024-11-05',
-        startTime: '10:00 AM',
-        endTime: '12:00 PM',
-        status: 'Pending',
-        notes: 'Mechanical structural optimization.',
-        price: 500,
-    },
-];
 
 export const defaultBookingRules: BookingRules = {
     minimumLeadTime: '24 Hours',
@@ -379,269 +89,5 @@ export const defaultTeamMembers: TeamMember[] = [
         role: 'Staff',
         status: 'Pending Invite',
         avatarInitials: 'SW',
-    },
-];
-
-export const INITIAL_USERS: UserThree[] = [
-    {
-        id: 'SL-49201',
-        name: 'Marcus Thorne',
-        email: 'm.thorne@example.com',
-        phone: '+1 (555) 012-3456',
-        created_at: 'Oct 12, 2023',
-        registeredTime: '10:45 AM',
-        bookingsCount: 24,
-        status: 'Active',
-        avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDaI003af57dMXZfAc5JLHBXqstN2nvBK6HpxGmEX_o60SWqgplV1YMx8O2qcoOIqLGTYSxUHuW5D69NTfC3Ab5Eyiz8XKNBO1BLTW09YQrx-jxElAqRONPfy7Qlaws69JwWyh5niR4pgdUL-htfZ8thWsW7kbPhPTOHG1mYnFwXE_ApFW0uuKY2FjlvI8jxDfYnO-3KvoAAMamQFuEpHdWj6jd4IGtGwv3tYxmCyXWC7qQcrbNTVMmgvTFo1R05bMfcsdfduc7JM4',
-    },
-    {
-        id: 'SL-49202',
-        name: 'Elena Rodriguez',
-        email: 'elena.rod@webmail.com',
-        phone: '+1 (555) 987-6543',
-        created_at: 'Nov 05, 2023',
-        registeredTime: '02:15 PM',
-        bookingsCount: 12,
-        status: 'Suspended',
-        avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBRASTxjF02aHDj5cyv4v-1lZIB2oeuYPmV40QHRAjyVbGV4GDgkzMsyI838sGyhY-WsrxL86BDNfy1RuRAO2zO6Pl-LgquPIcAkmzdaJD_Eo6z3G-rLGf39RFq5-FSu21c0elxdbTbVnQpxUDgM8YoCRgE4Kw1QpcqOdNFKnS6X3FG98YPM2PFyGiB0NnSZY9pJqHwkpy7YY81tuSJ39C9MWpMETDoOrCxvhYVwRJczWcMdKSEnupeqwJAvZsC4vN3jTImspX7tkM',
-    },
-    {
-        id: 'SL-49203',
-        name: 'Jordan Smith',
-        email: 'j.smith.dev@gmail.com',
-        phone: '+1 (555) 234-5678',
-        created_at: 'Dec 20, 2023',
-        registeredTime: '09:30 AM',
-        bookingsCount: 5,
-        status: 'Active',
-        avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDIXAQa-sm6HaPs64JQqKTKH0AWDel5nqlldOjXYZ9cA1v6ysDRlsKC8RLFWa_itmNyWAdr29DXwD_lgLJZqY58_IzlrxyZkCiaUuln3OYsU0s4FOgQxGxdhl-hM9H1NrYuJpI8kRXatd_mAc9-kFWEKlawrCGi2rBW0h7zji76lAS_px0cebMgdvRw6PaF1YHcy8kJi9HLRE__p8H5JPVYVAWK2-MyBlkfzOnrJsE55SUf8Vru60qvDaYOhrFvtObeYbZopK8AeLc',
-    },
-    {
-        id: 'SL-49204',
-        name: 'Aria Chen',
-        email: 'aria.chen@design.co',
-        phone: '+1 (555) 765-4321',
-        created_at: 'Jan 04, 2024',
-        registeredTime: '11:15 AM',
-        bookingsCount: 18,
-        status: 'Active',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    },
-    {
-        id: 'SL-49205',
-        name: 'Devon Carter',
-        email: 'd.carter@techcorp.com',
-        phone: '+1 (555) 456-7890',
-        created_at: 'Jan 15, 2024',
-        registeredTime: '04:00 PM',
-        bookingsCount: 8,
-        status: 'Pending',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    },
-    {
-        id: 'SL-49206',
-        name: 'Sonia Mehta',
-        email: 'sonia.mehta@health.org',
-        phone: '+1 (555) 890-1234',
-        created_at: 'Feb 10, 2024',
-        registeredTime: '10:00 AM',
-        bookingsCount: 22,
-        status: 'Active',
-        avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
-    },
-    {
-        id: 'SL-49207',
-        name: 'Liam Peterson',
-        email: 'liam.peterson@fintech.io',
-        phone: '+1 (555) 345-6789',
-        created_at: 'Feb 18, 2024',
-        registeredTime: '01:30 PM',
-        bookingsCount: 0,
-        status: 'Pending',
-        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-    },
-    {
-        id: 'SL-49208',
-        name: 'Chloe Dubois',
-        email: 'c.dubois@academy.edu',
-        phone: '+1 (555) 901-2345',
-        created_at: 'Mar 01, 2024',
-        registeredTime: '08:45 AM',
-        bookingsCount: 3,
-        status: 'Active',
-        avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
-    },
-    {
-        id: 'SL-49209',
-        name: 'Mateo Silva',
-        email: 'mateo.silva@creative.br',
-        phone: '+1 (555) 567-8901',
-        created_at: 'Mar 08, 2024',
-        registeredTime: '05:45 PM',
-        bookingsCount: 14,
-        status: 'Active',
-        avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80',
-    },
-];
-
-export const INITIAL_BOOKINGSS: BookingThree[] = [
-    {
-        id: 'BK-1001',
-        userName: 'Marcus Thorne',
-        userEmail: 'm.thorne@example.com',
-        userId: 'SL-49201',
-        service: 'VIP Strategy Consultation',
-        date: '2024-03-12',
-        timeSlot: '10:45 AM',
-        status: 'Completed',
-    },
-    {
-        id: 'BK-1002',
-        userName: 'Elena Rodriguez',
-        userEmail: 'elena.rod@webmail.com',
-        userId: 'SL-49202',
-        service: 'Technical Onboarding Session',
-        date: '2024-03-18',
-        timeSlot: '02:15 PM',
-        status: 'Cancelled',
-    },
-    {
-        id: 'BK-1003',
-        userName: 'Jordan Smith',
-        userEmail: 'j.smith.dev@gmail.com',
-        userId: 'SL-49203',
-        service: 'General Consultation',
-        date: '2024-03-20',
-        timeSlot: '09:30 AM',
-        status: 'Confirmed',
-    },
-    {
-        id: 'BK-1004',
-        userName: 'Aria Chen',
-        userEmail: 'aria.chen@design.co',
-        userId: 'SL-49204',
-        service: 'Design Review & Feedback',
-        date: '2024-03-21',
-        timeSlot: '11:15 AM',
-        status: 'Confirmed',
-    },
-    {
-        id: 'BK-1005',
-        userName: 'Sonia Mehta',
-        userEmail: 'sonia.mehta@health.org',
-        userId: 'SL-49206',
-        service: 'Health & Wellness Assessment',
-        date: '2024-03-22',
-        timeSlot: '10:00 AM',
-        status: 'Pending',
-    },
-];
-
-
-export const INITIAL_PROFILE: CustomerProfile = {
-    name: 'Eleanor Vance',
-    email: 'eleanor.vance@example.com',
-    joinedDate: 'Jan 12, 2023',
-    tier: 'Premium Member',
-    city: 'Chicago, IL',
-    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAS4hUTLFx0E6J98uzd04i3YX6UOkhedlYUCmPnbrvti24Ue_CL6ri6q8vvcD63qahKE-7K_01ONMTOkm7IPXtgdV-TEaq37JuFM-5sjMu1ZaVI1rzD_8U8PNnuBFrixHoY11-QO-v2o22VH5iCzzuqXgzXh8ziXm5jJpj3gYs7mJICzXvnr61i7sCB6Q1do1IsZEgg-ruxOHu7mP4fkgIIXgkTMq0CfMnHZc29JZ51XanpLw0JXNLLrR0XIr2A_YvkkkTl4TVWVbs',
-    active: true,
-};
-
-export const INITIAL_BOOKINGSSS: BookingFour[] = [
-    {
-        id: '1',
-        service: 'Consultation Session',
-        ref: '#BK-8291',
-        date: 'Oct 24, 2023',
-        timeSlot: '10:00 AM - 11:30 AM',
-        amount: 150.0,
-        status: 'Confirmed',
-        customerName: 'Eleanor Vance',
-        customerEmail: 'eleanor.vance@example.com',
-        notes: 'Review primary marketing roadmap, identify top performance acquisition channels, and map launch calendar milestones.',
-    },
-    {
-        id: '2',
-        service: 'Strategy Workshop',
-        ref: '#BK-7520',
-        date: 'Oct 12, 2023',
-        timeSlot: '02:00 PM - 05:00 PM',
-        amount: 450.0,
-        status: 'Confirmed',
-        customerName: 'Eleanor Vance',
-        customerEmail: 'eleanor.vance@example.com',
-        notes: 'Deep dive interactive workshop with core engineering and design leads. Syncing product specifications and system components.',
-    },
-    {
-        id: '3',
-        service: 'Follow-up Call',
-        ref: '#BK-6104',
-        date: 'Sep 28, 2023',
-        timeSlot: '11:00 AM - 11:30 AM',
-        amount: 75.0,
-        status: 'Pending',
-        customerName: 'Eleanor Vance',
-        customerEmail: 'eleanor.vance@example.com',
-        notes: 'Review Post-launch KPIs, address minor bug reports, and finalize retainer contracts.',
-    },
-    {
-        id: '4',
-        service: 'Branding Review',
-        ref: '#BK-5932',
-        date: 'Sep 15, 2023',
-        timeSlot: '04:00 PM - 05:00 PM',
-        amount: 300.0,
-        status: 'Cancelled',
-        customerName: 'Eleanor Vance',
-        customerEmail: 'eleanor.vance@example.com',
-        notes: 'Visual typography pairing system, tone guide alignment, and logo badge options.',
-    },
-    {
-        id: '5',
-        service: 'UX Audit Session',
-        ref: '#BK-3829',
-        date: 'Nov 05, 2023',
-        timeSlot: '09:00 AM - 10:30 AM',
-        amount: 200.0,
-        status: 'Confirmed',
-        customerName: 'Eleanor Vance',
-        customerEmail: 'eleanor.vance@example.com',
-        notes: 'Thorough onboarding audit, user activation metric review, and sign-up feedback loops design.',
-    },
-];
-
-export const INITIAL_LOGS: ActivityLog[] = [
-    {
-        id: 'log-1',
-        type: 'rescheduled',
-        title: 'Booking Rescheduled',
-        subtitle: 'Moved Consultation Session to Oct 24th.',
-        timeText: '2 hours ago',
-        timestamp: Date.now() - 2 * 3600000,
-    },
-    {
-        id: 'log-2',
-        type: 'payment',
-        title: 'Payment Received',
-        subtitle: '$450.00 for Strategy Workshop.',
-        timeText: 'Yesterday',
-        timestamp: Date.now() - 24 * 3600000,
-    },
-    {
-        id: 'log-3',
-        type: 'profile',
-        title: 'Profile Updated',
-        subtitle: 'Customer updated phone number and address.',
-        timeText: '3 days ago',
-        timestamp: Date.now() - 3 * 24 * 3600000,
-    },
-    {
-        id: 'log-4',
-        type: 'email',
-        title: 'Email Sent',
-        subtitle: 'Sent welcome package to eleanor.vance@example.com',
-        timeText: 'Oct 1, 2023',
-        timestamp: Date.now() - 15 * 24 * 3600000,
     },
 ];

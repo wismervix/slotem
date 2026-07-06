@@ -18,21 +18,190 @@ import {
     SlidersHorizontal,
     HelpCircle,
     BookOpen,
+    Check,
+    AlertTriangle,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import React, { useMemo, useState } from 'react';
-import StatusBadge from '@/components/Admin/StatusBadge';
+import React, { useEffect, useMemo, useState } from 'react';
 import AdminLayout from '@/layouts/Admin/AdminLayout';
 import { formatTime } from '@/lib/calendar-utils';
 import { usePage } from '@inertiajs/react';
-import { Service, Booking } from '@/types';
+import { Service, Booking, BookingStatus } from '@/types';
 
 interface BookingsProps {
     bookings: Booking[];
 }
 
 export default function AdminBookingIndex({ bookings }: BookingsProps) {
-    const { services } = usePage<{ services: Service[] }>().props;
+    const { services, flash } = usePage<{
+        services: Service[];
+        flash?: { success?: string; error?: string };
+    }>().props;
+
+    // Toast state
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
+    const [toastType, setToastType] = useState<'success' | 'error'>('success');
+
+    // Watch for flash messages
+    useEffect(() => {
+        if (flash?.success) {
+            setToastMessage(flash.success);
+            setToastType('success');
+            setShowToast(true);
+            const timer = setTimeout(() => setShowToast(false), 4000);
+            return () => clearTimeout(timer);
+        }
+        if (flash?.error) {
+            setToastMessage(flash.error);
+            setToastType('error');
+            setShowToast(true);
+            const timer = setTimeout(() => setShowToast(false), 4000);
+            return () => clearTimeout(timer);
+        }
+    }, [flash]);
+
+    // Modal states
+    const [selectedBooking, setSelectedBooking] = useState<Booking | null>(
+        null,
+    );
+    const [actionModalOpen, setActionModalOpen] = useState(false);
+    const [actionType, setActionType] = useState<BookingStatus | null>(null);
+    const [notes, setNotes] = useState('');
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    // Confirmation modal
+    const [confirmModal, setConfirmModal] = useState(false);
+    const [confirmAction, setConfirmAction] = useState<{
+        booking: Booking;
+        action: BookingStatus;
+    } | null>(null);
+
+    // Handle action button clicks
+    const handleActionClick = (booking: Booking, action: BookingStatus) => {
+        setSelectedBooking(booking);
+        setActionType(action);
+        setConfirmAction({ booking, action });
+        setConfirmModal(true);
+    };
+
+    // Confirm and execute action
+    const confirmAndExecuteAction = async () => {
+        if (!confirmAction) return;
+
+        setIsProcessing(true);
+        const { booking, action } = confirmAction;
+
+        try {
+            const actionRoutes: Record<string, string> = {
+                approved: `admin.bookings.approve`,
+                rejected: `admin.bookings.reject`,
+                completed: `admin.bookings.complete`,
+                cancelled: `admin.bookings.cancel`,
+                pending: `admin.bookings.restore`, // For restoring rejected bookings
+            };
+
+            const routeName = actionRoutes[action];
+
+            if (action === 'pending') {
+                // Restore action
+                inertiaRouter.put(
+                    route(routeName, booking.id),
+                    {},
+                    {
+                        preserveScroll: true,
+                        onSuccess: () => {
+                            setConfirmModal(false);
+                            setConfirmAction(null);
+                            setSelectedBooking(null);
+                            setNotes('');
+                        },
+                        onError: (errors) => {
+                            console.error('Action failed:', errors);
+                        },
+                        onFinish: () => {
+                            setIsProcessing(false);
+                        },
+                    },
+                );
+            } else if (action === 'completed') {
+                // Complete action with optional notes
+                inertiaRouter.put(
+                    route(routeName, booking.id),
+                    { notes },
+                    {
+                        preserveScroll: true,
+                        onSuccess: () => {
+                            setConfirmModal(false);
+                            setConfirmAction(null);
+                            setSelectedBooking(null);
+                            setNotes('');
+                        },
+                        onError: (errors) => {
+                            console.error('Action failed:', errors);
+                        },
+                        onFinish: () => {
+                            setIsProcessing(false);
+                        },
+                    },
+                );
+            } else {
+                // Approve, Reject, Cancel actions
+                inertiaRouter.put(
+                    route(routeName, booking.id),
+                    {},
+                    {
+                        preserveScroll: true,
+                        onSuccess: () => {
+                            setConfirmModal(false);
+                            setConfirmAction(null);
+                            setSelectedBooking(null);
+                            setNotes('');
+                        },
+                        onError: (errors) => {
+                            console.error('Action failed:', errors);
+                        },
+                        onFinish: () => {
+                            setIsProcessing(false);
+                        },
+                    },
+                );
+            }
+        } catch (error) {
+            console.error('Error executing action:', error);
+            setIsProcessing(false);
+        }
+    };
+
+    // Get status badge color
+    const getStatusColor = (status: BookingStatus) => {
+        switch (status) {
+            case 'pending':
+                return 'bg-yellow-50 text-yellow-800 border-yellow-200 dark:bg-yellow-950/40 dark:text-yellow-400 dark:border-yellow-900/50';
+            case 'approved':
+                return 'bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900/50';
+            case 'completed':
+                return 'bg-green-50 text-green-800 border-green-200 dark:bg-green-950/40 dark:text-green-400 dark:border-green-900/50';
+            case 'rejected':
+                return 'bg-red-50 text-red-800 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-900/50';
+            case 'cancelled':
+                return 'bg-gray-50 text-gray-800 border-gray-200 dark:bg-gray-950/40 dark:text-gray-400 dark:border-gray-900/50';
+            default:
+                return 'bg-gray-50 text-gray-800 border-gray-200 dark:bg-gray-950/40 dark:text-gray-400 dark:border-gray-900/50';
+        }
+    };
+
+    // Get action button label
+    const getActionLabel = (action: BookingStatus): string => {
+        const labels: Record<BookingStatus, string> = {
+            approved: 'Approve this booking?',
+            rejected: 'Reject this booking?',
+            completed: 'Mark as completed?',
+            cancelled: 'Cancel this booking?',
+            pending: 'Restore to pending?',
+        };
+        return labels[action] || 'Confirm action?';
+    };
 
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -126,6 +295,20 @@ export default function AdminBookingIndex({ bookings }: BookingsProps) {
 
     return (
         <AdminLayout>
+            {/* Toast Notification */}
+            {showToast && toastMessage && (
+                <div
+                    className={`animate-slide-in fixed right-6 bottom-6 z-50 flex items-center gap-3 rounded-xl border px-5 py-3 text-white shadow-2xl ${
+                        toastType === 'success'
+                            ? 'border-emerald-500/30 bg-emerald-600'
+                            : 'border-red-500/30 bg-red-600'
+                    }`}
+                >
+                    <Check className="h-5 w-5 shrink-0" />
+                    <p className="text-xs font-bold">{toastMessage}</p>
+                </div>
+            )}
+
             {/* Header */}
             <header className="mb-8 flex flex-col items-end justify-between gap-3 pb-2 sm:flex-row">
                 <div>
@@ -404,40 +587,45 @@ export default function AdminBookingIndex({ bookings }: BookingsProps) {
                                                 </div>
                                             </td>
 
-                                            {/* Styled mockup chips */}
+                                            {/* Styled Status chips */}
                                             <td className="px-6 py-4">
-                                                <StatusBadge
-                                                    status={booking.status}
-                                                />
+                                                <span
+                                                    className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold ${getStatusColor(booking.status)}`}
+                                                >
+                                                    {booking.status
+                                                        .charAt(0)
+                                                        .toUpperCase() +
+                                                        booking.status.slice(1)}
+                                                </span>
                                             </td>
 
                                             {/* Customized Action triggers */}
                                             <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                                                <div className="flex items-center justify-end gap-1.5 transition-opacity group-hover:opacity-100 md:opacity-0">
                                                     {booking.status ===
                                                         'pending' && (
                                                         <>
                                                             <button
                                                                 onClick={() =>
-                                                                    console.log(
-                                                                        'Approve Booking',
+                                                                    handleActionClick(
+                                                                        booking,
+                                                                        'approved',
                                                                     )
                                                                 }
                                                                 className="cursor-pointer rounded-lg p-1.5 text-purple-700 transition-colors hover:bg-purple-100 dark:text-purple-400 dark:hover:bg-purple-950"
                                                                 title="Approve Booking"
-                                                                id={`btn-approve-booking-${booking.id}`}
                                                             >
                                                                 <CheckCircle2 className="h-4.5 w-4.5" />
                                                             </button>
                                                             <button
                                                                 onClick={() =>
-                                                                    console.log(
-                                                                        'Reject Booking',
+                                                                    handleActionClick(
+                                                                        booking,
+                                                                        'rejected',
                                                                     )
                                                                 }
                                                                 className="cursor-pointer rounded-lg p-1.5 text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
                                                                 title="Reject"
-                                                                id={`btn-reject-booking-${booking.id}`}
                                                             >
                                                                 <XCircle className="h-4.5 w-4.5" />
                                                             </button>
@@ -449,56 +637,41 @@ export default function AdminBookingIndex({ bookings }: BookingsProps) {
                                                         <>
                                                             <button
                                                                 onClick={() =>
-                                                                    console.log(
-                                                                        'Marked as completed',
+                                                                    handleActionClick(
+                                                                        booking,
+                                                                        'completed',
                                                                     )
                                                                 }
                                                                 className="cursor-pointer rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
                                                                 title="Mark Completed"
-                                                                id={`btn-complete-booking-${booking.id}`}
                                                             >
                                                                 <CheckSquare className="h-4.5 w-4.5" />
                                                             </button>
                                                             <button
                                                                 onClick={() =>
-                                                                    console.log(
-                                                                        'Reject Bookin',
+                                                                    handleActionClick(
+                                                                        booking,
+                                                                        'cancelled',
                                                                     )
                                                                 }
                                                                 className="cursor-pointer rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
-                                                                title="More Options"
-                                                                id={`btn-options-booking-${booking.id}`}
+                                                                title="Cancel Booking"
                                                             >
-                                                                <MoreVertical className="h-4.5 w-4.5" />
+                                                                <XCircle className="h-4.5 w-4.5" />
                                                             </button>
                                                         </>
-                                                    )}
-
-                                                    {booking.status ===
-                                                        'completed' && (
-                                                        <button
-                                                            onClick={() =>
-                                                                console.log(
-                                                                    'Show notes!',
-                                                                )
-                                                            }
-                                                            id={`btn-view-notes-booking-${booking.id}`}
-                                                            className="cursor-pointer rounded-lg px-3 py-1.5 text-xs font-bold text-purple-700 transition-colors hover:bg-purple-50 hover:underline dark:text-purple-400 dark:hover:bg-purple-950/40"
-                                                        >
-                                                            View Notes
-                                                        </button>
                                                     )}
 
                                                     {booking.status ===
                                                         'rejected' && (
                                                         <button
                                                             onClick={() =>
-                                                                console.log(
-                                                                    'Restored rejected Booking',
+                                                                handleActionClick(
+                                                                    booking,
+                                                                    'pending',
                                                                 )
                                                             }
-                                                            className="dark:border-zinc-850 flex cursor-pointer items-center gap-1 rounded border border-zinc-200 px-3 py-1 text-xs font-semibold text-zinc-600 transition-all hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-800"
-                                                            id={`btn-restore-booking-${booking.id}`}
+                                                            className="flex cursor-pointer items-center gap-1 rounded border border-zinc-200 px-3 py-1 text-xs font-semibold text-zinc-600 transition-all hover:bg-zinc-50 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-800"
                                                         >
                                                             <RotateCcw className="h-3 w-3" />
                                                             <span>Restore</span>
@@ -588,7 +761,7 @@ export default function AdminBookingIndex({ bookings }: BookingsProps) {
                         </p>
                     </div>
                     <button
-                        onClick={()=>console.log("Export ts!")}
+                        onClick={() => console.log('Export ts!')}
                         id="btn-export-csv"
                         className="ml-auto cursor-pointer rounded-xl border border-on-secondary-container px-5 py-2.5 text-xs font-bold text-on-secondary-container transition-all hover:bg-on-secondary-container hover:text-white active:scale-95 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
                     >
@@ -596,6 +769,79 @@ export default function AdminBookingIndex({ bookings }: BookingsProps) {
                     </button>
                 </div>
             </section>
+
+            {/* Confirmation Modal */}
+            <AnimatePresence>
+                {confirmModal && confirmAction && (
+                    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setConfirmModal(false)}
+                            className="absolute inset-0 bg-on-background/40 backdrop-blur-[2px]"
+                        />
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            className="relative z-20 w-full max-w-md overflow-hidden rounded-2xl bg-surface p-6 shadow-2xl dark:bg-slate-900"
+                        >
+                            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-purple-950/40 dark:text-purple-400">
+                                <AlertTriangle size={28} />
+                            </div>
+                            <h3 className="text-center text-lg font-bold text-on-surface dark:text-white">
+                                {getActionLabel(confirmAction.action)}
+                            </h3>
+                            <p className="mt-2 text-center text-sm text-on-surface-variant dark:text-slate-400">
+                                Booking ID:{' '}
+                                <span className="font-bold">
+                                    #{confirmAction.booking.id}
+                                </span>{' '}
+                                for{' '}
+                                <span className="font-bold">
+                                    {confirmAction.booking.client_name}
+                                </span>
+                            </p>
+
+                            {confirmAction.action === 'completed' && (
+                                <div className="mt-4">
+                                    <label className="mb-2 block text-xs font-semibold text-on-surface-variant dark:text-slate-400">
+                                        Add Notes (Optional)
+                                    </label>
+                                    <textarea
+                                        value={notes}
+                                        onChange={(e) =>
+                                            setNotes(e.target.value)
+                                        }
+                                        placeholder="Add any notes about the completed booking..."
+                                        rows={3}
+                                        className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-2 text-sm text-on-surface placeholder-outline/60 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500"
+                                    />
+                                </div>
+                            )}
+
+                            <div className="mt-6 flex flex-col gap-2">
+                                <button
+                                    onClick={confirmAndExecuteAction}
+                                    disabled={isProcessing}
+                                    className="w-full cursor-pointer rounded-xl bg-primary py-3 text-sm font-semibold text-on-primary shadow-md shadow-primary/20 transition-all hover:bg-primary-container disabled:opacity-50 dark:bg-purple-600 dark:shadow-purple-600/20 dark:hover:bg-purple-700"
+                                >
+                                    {isProcessing
+                                        ? 'Processing...'
+                                        : 'Confirm Action'}
+                                </button>
+                                <button
+                                    onClick={() => setConfirmModal(false)}
+                                    className="w-full cursor-pointer rounded-xl py-3 text-sm font-semibold text-on-surface-variant transition-all hover:bg-surface-container dark:text-slate-400 dark:hover:bg-slate-800"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </AdminLayout>
     );
 }

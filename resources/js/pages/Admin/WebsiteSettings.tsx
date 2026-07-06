@@ -3,46 +3,58 @@ import {
     Upload,
     HeartHandshake,
     Shield,
-    Settings,
     Mail,
     Phone,
     Globe,
     ExternalLink,
 } from 'lucide-react';
-import { AdminProfile, INITIAL_ADMIN_PROFILE } from '@/data/initial-data';
+import { WebsiteSettings, WEBSITE_SETTINGS } from '@/data/initial-data';
 import AdminLayout from '@/layouts/Admin/AdminLayout';
 
 export default function AdminSettings() {
     // Local state for Business Profile Form
-    const [profile, setProfile] = useState<AdminProfile>(INITIAL_ADMIN_PROFILE);
+    const [setting, setSetting] = useState<WebsiteSettings>({
+        ...WEBSITE_SETTINGS,
+    });
 
     // Integrations/Security Modals
     const [activeInfoModal, setActiveInfoModal] = useState<
         'integrations' | 'security' | null
     >(null);
 
-    const handleProfileChange = (key: keyof AdminProfile, value: string) => {
-        setProfile((p) => ({ ...p, [key]: value }));
+    const handleSettingChange = (key: keyof WebsiteSettings, value: string) => {
+        setSetting((p) => ({ ...p, [key]: value }));
     };
 
     // State modification handlers
-    const handleSaveSettings = (profile: AdminProfile) => {
-        setProfile(profile);
+    const handleSaveSettings = (setting: WebsiteSettings) => {
+        setSetting(setting);
         //   triggerToast('Settings applied & synchronized successfully!');
     };
 
     const handleSaveAll = () => {
-        handleSaveSettings(profile);
+        handleSaveSettings(setting);
     };
 
     // Preset logo helper
-    const handleUpdateAvatarURL = () => {
+    const handleUpdateLogoURL = () => {
         const url = prompt(
             'Enter custom brand logo URL or leave empty:',
-            profile.avatarUrl,
+            setting.logoUrl,
         );
         if (url !== null) {
-            handleProfileChange('avatarUrl', url);
+            handleSettingChange('logoUrl', url);
+        }
+    };
+
+    // Preset logo helper
+    const handleUpdateFaviconURL = () => {
+        const url = prompt(
+            'Enter custom favicon URL or leave empty:',
+            setting.faviconUrl,
+        );
+        if (url !== null) {
+            handleSettingChange('faviconUrl', url);
         }
     };
 
@@ -53,7 +65,7 @@ export default function AdminSettings() {
                 <header className="mb-8">
                     <div>
                         <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 select-text dark:text-zinc-50">
-                            Admin Settings Management
+                            Admin Website Settings Management
                         </h1>
                         <p className="mt-1 text-sm font-medium text-zinc-500 dark:text-zinc-400">
                             Manage your organization's identity, operational
@@ -66,7 +78,7 @@ export default function AdminSettings() {
                 <div className="flex justify-end gap-3 pb-2">
                     <button
                         onClick={() => {
-                            setProfile({ ...profile });
+                            setSetting({ ...setting });
                         }}
                         className="cursor-pointer rounded-xl border border-slate-200 px-5 py-2.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                     >
@@ -86,7 +98,7 @@ export default function AdminSettings() {
                     <section className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xs dark:border-slate-700 dark:bg-slate-900">
                         <div className="border-b border-gray-50 bg-slate-50/50 p-6 dark:border-slate-700 dark:bg-slate-800/50">
                             <h3 className="text-md font-bold text-slate-800 dark:text-white">
-                                Admin Profile
+                                Business Profile
                             </h3>
                             <p className="mt-0.5 text-xs text-gray-400 dark:text-slate-400">
                                 Update your public identity and contact
@@ -96,17 +108,17 @@ export default function AdminSettings() {
 
                         <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-12">
                             {/* Logo Handler */}
-                            <div className="md:col-span-4">
+                            <div className="md:col-span-2">
                                 <div
-                                    onClick={handleUpdateAvatarURL}
-                                    className="group relative flex aspect-video w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-neutral-50 p-6 text-center transition-all hover:border-purple-600 hover:bg-purple-50/25 md:aspect-square dark:border-slate-700 dark:bg-slate-800 dark:hover:border-purple-500 dark:hover:bg-purple-950/25"
+                                    onClick={handleUpdateLogoURL}
+                                    className="group relative mb-8 flex aspect-video w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-neutral-50 p-6 text-center transition-all hover:border-purple-600 hover:bg-purple-50/25 md:aspect-square dark:border-slate-700 dark:bg-slate-800 dark:hover:border-purple-500 dark:hover:bg-purple-950/25"
                                 >
                                     {/* Logo Picture Overlay */}
-                                    {profile.avatarUrl && (
+                                    {setting.logoUrl && (
                                         <img
                                             className="absolute inset-0 h-full w-full rounded-2xl object-cover opacity-15 transition-opacity group-hover:opacity-25"
                                             alt="Slotem brand logo background"
-                                            src={profile.avatarUrl}
+                                            src={setting.logoUrl}
                                         />
                                     )}
 
@@ -123,24 +135,70 @@ export default function AdminSettings() {
                                     </div>
                                 </div>
                             </div>
+                            {/* Favicon Handler */}
+                            <div className="md:col-span-2">
+                                <div
+                                    onClick={handleUpdateFaviconURL}
+                                    className="group relative flex aspect-video w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-neutral-50 p-6 text-center transition-all hover:border-purple-600 hover:bg-purple-50/25 md:aspect-square dark:border-slate-700 dark:bg-slate-800 dark:hover:border-purple-500 dark:hover:bg-purple-950/25"
+                                >
+                                    {/* Favicon Picture Overlay */}
+                                    {setting.faviconUrl && (
+                                        <img
+                                            className="absolute inset-0 h-full w-full rounded-2xl object-cover opacity-15 transition-opacity group-hover:opacity-25"
+                                            alt="Slotem favicon background"
+                                            src={setting.faviconUrl}
+                                        />
+                                    )}
+
+                                    <Upload className="mb-2 h-8 w-8 text-purple-700 transition-transform group-hover:scale-110 dark:text-purple-400" />
+                                    <p className="text-xs font-bold text-slate-800 dark:text-white">
+                                        Upload Favicon
+                                    </p>
+                                    <p className="mt-1 max-w-[150px] text-[10px] font-semibold text-gray-400 uppercase dark:text-slate-400">
+                                        SVG, PNG or JPG (max. 800x400px)
+                                    </p>
+
+                                    <div className="absolute bottom-2 rounded-md bg-slate-900/10 px-2 py-0.5 font-mono text-[9px] font-bold text-slate-700 transition-colors hover:bg-purple-700 hover:text-white dark:bg-slate-700/50 dark:text-slate-300 dark:hover:bg-purple-600">
+                                        Change URL
+                                    </div>
+                                </div>
+                            </div>
 
                             {/* Profile Inputs */}
                             <div className="space-y-4 md:col-span-8">
-                                <div>
-                                    <label className="mb-1.5 block text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-slate-400">
-                                        Admin Name
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={profile.name}
-                                        onChange={(e) =>
-                                            handleProfileChange(
-                                                'name',
-                                                e.target.value,
-                                            )
-                                        }
-                                        className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-semibold text-slate-800 transition-all outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
-                                    />
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label className="mb-1.5 block text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-slate-400">
+                                            Business Name
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={setting.name}
+                                            onChange={(e) =>
+                                                handleSettingChange(
+                                                    'name',
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-semibold text-slate-800 transition-all outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="mb-1.5 block text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-slate-400">
+                                            Business Manager's Name
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={setting.managerName}
+                                            onChange={(e) =>
+                                                handleSettingChange(
+                                                    'managerName',
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-semibold text-slate-800 transition-all outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -152,9 +210,9 @@ export default function AdminSettings() {
                                             <Mail className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
                                             <input
                                                 type="email"
-                                                value={profile.email}
+                                                value={setting.email}
                                                 onChange={(e) =>
-                                                    handleProfileChange(
+                                                    handleSettingChange(
                                                         'email',
                                                         e.target.value,
                                                     )
@@ -172,9 +230,9 @@ export default function AdminSettings() {
                                             <Phone className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
                                             <input
                                                 type="tel"
-                                                value={profile.phone}
+                                                value={setting.phone}
                                                 onChange={(e) =>
-                                                    handleProfileChange(
+                                                    handleSettingChange(
                                                         'phone',
                                                         e.target.value,
                                                     )
@@ -183,6 +241,66 @@ export default function AdminSettings() {
                                             />
                                         </div>
                                     </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label className="mb-1.5 block text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-slate-400">
+                                            Address
+                                        </label>
+                                        <div className="relative">
+                                            <Globe className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
+                                            <input
+                                                type="url"
+                                                placeholder="https://slotem.design"
+                                                value={setting.address}
+                                                onChange={(e) =>
+                                                    handleSettingChange(
+                                                        'address',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pr-4 pl-10 font-mono text-sm text-slate-800 transition-all outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500 dark:focus:border-purple-500 dark:focus:ring-purple-500"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="mb-1.5 block text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-slate-400">
+                                            Website URL
+                                        </label>
+                                        <div className="relative">
+                                            <Globe className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
+                                            <input
+                                                type="url"
+                                                placeholder="https://slotem.design"
+                                                value={setting.websiteUrl}
+                                                onChange={(e) =>
+                                                    handleSettingChange(
+                                                        'websiteUrl',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pr-4 pl-10 font-mono text-sm text-slate-800 transition-all outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500 dark:focus:border-purple-500 dark:focus:ring-purple-500"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="mb-1.5 block text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-slate-400">
+                                        Business Description
+                                    </label>
+                                    <textarea
+                                        value={setting.description}
+                                        onChange={(e) =>
+                                            handleSettingChange(
+                                                'description',
+                                                e.target.value,
+                                            )
+                                        }
+                                        rows={3}
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-semibold text-slate-800 transition-all outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
+                                    ></textarea>
                                 </div>
                             </div>
                         </div>
