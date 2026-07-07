@@ -1,66 +1,180 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Upload,
     HeartHandshake,
     Shield,
     Mail,
+    Check,
     Phone,
     Globe,
     ExternalLink,
 } from 'lucide-react';
-import { WebsiteSettings, WEBSITE_SETTINGS } from '@/data/initial-data';
 import AdminLayout from '@/layouts/Admin/AdminLayout';
+import { useForm, usePage } from '@inertiajs/react';
+import { WebsiteSettings, SharedPageProps } from '@/types';
+
+interface AdminSettingsPageProps extends SharedPageProps {
+    settings: WebsiteSettings;
+}
 
 export default function AdminSettings() {
-    // Local state for Business Profile Form
-    const [setting, setSetting] = useState<WebsiteSettings>({
-        ...WEBSITE_SETTINGS,
-    });
+    const { settings, flash } = usePage<AdminSettingsPageProps>().props;
+
+    // Toast state
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
+    const [toastType, setToastType] = useState<'success' | 'error'>('success');
 
     // Integrations/Security Modals
     const [activeInfoModal, setActiveInfoModal] = useState<
         'integrations' | 'security' | null
     >(null);
 
-    const handleSettingChange = (key: keyof WebsiteSettings, value: string) => {
-        setSetting((p) => ({ ...p, [key]: value }));
+    // Image previews
+    const [logoPreview, setLogoPreview] = useState<string | null>(null);
+    const [faviconPreview, setFaviconPreview] = useState<string | null>(null);
+
+    // Inertia form
+    const { data, setData, post, processing, errors, reset } = useForm({
+        name: settings.name,
+        manager_name: settings.manager_name,
+        email: settings.email,
+        phone: settings.phone,
+        address: settings.address,
+        description: settings.description,
+        website_url: settings.website_url,
+        logo_url: null as File | null,
+        favicon_url: null as File | null,
+        _method: 'put',
+    });
+
+    // Watch for flash messages
+    useEffect(() => {
+        if (flash?.success) {
+            setToastMessage(flash.success);
+            setToastType('success');
+            setShowToast(true);
+            const timer = setTimeout(() => setShowToast(false), 4000);
+            return () => clearTimeout(timer);
+        }
+        if (flash?.error) {
+            setToastMessage(flash.error);
+            setToastType('error');
+            setShowToast(true);
+            const timer = setTimeout(() => setShowToast(false), 4000);
+            return () => clearTimeout(timer);
+        }
+    }, [flash]);
+
+    // Handle image file change
+    const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setData('logo_url', file);
+        const preview = URL.createObjectURL(file);
+        setLogoPreview(preview);
+    };
+    const handleFaviconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setData('favicon_url', file);
+        const preview = URL.createObjectURL(file);
+        setFaviconPreview(preview);
     };
 
-    // State modification handlers
-    const handleSaveSettings = (setting: WebsiteSettings) => {
-        setSetting(setting);
-        //   triggerToast('Settings applied & synchronized successfully!');
-    };
-
-    const handleSaveAll = () => {
-        handleSaveSettings(setting);
-    };
-
-    // Preset logo helper
+    // Handle logo URL update
     const handleUpdateLogoURL = () => {
-        const url = prompt(
-            'Enter custom brand logo URL or leave empty:',
-            setting.logoUrl,
-        );
-        if (url !== null) {
-            handleSettingChange('logoUrl', url);
-        }
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.onchange = (e) => {
+            const target = e.target as HTMLInputElement;
+            const file = target.files?.[0];
+            if (file) {
+                handleLogoChange(e as any);
+            }
+        };
+        fileInput.click();
     };
 
-    // Preset logo helper
     const handleUpdateFaviconURL = () => {
-        const url = prompt(
-            'Enter custom favicon URL or leave empty:',
-            setting.faviconUrl,
-        );
-        if (url !== null) {
-            handleSettingChange('faviconUrl', url);
-        }
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.onchange = (e) => {
+            const target = e.target as HTMLInputElement;
+            const file = target.files?.[0];
+            if (file) {
+                handleFaviconChange(e as any);
+            }
+        };
+        fileInput.click();
     };
+
+    // Handle form submission
+    const handleSaveAll = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        const hasLogoFile = data.logo_url instanceof File;
+        const hasFaviconFile = data.favicon_url instanceof File;
+
+        post(route('admin.website-settings.update'), {
+            forceFormData: hasLogoFile || hasFaviconFile,
+            preserveScroll: true,
+            onSuccess: () => {
+                reset('logo_url');
+                setLogoPreview(null);
+                reset('favicon_url');
+                setFaviconPreview(null);
+            },
+            onError: (errors) => {
+                console.error('Validation errors:', errors);
+            },
+        });
+    };
+
+    // Handle discard
+    const handleDiscard = () => {
+        reset();
+        setLogoPreview(null);
+        setFaviconPreview(null);
+    };
+
+    // Cleanup preview URL
+    useEffect(() => {
+        return () => {
+            if (logoPreview && logoPreview.startsWith('blob:')) {
+                URL.revokeObjectURL(logoPreview);
+            }
+        };
+    }, [logoPreview]);
+    useEffect(() => {
+        return () => {
+            if (faviconPreview && faviconPreview.startsWith('blob:')) {
+                URL.revokeObjectURL(faviconPreview);
+            }
+        };
+    }, [faviconPreview]);
 
     return (
         <AdminLayout>
             <div className="space-y-8 pb-12">
+                {/* Toast Notification */}
+                {showToast && toastMessage && (
+                    <div
+                        className={`animate-slide-in fixed right-6 bottom-6 z-50 flex items-center gap-3 rounded-xl border px-5 py-3 text-white shadow-2xl ${
+                            toastType === 'success'
+                                ? 'border-emerald-500/30 bg-emerald-600'
+                                : 'border-red-500/30 bg-red-600'
+                        }`}
+                    >
+                        <Check className="h-5 w-5 shrink-0" />
+                        <p className="text-xs font-bold">{toastMessage}</p>
+                    </div>
+                )}
+
                 {/* Header */}
                 <header className="mb-8">
                     <div>
@@ -77,15 +191,14 @@ export default function AdminSettings() {
                 {/* Header bar within tab containing Discard / Save changes */}
                 <div className="flex justify-end gap-3 pb-2">
                     <button
-                        onClick={() => {
-                            setSetting({ ...setting });
-                        }}
+                        onClick={handleDiscard}
                         className="cursor-pointer rounded-xl border border-slate-200 px-5 py-2.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                     >
                         Discard
                     </button>
                     <button
                         onClick={handleSaveAll}
+                        disabled={processing}
                         className="cursor-pointer rounded-xl bg-purple-700 px-5 py-2.5 text-xs font-bold text-on-primary shadow-sm transition-all hover:bg-purple-800 hover:brightness-110 active:scale-95 dark:bg-purple-600 dark:hover:bg-purple-700"
                     >
                         Save Changes
@@ -114,11 +227,14 @@ export default function AdminSettings() {
                                     className="group relative mb-8 flex aspect-video w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-neutral-50 p-6 text-center transition-all hover:border-purple-600 hover:bg-purple-50/25 md:aspect-square dark:border-slate-700 dark:bg-slate-800 dark:hover:border-purple-500 dark:hover:bg-purple-950/25"
                                 >
                                     {/* Logo Picture Overlay */}
-                                    {setting.logoUrl && (
+                                    {(logoPreview || settings.logo_url) && (
                                         <img
                                             className="absolute inset-0 h-full w-full rounded-2xl object-cover opacity-15 transition-opacity group-hover:opacity-25"
                                             alt="Slotem brand logo background"
-                                            src={setting.logoUrl}
+                                            src={
+                                                logoPreview || settings.logo_url
+                                            }
+                                            referrerPolicy="no-referrer"
                                         />
                                     )}
 
@@ -133,7 +249,20 @@ export default function AdminSettings() {
                                     <div className="absolute bottom-2 rounded-md bg-slate-900/10 px-2 py-0.5 font-mono text-[9px] font-bold text-slate-700 transition-colors hover:bg-purple-700 hover:text-white dark:bg-slate-700/50 dark:text-slate-300 dark:hover:bg-purple-600">
                                         Change URL
                                     </div>
+
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleLogoChange}
+                                        className="hidden"
+                                    />
                                 </div>
+
+                                {errors.logo_url && (
+                                    <p className="mt-2 text-xs text-red-500">
+                                        {errors.logo_url}
+                                    </p>
+                                )}
                             </div>
                             {/* Favicon Handler */}
                             <div className="md:col-span-2">
@@ -142,11 +271,15 @@ export default function AdminSettings() {
                                     className="group relative flex aspect-video w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-neutral-50 p-6 text-center transition-all hover:border-purple-600 hover:bg-purple-50/25 md:aspect-square dark:border-slate-700 dark:bg-slate-800 dark:hover:border-purple-500 dark:hover:bg-purple-950/25"
                                 >
                                     {/* Favicon Picture Overlay */}
-                                    {setting.faviconUrl && (
+                                    {(faviconPreview ||
+                                        settings.favicon_url) && (
                                         <img
                                             className="absolute inset-0 h-full w-full rounded-2xl object-cover opacity-15 transition-opacity group-hover:opacity-25"
                                             alt="Slotem favicon background"
-                                            src={setting.faviconUrl}
+                                            src={
+                                                faviconPreview ||
+                                                settings.favicon_url
+                                            }
                                         />
                                     )}
 
@@ -161,7 +294,20 @@ export default function AdminSettings() {
                                     <div className="absolute bottom-2 rounded-md bg-slate-900/10 px-2 py-0.5 font-mono text-[9px] font-bold text-slate-700 transition-colors hover:bg-purple-700 hover:text-white dark:bg-slate-700/50 dark:text-slate-300 dark:hover:bg-purple-600">
                                         Change URL
                                     </div>
+
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleFaviconChange}
+                                        className="hidden"
+                                    />
                                 </div>
+
+                                {errors.favicon_url && (
+                                    <p className="mt-2 text-xs text-red-500">
+                                        {errors.favicon_url}
+                                    </p>
+                                )}
                             </div>
 
                             {/* Profile Inputs */}
@@ -173,15 +319,17 @@ export default function AdminSettings() {
                                         </label>
                                         <input
                                             type="text"
-                                            value={setting.name}
+                                            value={data.name}
                                             onChange={(e) =>
-                                                handleSettingChange(
-                                                    'name',
-                                                    e.target.value,
-                                                )
+                                                setData('name', e.target.value)
                                             }
                                             className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-semibold text-slate-800 transition-all outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
                                         />
+                                        {errors.name && (
+                                            <p className="mt-1 text-xs text-red-500">
+                                                {errors.name}
+                                            </p>
+                                        )}
                                     </div>
                                     <div>
                                         <label className="mb-1.5 block text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-slate-400">
@@ -189,15 +337,20 @@ export default function AdminSettings() {
                                         </label>
                                         <input
                                             type="text"
-                                            value={setting.managerName}
+                                            value={data.manager_name}
                                             onChange={(e) =>
-                                                handleSettingChange(
-                                                    'managerName',
+                                                setData(
+                                                    'manager_name',
                                                     e.target.value,
                                                 )
                                             }
                                             className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-semibold text-slate-800 transition-all outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
                                         />
+                                        {errors.manager_name && (
+                                            <p className="mt-1 text-xs text-red-500">
+                                                {errors.manager_name}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -210,9 +363,9 @@ export default function AdminSettings() {
                                             <Mail className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
                                             <input
                                                 type="email"
-                                                value={setting.email}
+                                                value={data.email}
                                                 onChange={(e) =>
-                                                    handleSettingChange(
+                                                    setData(
                                                         'email',
                                                         e.target.value,
                                                     )
@@ -220,6 +373,11 @@ export default function AdminSettings() {
                                                 className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pr-4 pl-10 text-sm text-slate-800 transition-all outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
                                             />
                                         </div>
+                                        {errors.email && (
+                                            <p className="mt-1 text-xs text-red-500">
+                                                {errors.email}
+                                            </p>
+                                        )}
                                     </div>
 
                                     <div>
@@ -230,9 +388,9 @@ export default function AdminSettings() {
                                             <Phone className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
                                             <input
                                                 type="tel"
-                                                value={setting.phone}
+                                                value={data.phone}
                                                 onChange={(e) =>
-                                                    handleSettingChange(
+                                                    setData(
                                                         'phone',
                                                         e.target.value,
                                                     )
@@ -240,6 +398,11 @@ export default function AdminSettings() {
                                                 className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pr-4 pl-10 text-sm text-slate-800 transition-all outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
                                             />
                                         </div>
+                                        {errors.phone && (
+                                            <p className="mt-1 text-xs text-red-500">
+                                                {errors.phone}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -253,9 +416,9 @@ export default function AdminSettings() {
                                             <input
                                                 type="url"
                                                 placeholder="https://slotem.design"
-                                                value={setting.address}
+                                                value={data.address}
                                                 onChange={(e) =>
-                                                    handleSettingChange(
+                                                    setData(
                                                         'address',
                                                         e.target.value,
                                                     )
@@ -263,6 +426,11 @@ export default function AdminSettings() {
                                                 className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pr-4 pl-10 font-mono text-sm text-slate-800 transition-all outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500 dark:focus:border-purple-500 dark:focus:ring-purple-500"
                                             />
                                         </div>
+                                        {errors.address && (
+                                            <p className="mt-1 text-xs text-red-500">
+                                                {errors.address}
+                                            </p>
+                                        )}
                                     </div>
                                     <div>
                                         <label className="mb-1.5 block text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-slate-400">
@@ -273,16 +441,21 @@ export default function AdminSettings() {
                                             <input
                                                 type="url"
                                                 placeholder="https://slotem.design"
-                                                value={setting.websiteUrl}
+                                                value={data.website_url}
                                                 onChange={(e) =>
-                                                    handleSettingChange(
-                                                        'websiteUrl',
+                                                    setData(
+                                                        'website_url',
                                                         e.target.value,
                                                     )
                                                 }
                                                 className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pr-4 pl-10 font-mono text-sm text-slate-800 transition-all outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500 dark:focus:border-purple-500 dark:focus:ring-purple-500"
                                             />
                                         </div>
+                                        {errors.website_url && (
+                                            <p className="mt-1 text-xs text-red-500">
+                                                {errors.website_url}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -291,9 +464,9 @@ export default function AdminSettings() {
                                         Business Description
                                     </label>
                                     <textarea
-                                        value={setting.description}
+                                        value={data.description}
                                         onChange={(e) =>
-                                            handleSettingChange(
+                                            setData(
                                                 'description',
                                                 e.target.value,
                                             )
@@ -301,6 +474,11 @@ export default function AdminSettings() {
                                         rows={3}
                                         className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-semibold text-slate-800 transition-all outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
                                     ></textarea>
+                                    {errors.description && (
+                                        <p className="mt-1 text-xs text-red-500">
+                                            {errors.description}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         </div>

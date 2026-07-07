@@ -7,6 +7,7 @@ use App\Models\Availability;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class AvailabilityController extends Controller
@@ -29,6 +30,8 @@ class AvailabilityController extends Controller
             'date' => $request->date,
         ]);
 
+        Cache::forget('availabilities');
+
         return back();
     }
 
@@ -37,6 +40,8 @@ class AvailabilityController extends Controller
         $availability->timeSlots()->delete();
 
         $availability->delete();
+
+        Cache::forget('availabilities');
 
         return back();
     }
@@ -75,6 +80,8 @@ class AvailabilityController extends Controller
 
             // generate slots here
         }
+
+        Cache::forget('availabilities');
 
         return back();
     }
@@ -120,6 +127,8 @@ class AvailabilityController extends Controller
                 }
             }
         );
+
+        Cache::forget('availabilities');
 
         return back();
     }

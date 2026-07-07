@@ -1,4 +1,4 @@
-import { Booking } from "./booking";
+import { Booking } from './booking';
 
 export type UserStatus = 'active' | 'inactive' | 'suspended' | 'deleted';
 
@@ -20,3 +20,11 @@ export type User = {
 export type Auth = {
     user: User;
 };
+
+export interface AdminProfile {
+    name: string;
+    email: string;
+    phone: string;
+    avatar_url: string;
+    avatar_public_id?: string;
+}

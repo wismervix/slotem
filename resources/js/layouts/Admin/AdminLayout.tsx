@@ -4,12 +4,7 @@ import Footer from '@/components/Admin/Footer';
 import Sidebar from '@/components/Admin/Sidebar';
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import {
-    WebsiteSettings,
-    AdminProfile,
-    WEBSITE_SETTINGS,
-    INITIAL_ADMIN_PROFILE,
-} from '@/data/initial-data';
+import { WebsiteSettings, SharedPageProps } from '@/types';
 import { HelpCircle, Bell, Search, Menu, X } from 'lucide-react';
 
 interface Toast {
@@ -24,18 +19,15 @@ interface Props {
 export default function AdminLayout({ children }: Props) {
     const { url } = usePage();
 
+    const { auth } = usePage<SharedPageProps>().props;
+
+    const { settings } = usePage<{ settings: WebsiteSettings }>().props;
+
     // Global adaptive search string
     const [searchQuery, setSearchQuery] = useState('');
 
     // Responsive sidebar toggle for smaller viewports
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-
-    const [adminProfile, setAdminProfile] = useState<AdminProfile>(
-        INITIAL_ADMIN_PROFILE,
-    );
-
-    const [websiteSettings, setWebsiteSettings] =
-        useState<WebsiteSettings>(WEBSITE_SETTINGS);
 
     // Determine header search input placeholder adaptively
     const getSearchPlaceholder = () => {
@@ -54,8 +46,8 @@ export default function AdminLayout({ children }: Props) {
     return (
         <div className="flex min-h-screen bg-purple-50/20 font-sans text-zinc-800 antialiased transition-colors duration-250 dark:bg-zinc-950 dark:text-zinc-200">
             <Sidebar
-                businessName={websiteSettings.name}
-                managerName={websiteSettings.managerName}
+                businessName={settings.name}
+                managerName={settings.manager_name}
                 mobileSidebarOpen={mobileSidebarOpen}
                 setMobileSidebarOpen={setMobileSidebarOpen}
             />
@@ -113,17 +105,17 @@ export default function AdminLayout({ children }: Props) {
                         <div className="flex items-center gap-3 border-l border-outline-variant pl-4 select-none dark:border-slate-700">
                             <div className="hidden text-right sm:block">
                                 <p className="text-xs font-bold text-on-surface dark:text-white">
-                                    {adminProfile.name}
+                                    {auth.admin?.name}
                                 </p>
-                                <p className="mt-0.5 text-[9px] leading-none tracking-tighter text-outline uppercase dark:text-slate-500">
-                                    {adminProfile.title}
+                                <p className="mt-0.5 text-[9px] leading-none tracking-tighter text-outline dark:text-slate-500">
+                                    {auth.admin?.email}
                                 </p>
                             </div>
                             <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-outline-variant bg-surface-container-highest dark:border-slate-700 dark:bg-slate-800">
                                 <img
                                     className="h-full w-full object-cover"
-                                    src={adminProfile.avatarUrl}
-                                    alt={adminProfile.name}
+                                    src={auth.admin?.avatar_url}
+                                    alt={auth.admin?.name}
                                     referrerPolicy="no-referrer"
                                 />
                             </div>

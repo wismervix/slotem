@@ -6,6 +6,7 @@ use App\Models\Service;
 use Inertia\Middleware;
 use App\Models\Availability;
 use Illuminate\Http\Request;
+use App\Models\WebsiteSetting;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
@@ -49,6 +50,23 @@ class HandleInertiaRequests extends Middleware
                 'user' => Auth::guard('web')->user(),
                 'admin' => Auth::guard('admin')->user(),
             ],
+
+            'settings' => Cache::remember(
+                'website_settings',
+                now()->addHour(),
+                fn() => WebsiteSetting::firstOrCreate(
+                    [],
+                    [
+                        'name' => 'Slotem',
+                        'manager_name' => 'Admin Manager',
+                        'email' => 'manager@slotem.com',
+                        'phone' => '+1 (555) 124-7890',
+                        'address' => '123 Main Street, City, State 12345',
+                        'description' => 'Slotem is a modern booking platform.',
+                        'website_url' => 'https://slotem.design',
+                    ]
+                )->toArray()
+            ),
 
             'services' => Cache::remember(
                 'services',

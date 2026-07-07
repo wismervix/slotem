@@ -7,6 +7,7 @@ use App\Http\Requests\ServiceFormRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Illuminate\Support\Facades\Cache;
 
 class ServicesController extends Controller
 {
@@ -66,6 +67,8 @@ class ServicesController extends Controller
             ]);
         });
 
+        Cache::forget('services');
+
         return back()->with(
             'success',
             'Service created successfully.'
@@ -121,6 +124,8 @@ class ServicesController extends Controller
             ]);
         });
 
+        Cache::forget('services');
+
         return back()->with(
             'success',
             'Service updated successfully.'
@@ -141,6 +146,8 @@ class ServicesController extends Controller
             // Delete the service
             $service->delete();
         });
+
+        Cache::forget('services');
 
         return back()->with(
             'success',

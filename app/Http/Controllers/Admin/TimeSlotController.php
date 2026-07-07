@@ -11,6 +11,7 @@ use App\Http\Requests\UpdateTimeSlotRequest;
 use App\Services\AvailabilityService;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class TimeSlotController extends Controller
 {
@@ -74,6 +75,8 @@ class TimeSlotController extends Controller
             'is_booked' => false,
         ]);
 
+        Cache::forget('availabilities');
+
         return back();
     }
 
@@ -95,6 +98,8 @@ class TimeSlotController extends Controller
             'end_time' => $request->end_time,
         ]);
 
+        Cache::forget('availabilities');
+
         return back();
     }
 
@@ -111,6 +116,8 @@ class TimeSlotController extends Controller
         if ($availability->timeSlots()->count() === 0) {
             $availability->delete();
         }
+
+        Cache::forget('availabilities');
 
         return back();
     }
@@ -153,6 +160,8 @@ class TimeSlotController extends Controller
                 $request->end_time
             );
         }
+
+        Cache::forget('availabilities');
 
         return back();
     }
