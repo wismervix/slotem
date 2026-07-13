@@ -8,10 +8,9 @@ Route::controller(PagesController::class)->group(function(){
     Route::get('/', 'home')->name('home');
     Route::get('/services', 'services')->name('services');
     Route::get('/features', 'features')->name('features');
-    Route::get('/admin-two', 'adminTwo')->name('admin-two');
+    Route::get('/contact-sales', 'contactSales')->name('contact-sales');
     Route::get('/admin-three', 'adminThree')->name('admin-three');
     // Route::get('/pricing', 'pricing')->name('pricing');
-    Route::get('/how-it-works', 'howItWorks')->name('how-it-works');
     Route::get('/contact-us', 'contactUs')->name('contact-us');
 });
 

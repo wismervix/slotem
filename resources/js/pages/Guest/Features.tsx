@@ -21,7 +21,7 @@ import {
     Briefcase,
 } from 'lucide-react';
 
-export default function App() {
+export default function FeaturesPage() {
 
     return (
         <GuestLayout>

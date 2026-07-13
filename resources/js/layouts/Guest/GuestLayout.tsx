@@ -129,9 +129,9 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                             Help Center
                         </a>
 
-                        <a href="#" className="hover:text-purple-600">
+                        <Link href={route('contact-sales')} className="hover:text-purple-600">
                             Contact Sales
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </footer>

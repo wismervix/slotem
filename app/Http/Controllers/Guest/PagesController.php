@@ -19,9 +19,9 @@ class PagesController extends Controller
     {
         return Inertia::render('Guest/Services');
     }
-    public function howItWorks()
+    public function contactSales()
     {
-        return Inertia::render('Guest/HowItWorks');
+        return Inertia::render('Guest/ContactSales');
     }
     public function contactUs()
     {
