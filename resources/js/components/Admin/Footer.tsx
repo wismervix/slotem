@@ -1,7 +1,9 @@
+import { Link } from '@inertiajs/react';
+
 export default function Footer() {
     return (
         <footer className="dark:border-zinc-850 mt-16 flex w-full shrink-0 flex-col items-center justify-between gap-4 border-t border-purple-100 pt-8 pb-4 md:flex-row">
-            <div className="mb-6 md:mb-0">
+            <Link href={route('home')} className="mb-6 md:mb-0">
                 <span className="text-xl font-extrabold tracking-tight text-purple-700 dark:text-purple-400">
                     Slotem
                 </span>
@@ -10,7 +12,7 @@ export default function Footer() {
                     © {new Date().getFullYear()} Slotem Booking Systems. All
                     rights reserved.
                 </p>
-            </div>
+            </Link>
 
             <div className="flex gap-8">
                 {[
@@ -22,7 +24,7 @@ export default function Footer() {
                     <a
                         key={link}
                         href="#"
-                        className="text-[11px] font-semibold text-on-surface-variant dark:text-on-surface-variant-dark transition-colors hover:text-primary"
+                        className="text-[11px] font-semibold text-on-surface-variant transition-colors hover:text-primary dark:text-on-surface-variant-dark"
                     >
                         {link}
                     </a>

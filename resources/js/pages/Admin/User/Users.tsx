@@ -23,6 +23,8 @@ import { Link, useForm } from '@inertiajs/react';
 
 // ─── Layouts & Components ───────────────────────────────────────────────
 import AdminLayout from '@/layouts/Admin/AdminLayout';
+import { useConfirmation } from '@/hooks/useConfirmation';
+import ConfirmationModal from '@/components/Shared/ConfirmationModal';
 
 // ─── Types & Utilities ───────────────────────────────────────────────
 import { User, UserStatus } from '@/types';
@@ -43,6 +45,9 @@ interface AdminUsersProps {
 // ─── Component ───────────────────────────────────────────────────────
 export default function AdminUsers({ users, flash }: AdminUsersProps) {
     // ─── 1. STATE ──────────────────────────────────────────────────
+
+    // Use the confirmation hook
+    const confirmation = useConfirmation();
 
     // 📋 Table Filters & Sorting
     const [searchQuery, setSearchQuery] = useState<string>('');
@@ -231,17 +236,9 @@ export default function AdminUsers({ users, flash }: AdminUsersProps) {
         });
     };
 
-    // 🔄 Toggle user status (Active ↔ Suspended)
-    const handleToggleStatus = (user: User) => {
-        const nextStatus = user.status === 'active' ? 'suspended' : 'active';
-        const verb = nextStatus === 'suspended' ? 'suspend' : 'reactivate';
-
-        if (!confirm(`Are you sure you want to ${verb} ${user.name}?`)) {
-            return;
-        }
-
+    const performToggleStatus = (userId: number, nextStatus: string) => {
         inertiaRouter.patch(
-            route('admin.users.status', user.id),
+            route('admin.users.status', userId),
             { status: nextStatus },
             {
                 preserveScroll: true,
@@ -252,21 +249,45 @@ export default function AdminUsers({ users, flash }: AdminUsersProps) {
         );
     };
 
+    // 🔄 Toggle user status (Active ↔ Suspended)
+    const handleToggleStatus = (user: User) => {
+        if (!user) return;
+
+        const nextStatus = user.status === 'active' ? 'suspended' : 'active';
+        const verb = nextStatus === 'suspended' ? 'suspend' : 'reactivate';
+
+        // Use the confirmation hook instead of setConfirmState
+        confirmation.confirm({
+            title: `Are you sure you want to ${verb} ${user.name}?`,
+            message: `Are you absolutely sure you want to ${verb} ${user.name}? This cannot be undone.`,
+            confirmLabel: `${verb.charAt(0).toUpperCase() + verb.slice(1)} User`,
+            variant: 'danger',
+            onConfirm: () => performToggleStatus(user.id, nextStatus),
+        });
+    };
+
     // 🗑️ Delete user
-    const handleDeleteUser = (userId: number) => {
-        if (
-            confirm(
-                'Are you absolutely sure you want to delete this client? All history will be archived.',
-            )
-        ) {
-            inertiaRouter.delete(route('admin.users.destroy', userId), {
-                preserveScroll: true,
-                onSuccess: () => {
-                    setEditingUser(null);
-                    setViewingUser(null);
-                },
-            });
-        }
+    const performDeleteUser = (userId: number) => {
+        inertiaRouter.delete(route('admin.users.destroy', userId), {
+            preserveScroll: true,
+            onSuccess: () => {
+                setEditingUser(null);
+                setViewingUser(null);
+            },
+        });
+    };
+    const handleDeleteUser = (user: User) => {
+        if (!user) return;
+
+        // Use the confirmation hook instead of setConfirmState
+        confirmation.confirm({
+            title: 'Are you sure you want to delete this user?',
+            message: `Are you absolutely sure you want to delete this client? All history will be archived. 
+                 Closing this day will remove all of  ${user.name}'s data. This cannot be undone.`,
+            confirmLabel: 'Delete User',
+            variant: 'danger',
+            onConfirm: () => performDeleteUser(user.id),
+        });
     };
 
     // ─── 5. HELPER FUNCTIONS ──────────────────────────────────────
@@ -1150,7 +1171,8 @@ export default function AdminUsers({ users, flash }: AdminUsersProps) {
                                             onChange={(e) =>
                                                 setData(
                                                     'status',
-                                                    e.target.value as UserStatus,
+                                                    e.target
+                                                        .value as UserStatus,
                                                 )
                                             }
                                             className="w-full rounded-lg border border-outline-variant px-3 py-2 text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500"
@@ -1182,15 +1204,7 @@ export default function AdminUsers({ users, flash }: AdminUsersProps) {
                                         type="button"
                                         disabled={processing}
                                         onClick={() => {
-                                            if (
-                                                confirm(
-                                                    `Are you absolutely sure you want to delete client ${editingUser.name}? All history will be archived.`,
-                                                )
-                                            ) {
-                                                handleDeleteUser(
-                                                    editingUser.id,
-                                                );
-                                            }
+                                            handleDeleteUser(editingUser);
                                         }}
                                         className="cursor-pointer rounded-lg border border-red-200 px-3.5 py-2 text-xs font-bold text-red-600 transition-all hover:bg-red-50 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-950/30"
                                     >
@@ -1234,6 +1248,18 @@ export default function AdminUsers({ users, flash }: AdminUsersProps) {
                         </form>
                     </div>
                 )}
+
+                <ConfirmationModal
+                    isOpen={confirmation.isOpen}
+                    onClose={confirmation.close}
+                    onConfirm={confirmation.handleConfirm}
+                    title={confirmation.options?.title || ''}
+                    message={confirmation.options?.message || ''}
+                    confirmLabel={confirmation.options?.confirmLabel}
+                    cancelLabel={confirmation.options?.cancelLabel}
+                    variant={confirmation.options?.variant}
+                    isLoading={confirmation.isLoading}
+                />
             </div>
         </AdminLayout>
     );

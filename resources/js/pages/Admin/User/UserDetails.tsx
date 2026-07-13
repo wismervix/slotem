@@ -30,6 +30,7 @@ import { Booking, User, Notification } from '@/types';
 import AdminLayout from '@/layouts/Admin/AdminLayout';
 import { formatDateAndTime, formatTime } from '@/lib/calendar-utils';
 import { serviceIcons } from '@/lib/service-icons';
+import { Link } from '@inertiajs/react';
 
 interface UserDetailsProps {
     user: User;
@@ -110,7 +111,7 @@ export default function DashboardView({
         }
     };
 
-    console.log('User Prop: ', user);
+    // console.log('User Prop: ', user);
     // console.log('Notifications Prop: ', notifications);
 
     return (
@@ -286,15 +287,13 @@ export default function DashboardView({
                                 <h3 className="text-base font-semibold text-primary dark:text-white">
                                     Booking History
                                 </h3>
-                                <button
-                                    onClick={() =>
-                                        console.log('Go to bookings page')
-                                    }
+                                <Link
+                                    href={route('admin.bookings')}
                                     className="flex cursor-pointer items-center gap-1 text-xs font-semibold text-primary transition-colors hover:underline dark:text-purple-400"
                                 >
                                     <span>View All</span>
                                     <ArrowRight className="h-3.5 w-3.5" />
-                                </button>
+                                </Link>
                             </div>
 
                             <div className="overflow-x-auto">

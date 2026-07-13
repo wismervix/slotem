@@ -1,8 +1,10 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { Mail, Share2, Globe, MessageSquare } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export default function ContactUs() {
+    const { auth } = usePage().props as any;
+
     const containerVariants = {
         hidden: { opacity: 0 },
         visible: {
@@ -19,7 +21,7 @@ export default function ContactUs() {
     };
 
     return (
-        <div className="selection:bg-primary/30 flex min-h-screen flex-col">
+        <div className="flex min-h-screen flex-col selection:bg-primary/30">
             {/* Background with Overlay */}
             <div
                 className="fixed inset-0 z-[-1] bg-cover bg-center bg-no-repeat"
@@ -27,7 +29,7 @@ export default function ContactUs() {
                     backgroundImage: `url('https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=2000')`,
                 }}
             >
-                <div className="bg-primary/20 absolute inset-0 backdrop-blur-[2px] backdrop-brightness-75" />
+                <div className="absolute inset-0 bg-primary/20 backdrop-blur-[2px] backdrop-brightness-75" />
             </div>
 
             {/* Header */}
@@ -62,21 +64,52 @@ export default function ContactUs() {
                             Contact Us
                         </Link>
 
-                        <Link
-                            href={route('admin.dashboard')}
-                            className="text-sm font-medium text-white/70 transition-colors hover:text-white"
-                        >
-                            Admin
-                        </Link>
+                        {auth?.admin ? (
+                            <Link
+                                href={route('admin.dashboard')}
+                                className="text-sm font-medium text-white/70 transition-colors hover:text-white"
+                            >
+                                View Admin Dashboard
+                            </Link>
+                        ) : (
+                            <Link
+                                href={route('admin.login')}
+                                className="text-sm font-medium text-white/70 transition-colors hover:text-white"
+                            >
+                                Admin
+                            </Link>
+                        )}
                     </div>
 
                     <div className="flex items-center space-x-4">
-                        <Link
-                            href={route('user.login')}
-                            className="px-4 py-2 text-sm font-medium text-white/70 transition-colors hover:text-white"
-                        >
-                            Login
-                        </Link>
+                        {auth.user ? (
+                            <>
+                                <Link href={route('user.dashboard')}>
+                                    <div className="flex h-14 w-14 items-center justify-center rounded-full border border-primary/20 bg-primary-fixed text-2xl font-extrabold text-primary">
+                                        {auth.user.name ? (
+                                            <img
+                                                alt="Profile Avatar"
+                                                src={auth.user.avatar_url}
+                                                title={`Hi, ${auth.user.name}`}
+                                                className="h-full w-full rounded-full object-cover"
+                                            />
+                                        ) : (
+                                            auth.user.name
+                                                .charAt(0)
+                                                .toUpperCase()
+                                        )}
+                                    </div>
+                                    {/* View Bookings */}
+                                </Link>
+                            </>
+                        ) : (
+                            <Link
+                                href={route('user.login')}
+                                className="px-4 py-2 text-sm font-medium text-white/70 transition-colors hover:text-white"
+                            >
+                                Login
+                            </Link>
+                        )}
 
                         <Link
                             href={route('services')}
@@ -99,7 +132,7 @@ export default function ContactUs() {
                     {/* Hero Section */}
                     <div className="mb-16 text-center">
                         <motion.h1
-                            className="font-heading mb-4 text-6xl tracking-widest text-white drop-shadow-2xl md:text-8xl"
+                            className="mb-4 font-heading text-6xl tracking-widest text-white drop-shadow-2xl md:text-8xl"
                             variants={itemVariants}
                         >
                             CONNECT WITH SLOTEM
@@ -119,7 +152,7 @@ export default function ContactUs() {
                             variants={itemVariants}
                         >
                             {/* Decorative background shadow/blur */}
-                            <div className="from-primary/30 absolute -inset-1 bg-gradient-to-r to-purple-500/30 opacity-50 blur-2xl transition duration-1000 group-hover:opacity-100" />
+                            <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 to-purple-500/30 opacity-50 blur-2xl transition duration-1000 group-hover:opacity-100" />
 
                             <div className="relative overflow-hidden rounded-3xl border border-white/20 bg-white/10 p-8 shadow-2xl backdrop-blur-2xl md:p-12">
                                 <form
@@ -131,14 +164,14 @@ export default function ContactUs() {
                                             <input
                                                 type="text"
                                                 placeholder="Your Name"
-                                                className="focus:border-primary-container w-full border-b border-white/20 bg-white/5 p-4 text-white outline-none transition-all placeholder:text-white/40 focus:bg-white/10"
+                                                className="w-full border-b border-white/20 bg-white/5 p-4 text-white transition-all outline-none placeholder:text-white/40 focus:border-primary-container focus:bg-white/10"
                                             />
                                         </div>
                                         <div className="space-y-1">
                                             <input
                                                 type="email"
                                                 placeholder="Email Address"
-                                                className="focus:border-primary-container w-full border-b border-white/20 bg-white/5 p-4 text-white outline-none transition-all placeholder:text-white/40 focus:bg-white/10"
+                                                className="w-full border-b border-white/20 bg-white/5 p-4 text-white transition-all outline-none placeholder:text-white/40 focus:border-primary-container focus:bg-white/10"
                                             />
                                         </div>
                                     </div>
@@ -146,16 +179,16 @@ export default function ContactUs() {
                                     <input
                                         type="text"
                                         placeholder="Subject"
-                                        className="focus:border-primary-container w-full border-b border-white/20 bg-white/5 p-4 text-white outline-none transition-all placeholder:text-white/40 focus:bg-white/10"
+                                        className="w-full border-b border-white/20 bg-white/5 p-4 text-white transition-all outline-none placeholder:text-white/40 focus:border-primary-container focus:bg-white/10"
                                     />
 
                                     <textarea
                                         placeholder="Message"
                                         rows={4}
-                                        className="focus:border-primary-container w-full resize-none border-b border-white/20 bg-white/5 p-4 text-white outline-none transition-all placeholder:text-white/40 focus:bg-white/10"
+                                        className="w-full resize-none border-b border-white/20 bg-white/5 p-4 text-white transition-all outline-none placeholder:text-white/40 focus:border-primary-container focus:bg-white/10"
                                     />
 
-                                    <button className="bg-primary-container font-heading hover:bg-primary shadow-primary/30 w-full rounded-xl py-4 text-3xl tracking-widest text-white shadow-xl transition-all active:scale-[0.98]">
+                                    <button className="w-full rounded-xl bg-primary-container py-4 font-heading text-3xl tracking-widest text-white shadow-xl shadow-primary/30 transition-all hover:bg-primary active:scale-[0.98]">
                                         SEND INQUIRY
                                     </button>
                                 </form>
@@ -169,11 +202,11 @@ export default function ContactUs() {
                         >
                             {/* Direct Card */}
                             <div className="rounded-3xl border border-white/10 bg-white/10 p-8 backdrop-blur-xl transition-all hover:bg-white/15">
-                                <h3 className="font-heading mb-6 text-3xl tracking-wider text-white">
+                                <h3 className="mb-6 font-heading text-3xl tracking-wider text-white">
                                     DIRECT
                                 </h3>
                                 <div className="group flex cursor-pointer items-center gap-4 text-white/80 transition-colors hover:text-white">
-                                    <div className="group-hover:bg-primary/20 rounded-full bg-white/5 p-3 transition-all">
+                                    <div className="rounded-full bg-white/5 p-3 transition-all group-hover:bg-primary/20">
                                         <Mail className="h-5 w-5" />
                                     </div>
                                     <span className="text-lg">
@@ -183,18 +216,18 @@ export default function ContactUs() {
                             </div>
 
                             {/* Social Card */}
-                            <div className="bg-primary-container/10 hover:bg-primary-container/20 rounded-3xl border border-white/10 p-8 backdrop-blur-xl transition-all">
-                                <h3 className="font-heading mb-6 text-3xl tracking-wider text-white">
+                            <div className="rounded-3xl border border-white/10 bg-primary-container/10 p-8 backdrop-blur-xl transition-all hover:bg-primary-container/20">
+                                <h3 className="mb-6 font-heading text-3xl tracking-wider text-white">
                                     SOCIAL
                                 </h3>
                                 <div className="flex gap-6">
-                                    <button className="hover:text-primary rounded-full bg-white/5 p-4 text-white/70 transition-all hover:bg-white/10">
+                                    <button className="rounded-full bg-white/5 p-4 text-white/70 transition-all hover:bg-white/10 hover:text-primary">
                                         <Share2 className="h-6 w-6" />
                                     </button>
-                                    <button className="hover:text-primary rounded-full bg-white/5 p-4 text-white/70 transition-all hover:bg-white/10">
+                                    <button className="rounded-full bg-white/5 p-4 text-white/70 transition-all hover:bg-white/10 hover:text-primary">
                                         <Globe className="h-6 w-6" />
                                     </button>
-                                    <button className="hover:text-primary rounded-full bg-white/5 p-4 text-white/70 transition-all hover:bg-white/10">
+                                    <button className="rounded-full bg-white/5 p-4 text-white/70 transition-all hover:bg-white/10 hover:text-primary">
                                         <MessageSquare className="h-6 w-6" />
                                     </button>
                                 </div>
@@ -207,14 +240,14 @@ export default function ContactUs() {
             {/* Footer */}
             <footer className="border-t border-white/10 bg-black/40 px-6 py-12 backdrop-blur-lg">
                 <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-8 md:flex-row">
-                    <div>
+                    <Link href={route('home')} className="cursor-pointer">
                         <div className="mb-2 text-xl font-bold text-white">
                             Slotem
                         </div>
                         <p className="text-sm text-white/50">
                             © 2024 Slotem Booking Systems. All rights reserved.
                         </p>
-                    </div>
+                    </Link>
 
                     <div className="flex flex-wrap justify-center gap-8">
                         <a

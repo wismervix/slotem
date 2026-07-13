@@ -78,6 +78,13 @@
     --color-on-error: #ffffff;
     --color-on-error-container: #93000a;
 
+    --color-brand-dark: #1d1a24;
+    --color-brand-gray: #4a4455;
+    --color-brand-sec-bg: #dae2fd;
+    --color-brand-container: #f3ebfa;
+    --color-brand-container-low: #f9f1ff;
+
+    --color-brand-purple: #732ee4;
     --color-brand-primary: #630ed4;
     --color-brand-primary-light: #7c3aed;
     --color-brand-primary-container: #7c3aed;
@@ -91,6 +98,7 @@
     --color-brand-on-tertiary-container: #ffe0cd;
 
     --color-brand-bg: #fef7ff;
+    --color-brand-background: #fef7ff;
     --color-brand-surface: #ffffff;
     --color-brand-surface-container: #f3ebfa;
     --color-brand-surface-container-high: #ede5f4;
@@ -105,11 +113,11 @@
     --color-brand-muted: #565e74;
 
     --color-brand-outline: #7b7487;
+    --color-brand-outline: #ccc3d8;
     --color-brand-outline-variant: #ccc3d8;
 
     --color-brand-error: #ba1a1a;
 
-    --color-brand-background: #fef7ff;
 
     --radius-xl: 0.5rem;
     --radius-2xl: 1rem;
@@ -120,6 +128,42 @@
     /* --color-tertiary-container: #ffdfcb;
   --color-on-tertiary-container: #713700; */
 }
+
+/* Material Symbols Styling */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.material-symbols-filled {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
 
 @layer base {
     body {
@@ -224,3 +268,31 @@ body {
         opacity: 1;
     }
 }
+
+/* Glass Card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(204, 195, 216, 0.4);
+}
+
+/* Custom Animations */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(99, 14, 212, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 8px rgba(99, 14, 212, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(99, 14, 212, 0);
+  }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+

@@ -8,7 +8,7 @@ import {
     Settings as SettingsIcon,
     ChevronDown,
     ChevronRight,
-    Plus,
+    SquareArrowOutUpRight,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useState } from 'react';
@@ -258,11 +258,11 @@ export default function Sidebar({
                 {/* New Booking CTA */}
                 <div className="mt-auto border-t border-purple-100 pt-4 dark:border-zinc-800">
                     <Link
-                        href={route('services')}
+                        href={route('home')}
                         className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-purple-600 px-4 py-3 font-semibold text-white transition-all hover:bg-purple-700 hover:shadow-lg hover:shadow-purple-500/20 active:scale-[0.98]"
                     >
-                        <Plus size={20} />
-                        New Booking
+                        <SquareArrowOutUpRight size={20} />
+                        Go To Website
                     </Link>
                 </div>
             </aside>

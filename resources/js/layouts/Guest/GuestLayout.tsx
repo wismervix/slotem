@@ -19,10 +19,11 @@ export default function GuestLayout({ children }: PropsWithChildren) {
 
                     <div className="hidden items-center gap-8 md:flex">
                         <a
-                            href="/#how-it-works"
+                            // href="/#how-it-works"
+                            href={route('features')}
                             className="font-medium text-slate-600 transition hover:text-purple-600 dark:text-slate-300"
                         >
-                            How It Works
+                            Features
                         </a>
 
                         <Link
@@ -40,12 +41,12 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                         </Link>
 
                         {auth?.admin ? (
-                                <Link
-                                    href={route('admin.dashboard')}
-                                    className="text-slate-600 transition hover:text-purple-600 dark:text-slate-300"
-                                >
-                                    View Admin Dashboard
-                                </Link>
+                            <Link
+                                href={route('admin.dashboard')}
+                                className="text-slate-600 transition hover:text-purple-600 dark:text-slate-300"
+                            >
+                                View Admin Dashboard
+                            </Link>
                         ) : (
                             <Link
                                 href={route('admin.login')}
@@ -105,7 +106,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
             {/* Footer */}
             <footer className="border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
                 <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-8 px-6 py-10 md:flex-row">
-                    <div>
+                    <Link href={route('home')}>
                         <h3 className="text-2xl font-bold text-purple-600">
                             Slotem
                         </h3>
@@ -113,7 +114,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                         <p className="mt-2 text-sm text-slate-500">
                             © 2026 Slotem Booking Systems. All rights reserved.
                         </p>
-                    </div>
+                    </Link>
 
                     <div className="flex flex-wrap justify-center gap-6 text-sm text-slate-500">
                         <a href="#" className="hover:text-purple-600">

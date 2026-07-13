@@ -34,7 +34,7 @@ class DashboardController extends Controller
     {
         $admin = auth('admin')->user();
 
-        return inertia('Admin/Settings', [
+        return inertia('Admin/Settings/Settings', [
             'admin' => [
                 'id' => $admin->id,
                 'name' => $admin->name,
@@ -123,7 +123,7 @@ class DashboardController extends Controller
             ]);
         }
 
-        return inertia('Admin/WebsiteSettings', [
+        return inertia('Admin/Settings/WebsiteSettings', [
             'settings' => $settings,
         ]);
     }

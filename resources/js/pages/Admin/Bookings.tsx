@@ -61,11 +61,23 @@ export default function AdminBookingIndex({ bookings }: BookingsProps) {
         }
     }, [flash]);
 
+    // Toast helper
+    const triggerToast = (msg: string) => {
+        setToastMessage(msg);
+        setShowToast(true);
+    };
+
+    useEffect(() => {
+        if (showToast) {
+            const timer = setTimeout(() => setShowToast(false), 4000);
+            return () => clearTimeout(timer);
+        }
+    }, [showToast]);
+
     // Modal states
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(
         null,
     );
-    const [actionModalOpen, setActionModalOpen] = useState(false);
     const [actionType, setActionType] = useState<BookingStatus | null>(null);
     const [notes, setNotes] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
@@ -171,6 +183,22 @@ export default function AdminBookingIndex({ bookings }: BookingsProps) {
             console.error('Error executing action:', error);
             setIsProcessing(false);
         }
+    };
+
+    //Handle Export Rules
+
+    const handleExportRules = () => {
+        const dataStr =
+            'data:text/json;charset=utf-8,' +
+            encodeURIComponent(JSON.stringify(bookings, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute('href', dataStr);
+        downloadAnchor.setAttribute('download', 'bookings.json');
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+
+        triggerToast('Bookings exported!');
     };
 
     // Get status badge color
@@ -319,10 +347,14 @@ export default function AdminBookingIndex({ bookings }: BookingsProps) {
                         Review and manage upcoming client appointments.
                     </p>
                 </div>
-                <div className="flex cursor-pointer items-center gap-2 rounded-full border border-purple-100 bg-purple-50 px-4 py-2 transition-colors select-none hover:bg-purple-100/50 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-900/50">
+                <div className="flex items-center gap-2 rounded-full border border-purple-100 bg-purple-50 px-4 py-2 transition-colors select-none hover:bg-purple-100/50 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-900/50">
                     <Calendar className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                    <span className="text-[11px] leading-none font-bold tracking-widest text-purple-900 uppercase dark:text-purple-300">
-                        October 24, 2024
+                    <span className="text-[11px] leading-none pt-1 font-bold tracking-widest text-purple-900 uppercase dark:text-purple-300">
+                        {new Date().toLocaleDateString('en-US', {
+                            month: 'long',
+                            day: 'numeric',
+                            year: 'numeric',
+                        })}
                     </span>
                 </div>
             </header>
@@ -761,7 +793,8 @@ export default function AdminBookingIndex({ bookings }: BookingsProps) {
                         </p>
                     </div>
                     <button
-                        onClick={() => console.log('Export ts!')}
+                        onClick={handleExportRules}
+                        // onClick={() => console.log('Export ts!')}
                         id="btn-export-csv"
                         className="ml-auto cursor-pointer rounded-xl border border-on-secondary-container px-5 py-2.5 text-xs font-bold text-on-secondary-container transition-all hover:bg-on-secondary-container hover:text-white active:scale-95 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
                     >
@@ -823,8 +856,8 @@ export default function AdminBookingIndex({ bookings }: BookingsProps) {
 
                             <div className="mt-6 flex flex-col gap-2">
                                 <button
-                                    onClick={confirmAndExecuteAction}
                                     disabled={isProcessing}
+                                    onClick={confirmAndExecuteAction}
                                     className="w-full cursor-pointer rounded-xl bg-primary py-3 text-sm font-semibold text-on-primary shadow-md shadow-primary/20 transition-all hover:bg-primary-container disabled:opacity-50 dark:bg-purple-600 dark:shadow-purple-600/20 dark:hover:bg-purple-700"
                                 >
                                     {isProcessing
@@ -832,6 +865,7 @@ export default function AdminBookingIndex({ bookings }: BookingsProps) {
                                         : 'Confirm Action'}
                                 </button>
                                 <button
+                                    disabled={isProcessing}
                                     onClick={() => setConfirmModal(false)}
                                     className="w-full cursor-pointer rounded-xl py-3 text-sm font-semibold text-on-surface-variant transition-all hover:bg-surface-container dark:text-slate-400 dark:hover:bg-slate-800"
                                 >

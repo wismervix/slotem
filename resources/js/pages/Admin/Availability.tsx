@@ -11,6 +11,9 @@ import {
 } from 'lucide-react';
 import { useEffect, useState, FormEvent, useMemo } from 'react';
 
+import { useConfirmation } from '@/hooks/useConfirmation';
+import ConfirmationModal from '@/components/Shared/ConfirmationModal';
+
 import type { Availability, TimeSlot } from '@/types';
 import { usePage } from '@inertiajs/react';
 import {
@@ -27,6 +30,10 @@ export default function AdminAvailability() {
     // ============================================
     // STATE MANAGEMENT
     // ============================================
+
+    // Use the confirmation hook
+    const confirmation = useConfirmation();
+
     const today = new Date();
     const days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
     const [currentMonth, setCurrentMonth] = useState(today.getMonth());
@@ -172,7 +179,8 @@ export default function AdminAvailability() {
 
     const isClosed = !selectedAvailability;
 
-    const handleCloseDay = () => {
+    // Actual close-day logic, now only invoked after confirmation.
+    const performCloseDay = () => {
         inertiaRouter.delete(
             route('admin.availability.destroy', selectedAvailability?.id),
             {
@@ -183,6 +191,29 @@ export default function AdminAvailability() {
                 },
             },
         );
+    };
+
+    const handleCloseDay = () => {
+        if (!selectedAvailability) return;
+
+        const bookedCount = selectedAvailability.time_slots.filter(
+            (s) => s.is_booked,
+        ).length;
+
+        confirmation.confirm({
+            title: 'Mark day as closed?',
+            message:
+                bookedCount > 0
+                    ? `${formatDateLabel(selectedDateStr)} has ${bookedCount} booked slot${
+                          bookedCount === 1 ? '' : 's'
+                      }. Closing this day will remove all of its time slots. This cannot be undone.`
+                    : `This will remove all time slots for ${formatDateLabel(
+                          selectedDateStr,
+                      )} and mark it as closed. This cannot be undone.`,
+            confirmLabel: 'Mark Closed',
+            variant: 'danger',
+            onConfirm: performCloseDay,
+        });
     };
 
     const handleReopenDay = (dateStr: string) => {
@@ -198,9 +229,27 @@ export default function AdminAvailability() {
     // ============================================
     // TIME SLOT OPERATIONS
     // ============================================
-    const handleDeleteTimeSlot = (slotId: number) => {
+    const performDeleteTimeSlot = (slotId: number) => {
         inertiaRouter.delete(route('admin.time-slots.destroy', slotId));
+
+        triggerToast('Slot deleted');
     };
+
+    const handleDeleteTimeSlot = (slot: TimeSlot) => {
+        if (slot.is_booked) return;
+
+        confirmation.confirm({
+            title: 'Delete this time slot?',
+            message: `This will permanently delete the ${slot.start_time} – ${slot.end_time} slot. This cannot be undone.`,
+            confirmLabel: 'Delete Slot',
+            variant: 'danger',
+            onConfirm: () => performDeleteTimeSlot(slot.id),
+        });
+    };
+
+    // const handleDeleteTimeSlot = (slotId: number) => {
+    //     inertiaRouter.delete(route('admin.time-slots.destroy', slotId));
+    // };
 
     const handleCopyToDate = () => {
         inertiaRouter.post(route('admin.availability.copy-schedule'), {
@@ -273,9 +322,7 @@ export default function AdminAvailability() {
     // ============================================
     // FORM SUBMISSION
     // ============================================
-    const handleSubmitBulkForm = (e: FormEvent) => {
-        e.preventDefault();
-
+    const performSubmitBulkForm = () => {
         inertiaRouter.post(route('admin.time-slots.bulk-create'), {
             start_date: formDateStart,
             end_date: formDateEnd,
@@ -287,6 +334,39 @@ export default function AdminAvailability() {
 
         triggerToast('Time slots created successfully!');
     };
+
+    const handleSubmitBulkForm = (e: FormEvent) => {
+        e.preventDefault();
+
+        // Bulk creation can touch many days at once (and silently overwrite
+        // existing slots depending on backend behavior), so confirm first.
+        confirmation.confirm({
+            title: 'Create time slots in bulk?',
+            message: `This will create time slots from ${formatDateLabel(
+                formDateStart,
+            )} to ${formatDateLabel(
+                formDateEnd,
+            )} (${formTimeStart}–${formTimeEnd}), skipping any closed dates or weekdays you've excluded.`,
+            confirmLabel: 'Create Slots',
+            variant: 'warning',
+            onConfirm: performSubmitBulkForm,
+        });
+    };
+
+    // const handleSubmitBulkForm = (e: FormEvent) => {
+    //     e.preventDefault();
+
+    //     inertiaRouter.post(route('admin.time-slots.bulk-create'), {
+    //         start_date: formDateStart,
+    //         end_date: formDateEnd,
+    //         start_time: formTimeStart,
+    //         end_time: formTimeEnd,
+    //         closed_dates: formClosedDates,
+    //         closed_weekdays: formClosedWeekdays,
+    //     });
+
+    //     triggerToast('Time slots created successfully!');
+    // };
 
     const handleSaveAll = () => {
         setIsSaving(true);
@@ -631,9 +711,7 @@ export default function AdminAvailability() {
                                             <button
                                                 onClick={() => {
                                                     if (slot.is_booked) return;
-                                                    handleDeleteTimeSlot(
-                                                        slot.id,
-                                                    );
+                                                    handleDeleteTimeSlot(slot);
                                                 }}
                                                 className={` ${
                                                     slot.is_booked
@@ -1097,6 +1175,19 @@ export default function AdminAvailability() {
                     </div>
                 </div>
             )}
+
+            {/* Generic confirmation modal for destructive / high-impact actions */}
+            <ConfirmationModal
+                isOpen={confirmation.isOpen}
+                onClose={confirmation.close}
+                onConfirm={confirmation.handleConfirm}
+                title={confirmation.options?.title || ''}
+                message={confirmation.options?.message || ''}
+                confirmLabel={confirmation.options?.confirmLabel}
+                cancelLabel={confirmation.options?.cancelLabel}
+                variant={confirmation.options?.variant}
+                isLoading={confirmation.isLoading}
+            />
 
             {/* Toast notification */}
             {isToastVisible && (

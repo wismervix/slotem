@@ -559,7 +559,7 @@ export default function AdminSettings() {
                             <div className="flex justify-end">
                                 <button
                                     onClick={() => setActiveInfoModal(null)}
-                                    className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700"
+                                    className="rounded-xl cursor-pointer bg-slate-900 px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700"
                                 >
                                     Done
                                 </button>

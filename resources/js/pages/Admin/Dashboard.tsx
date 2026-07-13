@@ -1,6 +1,6 @@
 import AdminLayout from '@/layouts/Admin/AdminLayout';
 import React, { useMemo, useState } from 'react';
-
+// import type { Html2PdfOptions } from 'html2pdf.js';
 import {
     TrendingUp,
     BookOpen,
@@ -11,6 +11,8 @@ import {
     Activity,
     ArrowUpRight,
     UserCheck,
+    AlertTriangle,
+    Download,
 } from 'lucide-react';
 import {
     BarChart,
@@ -25,6 +27,7 @@ import {
     Cell,
     Legend,
 } from 'recharts';
+import { motion, AnimatePresence } from 'motion/react';
 import { Service, Booking, BookingStatus } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { formatTime } from '@/lib/calendar-utils';
@@ -42,13 +45,126 @@ interface Toast {
 export default function AdminDashboard({ bookings }: AdminDashboardProps) {
     const { services } = usePage<{ services: Service[] }>().props;
 
-    // 2. Global Event Handlers for Bookings state
-    const handleApproveBooking = (id: string) => {
-        console.log('Handle Approve Booking!');
+    // Modal states
+    const [selectedBooking, setSelectedBooking] = useState<Booking | null>(
+        null,
+    );
+    const [notes, setNotes] = useState('');
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
+
+    // Confirmation modal
+    const [confirmModal, setConfirmModal] = useState(false);
+    const [confirmAction, setConfirmAction] = useState<{
+        booking: Booking;
+        action: BookingStatus;
+    } | null>(null);
+
+    // Handle action button clicks
+    const handleActionClick = (booking: Booking, action: BookingStatus) => {
+        setSelectedBooking(booking);
+        setConfirmAction({ booking, action });
+        setConfirmModal(true);
     };
 
-    const handleCompleteBooking = (id: string) => {
-        console.log('Handle Complete Booking!');
+    // Confirm and execute action
+    const confirmAndExecuteAction = async () => {
+        if (!confirmAction) return;
+
+        setIsProcessing(true);
+        const { booking, action } = confirmAction;
+
+        try {
+            const actionRoutes: Record<string, string> = {
+                approved: `admin.bookings.approve`,
+                rejected: `admin.bookings.reject`,
+                completed: `admin.bookings.complete`,
+                cancelled: `admin.bookings.cancel`,
+                pending: `admin.bookings.restore`, // For restoring rejected bookings
+            };
+
+            const routeName = actionRoutes[action];
+
+            if (action === 'pending') {
+                // Restore action
+                inertiaRouter.put(
+                    route(routeName, booking.id),
+                    {},
+                    {
+                        preserveScroll: true,
+                        onSuccess: () => {
+                            setConfirmModal(false);
+                            setConfirmAction(null);
+                            setSelectedBooking(null);
+                            setNotes('');
+                        },
+                        onError: (errors) => {
+                            console.error('Action failed:', errors);
+                        },
+                        onFinish: () => {
+                            setIsProcessing(false);
+                        },
+                    },
+                );
+            } else if (action === 'completed') {
+                // Complete action with optional notes
+                inertiaRouter.put(
+                    route(routeName, booking.id),
+                    { notes },
+                    {
+                        preserveScroll: true,
+                        onSuccess: () => {
+                            setConfirmModal(false);
+                            setConfirmAction(null);
+                            setSelectedBooking(null);
+                            setNotes('');
+                        },
+                        onError: (errors) => {
+                            console.error('Action failed:', errors);
+                        },
+                        onFinish: () => {
+                            setIsProcessing(false);
+                        },
+                    },
+                );
+            } else {
+                // Approve, Reject, Cancel actions
+                inertiaRouter.put(
+                    route(routeName, booking.id),
+                    {},
+                    {
+                        preserveScroll: true,
+                        onSuccess: () => {
+                            setConfirmModal(false);
+                            setConfirmAction(null);
+                            setSelectedBooking(null);
+                            setNotes('');
+                        },
+                        onError: (errors) => {
+                            console.error('Action failed:', errors);
+                        },
+                        onFinish: () => {
+                            setIsProcessing(false);
+                        },
+                    },
+                );
+            }
+        } catch (error) {
+            console.error('Error executing action:', error);
+            setIsProcessing(false);
+        }
+    };
+
+    // Get action button label
+    const getActionLabel = (action: BookingStatus): string => {
+        const labels: Record<BookingStatus, string> = {
+            approved: 'Approve this booking?',
+            rejected: 'Reject this booking?',
+            completed: 'Mark as completed?',
+            cancelled: 'Cancel this booking?',
+            pending: 'Restore to pending?',
+        };
+        return labels[action] || 'Confirm action?';
     };
 
     const handleUpdateBookingStatus = (id: number, status: BookingStatus) => {
@@ -63,7 +179,8 @@ export default function AdminDashboard({ bookings }: AdminDashboardProps) {
     const cancelledBookings = bookings.filter((a) => a.status === 'cancelled');
 
     // completion rate math
-    let completionRate;
+    // let completionRate: number;
+    let completionRate = 0;
     if (bookings.length > 0) {
         completionRate = Math.round(
             (completedBookings.length /
@@ -149,6 +266,141 @@ export default function AdminDashboard({ bookings }: AdminDashboardProps) {
         rejected: 'bg-rose-500',
     };
 
+
+    // PDF Export Handler
+    const handleExportPDF = async () => {
+        setIsExporting(true);
+        try {
+            // Dynamically import html2pdf
+            const html2pdf = (await import('html2pdf.js')).default;
+
+            // Create a temporary container with the content
+            const element = document.createElement('div');
+            element.style.padding = '20px';
+            element.style.backgroundColor = '#ffffff';
+            element.style.fontFamily = 'Arial, sans-serif';
+
+            // Title
+            element.innerHTML = `
+                <h1 style="font-size: 28px; font-weight: bold; margin-bottom: 20px; color: #1f2937;">Dashboard Analytics Report</h1>
+                <p style="font-size: 12px; color: #6b7280; margin-bottom: 30px;">Generated on ${new Date().toLocaleString()}</p>
+ 
+                <h2 style="font-size: 18px; font-weight: bold; margin-top: 30px; margin-bottom: 15px; color: #1f2937; border-bottom: 2px solid #7c3aed; padding-bottom: 10px;">Key Metrics</h2>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                    <div style="border: 1px solid #e5e7eb; padding: 15px; border-radius: 8px; background-color: #f9fafb;">
+                        <p style="font-size: 12px; color: #6b7280; margin-bottom: 10px;">Total Bookings</p>
+                        <p style="font-size: 24px; font-weight: bold; color: #7c3aed;">${bookings.length}</p>
+                        <p style="font-size: 11px; color: #10b981; margin-top: 5px;">+12% vs last month</p>
+                    </div>
+                    <div style="border: 1px solid #e5e7eb; padding: 15px; border-radius: 8px; background-color: #f9fafb;">
+                        <p style="font-size: 12px; color: #6b7280; margin-bottom: 10px;">Pending Tasks</p>
+                        <p style="font-size: 24px; font-weight: bold; color: #f59e0b;">${pendingBookings.length}</p>
+                        <p style="font-size: 11px; color: #6b7280; margin-top: 5px;">Requires approval</p>
+                    </div>
+                    <div style="border: 1px solid #e5e7eb; padding: 15px; border-radius: 8px; background-color: #f9fafb;">
+                        <p style="font-size: 12px; color: #6b7280; margin-bottom: 10px;">Today's Load</p>
+                        <p style="font-size: 24px; font-weight: bold; color: #4f46e5;">${todayBookings.length}</p>
+                        <p style="font-size: 11px; color: #6b7280; margin-top: 5px;">Active meetings</p>
+                    </div>
+                    <div style="border: 1px solid #e5e7eb; padding: 15px; border-radius: 8px; background-color: #7c3aed;">
+                        <p style="font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 10px;">Completion Rate</p>
+                        <p style="font-size: 24px; font-weight: bold; color: white;">${completionRate}%</p>
+                        <p style="font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 5px;">Quality benchmark</p>
+                    </div>
+                </div>
+ 
+                <h2 style="font-size: 18px; font-weight: bold; margin-top: 30px; margin-bottom: 15px; color: #1f2937; border-bottom: 2px solid #7c3aed; padding-bottom: 10px;">Weekly Breakdown</h2>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                    <thead>
+                        <tr style="background-color: #f3f4f6;">
+                            <th style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; font-size: 12px; font-weight: bold;">Day</th>
+                            <th style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; font-size: 12px; font-weight: bold;">Bookings</th>
+                            <th style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; font-size: 12px; font-weight: bold;">Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${weeklyLoadData
+                            .map(
+                                (day) => `
+                            <tr>
+                                <td style="border: 1px solid #e5e7eb; padding: 10px; font-size: 12px;">${day.name}</td>
+                                <td style="border: 1px solid #e5e7eb; padding: 10px; font-size: 12px;">${day.bookings}</td>
+                                <td style="border: 1px solid #e5e7eb; padding: 10px; font-size: 12px;">$${day.revenue.toLocaleString()}</td>
+                            </tr>
+                        `,
+                            )
+                            .join('')}
+                    </tbody>
+                </table>
+ 
+                <h2 style="font-size: 18px; font-weight: bold; margin-top: 30px; margin-bottom: 15px; color: #1f2937; border-bottom: 2px solid #7c3aed; padding-bottom: 10px;">Service Distribution</h2>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                    <thead>
+                        <tr style="background-color: #f3f4f6;">
+                            <th style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; font-size: 12px; font-weight: bold;">Service</th>
+                            <th style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; font-size: 12px; font-weight: bold;">Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${servicesDistribution
+                            .map(
+                                (service) => `
+                            <tr>
+                                <td style="border: 1px solid #e5e7eb; padding: 10px; font-size: 12px;">${service.name}</td>
+                                <td style="border: 1px solid #e5e7eb; padding: 10px; font-size: 12px;">${service.value}</td>
+                            </tr>
+                        `,
+                            )
+                            .join('')}
+                    </tbody>
+                </table>
+ 
+                <h2 style="font-size: 18px; font-weight: bold; margin-top: 30px; margin-bottom: 15px; color: #1f2937; border-bottom: 2px solid #7c3aed; padding-bottom: 10px;">Recent Bookings</h2>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background-color: #f3f4f6;">
+                            <th style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; font-size: 12px; font-weight: bold;">Client</th>
+                            <th style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; font-size: 12px; font-weight: bold;">Service</th>
+                            <th style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; font-size: 12px; font-weight: bold;">Date</th>
+                            <th style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; font-size: 12px; font-weight: bold;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${bookings
+                            .slice(0, 10)
+                            .map(
+                                (b) => `
+                            <tr>
+                                <td style="border: 1px solid #e5e7eb; padding: 10px; font-size: 12px;">${b.client_name}</td>
+                                <td style="border: 1px solid #e5e7eb; padding: 10px; font-size: 12px;">${b.service?.name || 'N/A'}</td>
+                                <td style="border: 1px solid #e5e7eb; padding: 10px; font-size: 12px;">${new Date(b.date).toLocaleDateString()}</td>
+                                <td style="border: 1px solid #e5e7eb; padding: 10px; font-size: 12px; text-transform: capitalize;">${b.status}</td>
+                            </tr>
+                        `,
+                            )
+                            .join('')}
+                    </tbody>
+                </table>
+            `;
+
+            // Generate PDF
+            const options = {
+                margin: 10,
+                filename: `dashboard-analytics-${new Date().toISOString().split('T')[0]}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' },
+            } as const;
+
+            html2pdf().set(options).from(element).save();
+        } catch (error) {
+            console.error('Error exporting PDF:', error);
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
     // console.log('Bookings from backend: ', bookings);
 
     return (
@@ -165,14 +417,25 @@ export default function AdminDashboard({ bookings }: AdminDashboardProps) {
                             Real-time analytics and operating health overview.
                         </p>
                     </div>
-                    <div className="flex gap-2">
+
+                    <button
+                        onClick={handleExportPDF}
+                        disabled={isExporting}
+                        className="flex cursor-pointer items-center gap-2 rounded-xl bg-purple-600 px-4 py-2 text-xs font-semibold text-white shadow-md shadow-purple-500/10 transition-all hover:bg-purple-700 active:scale-95 disabled:opacity-50 dark:bg-purple-600 dark:hover:bg-purple-700"
+                    >
+                        <Download className="h-4 w-4" />
+                        {isExporting ? 'Exporting...' : 'Export Analytics'}
+                    </button>
+
+                    {/* <div className="flex gap-2">
                         <button
-                            onClick={() => console.log('Open Services Modal')}
+                            onClick={handleExportPDF}
+                            disabled={isExporting}
                             className="cursor-pointer rounded-xl bg-purple-600 px-4 py-2 text-xs font-semibold text-white shadow-md shadow-purple-500/10 transition-all hover:bg-purple-700 active:scale-95"
                         >
                             Create New Slot
                         </button>
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* Bento Grid Statistics */}
@@ -519,8 +782,9 @@ export default function AdminDashboard({ bookings }: AdminDashboardProps) {
                                                 <div className="flex justify-end gap-2">
                                                     <button
                                                         onClick={() =>
-                                                            console.log(
-                                                                'Approve Booking',
+                                                            handleActionClick(
+                                                                b,
+                                                                'approved',
                                                             )
                                                         }
                                                         className="cursor-pointer rounded-md bg-purple-50 px-2.5 py-1 text-xs font-bold text-purple-700 transition-colors hover:bg-purple-100 dark:bg-purple-950/40 dark:text-purple-400 dark:hover:bg-purple-950/60"
@@ -530,8 +794,8 @@ export default function AdminDashboard({ bookings }: AdminDashboardProps) {
 
                                                     <button
                                                         onClick={() =>
-                                                            handleUpdateBookingStatus(
-                                                                b.id,
+                                                            handleActionClick(
+                                                                b,
                                                                 'rejected',
                                                             )
                                                         }
@@ -546,8 +810,8 @@ export default function AdminDashboard({ bookings }: AdminDashboardProps) {
                                                 <div className="flex justify-end gap-2">
                                                     <button
                                                         onClick={() =>
-                                                            handleUpdateBookingStatus(
-                                                                b.id,
+                                                            handleActionClick(
+                                                                b,
                                                                 'completed',
                                                             )
                                                         }
@@ -558,8 +822,8 @@ export default function AdminDashboard({ bookings }: AdminDashboardProps) {
 
                                                     <button
                                                         onClick={() =>
-                                                            handleUpdateBookingStatus(
-                                                                b.id,
+                                                            handleActionClick(
+                                                                b,
                                                                 'rejected',
                                                             )
                                                         }
@@ -574,14 +838,14 @@ export default function AdminDashboard({ bookings }: AdminDashboardProps) {
                                                 <div className="flex justify-end gap-2">
                                                     <button
                                                         onClick={() =>
-                                                            handleUpdateBookingStatus(
-                                                                b.id,
-                                                                'rejected',
+                                                            handleActionClick(
+                                                                b,
+                                                                'pending',
                                                             )
                                                         }
-                                                        className="cursor-pointer rounded-md bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-700 transition-colors hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-400 dark:hover:bg-rose-950/60"
+                                                        className="cursor-pointer rounded-md bg-zinc-50 px-2.5 py-1 text-xs font-bold text-zinc-700 transition-colors hover:bg-zinc-100 dark:bg-zinc-950/40 dark:text-zinc-400 dark:hover:bg-zinc-950/60"
                                                     >
-                                                        Rejected
+                                                        Restore
                                                     </button>
                                                 </div>
                                             )}
@@ -605,6 +869,80 @@ export default function AdminDashboard({ bookings }: AdminDashboardProps) {
                     </div>
                 </div>
             </div>
+
+            {/* Confirmation Modal */}
+            <AnimatePresence>
+                {confirmModal && confirmAction && (
+                    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setConfirmModal(false)}
+                            className="absolute inset-0 bg-on-background/40 backdrop-blur-[2px]"
+                        />
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            className="relative z-20 w-full max-w-md overflow-hidden rounded-2xl bg-surface p-6 shadow-2xl dark:bg-slate-900"
+                        >
+                            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-purple-950/40 dark:text-purple-400">
+                                <AlertTriangle size={28} />
+                            </div>
+                            <h3 className="text-center text-lg font-bold text-on-surface dark:text-white">
+                                {getActionLabel(confirmAction.action)}
+                            </h3>
+                            <p className="mt-2 text-center text-sm text-on-surface-variant dark:text-slate-400">
+                                Booking ID:{' '}
+                                <span className="font-bold">
+                                    #{confirmAction.booking.id}
+                                </span>{' '}
+                                for{' '}
+                                <span className="font-bold">
+                                    {confirmAction.booking.client_name}
+                                </span>
+                            </p>
+
+                            {confirmAction.action === 'completed' && (
+                                <div className="mt-4">
+                                    <label className="mb-2 block text-xs font-semibold text-on-surface-variant dark:text-slate-400">
+                                        Add Notes (Optional)
+                                    </label>
+                                    <textarea
+                                        value={notes}
+                                        onChange={(e) =>
+                                            setNotes(e.target.value)
+                                        }
+                                        placeholder="Add any notes about the completed booking..."
+                                        rows={3}
+                                        className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-2 text-sm text-on-surface placeholder-outline/60 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500"
+                                    />
+                                </div>
+                            )}
+
+                            <div className="mt-6 flex flex-col gap-2">
+                                <button
+                                    disabled={isProcessing}
+                                    onClick={confirmAndExecuteAction}
+                                    className="w-full cursor-pointer rounded-xl bg-primary py-3 text-sm font-semibold text-on-primary shadow-md shadow-primary/20 transition-all hover:bg-primary-container disabled:opacity-50 dark:bg-purple-600 dark:shadow-purple-600/20 dark:hover:bg-purple-700"
+                                >
+                                    {isProcessing
+                                        ? 'Processing...'
+                                        : 'Confirm Action'}
+                                </button>
+                                <button
+                                    disabled={isProcessing}
+                                    onClick={() => setConfirmModal(false)}
+                                    className="w-full cursor-pointer rounded-xl py-3 text-sm font-semibold text-on-surface-variant transition-all hover:bg-surface-container dark:text-slate-400 dark:hover:bg-slate-800"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </AdminLayout>
     );
 }
