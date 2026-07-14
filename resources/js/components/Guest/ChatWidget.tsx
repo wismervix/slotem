@@ -37,8 +37,6 @@ export default function ChatWidget({
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    // const { page } = usePage();
-    // const baseUrl = page.props.baseUrl || '';
 
     const quickPrompts = [
         {
@@ -65,13 +63,12 @@ export default function ChatWidget({
         }
     }, [isOpen, messages, isLoading]);
 
-    
-const getCsrfToken = () => {
-    const token = document
-        .querySelector('meta[name="csrf-token"]')
-        ?.getAttribute('content');
-    return token || '';
-};
+    const getCsrfToken = () => {
+        const token = document
+            .querySelector('meta[name="csrf-token"]')
+            ?.getAttribute('content');
+        return token || '';
+    };
 
     const handleSendMessage = async (textToSend: string) => {
         if (!textToSend.trim()) return;
@@ -93,7 +90,6 @@ const getCsrfToken = () => {
         try {
             const updatedMessages = [...messages, userMsg];
 
-            // Send to Laravel API
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: {
@@ -126,7 +122,6 @@ const getCsrfToken = () => {
         } catch (err) {
             console.error('Chat API error:', err);
 
-            // Enhanced fallback response
             const fallbackMsg: ChatMessage = {
                 id: `msg-${Date.now() + 1}`,
                 sender: 'assistant',
@@ -160,10 +155,10 @@ const getCsrfToken = () => {
                         whileHover={{ scale: 1.08 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={onOpen}
-                        className="fixed right-6 bottom-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#630ed4] text-white shadow-lg shadow-purple-500/20 transition-all hover:bg-[#5209b5] focus:ring-2 focus:ring-[#630ed4] focus:ring-offset-2 focus:outline-none"
+                        className="fixed right-6 bottom-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#630ed4] text-white shadow-lg shadow-purple-500/20 transition-all hover:bg-[#5209b5] focus:ring-2 focus:ring-[#630ed4] focus:ring-offset-2 focus:outline-none dark:shadow-purple-500/10"
                     >
                         <MessageSquare className="h-6 w-6" />
-                        <span className="absolute -top-1 -right-1 flex h-4 w-4 animate-pulse rounded-full border-2 border-white bg-emerald-500" />
+                        <span className="absolute -top-1 -right-1 flex h-4 w-4 animate-pulse rounded-full border-2 border-white bg-emerald-500 dark:border-slate-900" />
                     </motion.button>
                 )}
             </AnimatePresence>
@@ -177,10 +172,10 @@ const getCsrfToken = () => {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 50, scale: 0.95 }}
                         transition={{ type: 'spring', duration: 0.4 }}
-                        className="fixed right-6 bottom-6 z-50 flex h-[580px] w-full max-w-[400px] flex-col overflow-hidden rounded-2xl border border-purple-100 bg-white shadow-2xl shadow-purple-900/10"
+                        className="fixed right-6 bottom-6 z-50 flex h-[580px] w-full max-w-[400px] flex-col overflow-hidden rounded-2xl border border-purple-100 bg-white shadow-2xl shadow-purple-900/10 dark:border-slate-700 dark:bg-slate-900 dark:shadow-slate-900/50"
                     >
                         {/* Header */}
-                        <div className="flex items-center justify-between bg-gradient-to-r from-[#630ed4] to-[#7c3aed] p-4 text-white">
+                        <div className="flex items-center justify-between bg-gradient-to-r from-[#630ed4] to-[#7c3aed] p-4 text-white dark:from-[#4a0a9e] dark:to-[#6d28d9]">
                             <div className="flex items-center gap-3">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
                                     <Sparkles className="h-5 w-5 text-purple-200" />
@@ -204,7 +199,7 @@ const getCsrfToken = () => {
                         </div>
 
                         {/* Message Area */}
-                        <div className="flex-1 space-y-4 overflow-y-auto bg-slate-50 p-4">
+                        <div className="flex-1 space-y-4 overflow-y-auto bg-slate-50 p-4 dark:bg-slate-800">
                             {messages.map((msg) => {
                                 const isAssistant = msg.sender === 'assistant';
                                 return (
@@ -219,8 +214,8 @@ const getCsrfToken = () => {
                                         <div
                                             className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold select-none ${
                                                 isAssistant
-                                                    ? 'bg-purple-100 text-[#630ed4]'
-                                                    : 'bg-purple-600 text-white'
+                                                    ? 'bg-purple-100 text-[#630ed4] dark:bg-slate-700 dark:text-purple-400'
+                                                    : 'bg-purple-600 text-white dark:bg-purple-700'
                                             }`}
                                         >
                                             {isAssistant ? (
@@ -233,16 +228,14 @@ const getCsrfToken = () => {
                                             <div
                                                 className={`rounded-2xl px-3.5 py-2.5 text-sm shadow-sm ${
                                                     isAssistant
-                                                        ? 'rounded-tl-none border border-slate-100 bg-white text-slate-800'
-                                                        : 'rounded-tr-none bg-[#630ed4] text-white'
+                                                        ? 'rounded-tl-none border border-slate-100 bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'
+                                                        : 'rounded-tr-none bg-[#630ed4] text-white dark:bg-purple-600'
                                                 }`}
                                             >
-                                                {/* Inline markdown support for bolding and lists */}
                                                 <div className="space-y-1.5 leading-relaxed whitespace-pre-line">
                                                     {msg.text
                                                         .split('\n')
                                                         .map((line, idx) => {
-                                                            // Bold check
                                                             let formatted =
                                                                 line;
                                                             const boldRegex =
@@ -305,7 +298,7 @@ const getCsrfToken = () => {
                                                         })}
                                                 </div>
                                             </div>
-                                            <span className="mt-1 block text-right text-[10px] text-slate-400">
+                                            <span className="mt-1 block text-right text-[10px] text-slate-400 dark:text-slate-500">
                                                 {msg.timestamp}
                                             </span>
                                         </div>
@@ -315,25 +308,25 @@ const getCsrfToken = () => {
 
                             {isLoading && (
                                 <div className="mr-auto flex max-w-[85%] gap-2.5">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100 text-[#630ed4]">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100 text-[#630ed4] dark:bg-slate-700 dark:text-purple-400">
                                         <Sparkles className="h-4 w-4 animate-spin" />
                                     </div>
-                                    <div className="rounded-2xl rounded-tl-none border border-slate-100 bg-white px-4 py-3 shadow-sm">
+                                    <div className="rounded-2xl rounded-tl-none border border-slate-100 bg-white px-4 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-900">
                                         <div className="flex items-center gap-1.5">
                                             <span
-                                                className="h-2 w-2 animate-bounce rounded-full bg-slate-300"
+                                                className="h-2 w-2 animate-bounce rounded-full bg-slate-300 dark:bg-slate-600"
                                                 style={{
                                                     animationDelay: '0ms',
                                                 }}
                                             />
                                             <span
-                                                className="h-2 w-2 animate-bounce rounded-full bg-slate-300"
+                                                className="h-2 w-2 animate-bounce rounded-full bg-slate-300 dark:bg-slate-600"
                                                 style={{
                                                     animationDelay: '150ms',
                                                 }}
                                             />
                                             <span
-                                                className="h-2 w-2 animate-bounce rounded-full bg-slate-300"
+                                                className="h-2 w-2 animate-bounce rounded-full bg-slate-300 dark:bg-slate-600"
                                                 style={{
                                                     animationDelay: '300ms',
                                                 }}
@@ -346,12 +339,12 @@ const getCsrfToken = () => {
                         </div>
 
                         {/* Quick Prompts Container */}
-                        <div className="scrollbar-none flex shrink-0 gap-1.5 overflow-x-auto border-t border-slate-100 bg-white p-2">
+                        <div className="scrollbar-none flex shrink-0 gap-1.5 overflow-x-auto border-t border-slate-100 bg-white p-2 dark:border-slate-700 dark:bg-slate-900">
                             {quickPrompts.map((p, i) => (
                                 <button
                                     key={i}
                                     onClick={() => handleSendMessage(p.query)}
-                                    className="shrink-0 rounded-full border border-purple-100 bg-purple-50/50 px-3 py-1 text-xs text-[#630ed4] transition-colors hover:border-purple-200 hover:bg-purple-100/75 focus:outline-none"
+                                    className="shrink-0 rounded-full border border-purple-100 bg-purple-50/50 px-3 py-1 text-xs text-[#630ed4] transition-colors hover:border-purple-200 hover:bg-purple-100/75 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-purple-400 dark:hover:border-slate-600 dark:hover:bg-slate-700"
                                 >
                                     {p.label}
                                 </button>
@@ -364,19 +357,19 @@ const getCsrfToken = () => {
                                 e.preventDefault();
                                 handleSendMessage(inputValue);
                             }}
-                            className="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white p-3"
+                            className="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white p-3 dark:border-slate-700 dark:bg-slate-900"
                         >
                             <input
                                 type="text"
                                 value={inputValue}
                                 onChange={(e) => setInputValue(e.target.value)}
                                 placeholder="Ask about integrations, security..."
-                                className="h-10 flex-1 rounded-full border border-slate-200 bg-slate-50 px-4 text-sm text-slate-800 transition-all focus:border-[#630ed4] focus:bg-white focus:outline-none"
+                                className="h-10 flex-1 rounded-full border border-slate-200 bg-slate-50 px-4 text-sm text-slate-800 transition-all focus:border-[#630ed4] focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:focus:border-purple-500 dark:focus:bg-slate-700"
                             />
                             <button
                                 type="submit"
                                 disabled={!inputValue.trim() || isLoading}
-                                className="flex h-10 w-10 items-center justify-center rounded-full bg-[#630ed4] text-white transition-all hover:bg-[#5209b5] focus:outline-none active:scale-95 disabled:bg-slate-100 disabled:text-slate-400"
+                                className="flex h-10 w-10 items-center justify-center rounded-full bg-[#630ed4] text-white transition-all hover:bg-[#5209b5] focus:outline-none active:scale-95 disabled:bg-slate-100 disabled:text-slate-400 dark:disabled:bg-slate-700 dark:disabled:text-slate-500"
                             >
                                 <Send className="h-4 w-4" />
                             </button>
