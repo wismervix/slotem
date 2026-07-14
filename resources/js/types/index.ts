@@ -6,4 +6,7 @@ export * from './availability';
 export * from './user-profile';
 export * from './notification';
 export * from './inertia';
-export * from './demo-types';
+export * from './contact-sales-types';
+export * from './help-center-types';
+export * from './privacy-types';
+export * from './terms-types';

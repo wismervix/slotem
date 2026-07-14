@@ -250,30 +250,30 @@ export default function ContactUs() {
                     </Link>
 
                     <div className="flex flex-wrap justify-center gap-8">
-                        <a
-                            href="#"
+                        <Link
+                            href={route('privacy-policy')}
                             className="text-xs font-medium text-white/50 transition-colors hover:text-white"
                         >
                             Privacy Policy
-                        </a>
-                        <a
-                            href="#"
+                        </Link>
+                        <Link
+                            href={route('terms-of-service')}
                             className="text-xs font-medium text-white/50 transition-colors hover:text-white"
                         >
                             Terms of Service
-                        </a>
-                        <a
-                            href="#"
+                        </Link>
+                        <Link
+                            href={route('help-center')}
                             className="text-xs font-medium text-white/50 transition-colors hover:text-white"
                         >
                             Help Center
-                        </a>
-                        <a
-                            href="#"
+                        </Link>
+                        <Link
+                            href={route('contact-sales')}
                             className="text-xs font-medium text-white/50 transition-colors hover:text-white"
                         >
                             Contact Sales
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </footer>

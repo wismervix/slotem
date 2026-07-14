@@ -7,10 +7,10 @@ import {
   RefreshCw
 } from "lucide-react";
 
-import ChatWidget from "@/components/Guest/ChatWidget";
-import FeaturesShowcase from "@/components/Guest/FeaturesShowcase";
-import PricingCalculator from "@/components/Guest/PricingCalculator";
-import HelpCenter from "@/components/Guest/HelpCenter";
+import ChatWidget from "@/components/Guest/ContactSales/ChatWidget";
+import FeaturesShowcase from "@/components/Guest/ContactSales/FeaturesShowcase";
+import PricingCalculator from "@/components/Guest/ContactSales/PricingCalculator";
+import HelpCenter from "@/components/Guest/ContactSales/HelpCenter";
 import GuestLayout from "@/layouts/Guest/GuestLayout";
 
 export default function ContactSalesPage() {

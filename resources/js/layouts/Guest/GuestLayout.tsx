@@ -117,17 +117,17 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                     </Link>
 
                     <div className="flex flex-wrap justify-center gap-6 text-sm text-slate-500">
-                        <a href="#" className="hover:text-purple-600">
+                        <Link href={route('privacy-policy')} className="hover:text-purple-600">
                             Privacy Policy
-                        </a>
+                        </Link>
 
-                        <a href="#" className="hover:text-purple-600">
+                        <Link href={route('terms-of-service')} className="hover:text-purple-600">
                             Terms of Service
-                        </a>
+                        </Link>
 
-                        <a href="#" className="hover:text-purple-600">
+                        <Link href={route('help-center')} className="hover:text-purple-600">
                             Help Center
-                        </a>
+                        </Link>
 
                         <Link href={route('contact-sales')} className="hover:text-purple-600">
                             Contact Sales

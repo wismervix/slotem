@@ -23,6 +23,18 @@ class PagesController extends Controller
     {
         return Inertia::render('Guest/ContactSales');
     }
+    public function helpCenter()
+    {
+        return Inertia::render('Guest/HelpCenter');
+    }
+    public function privacyPolicy()
+    {
+        return Inertia::render('Guest/PrivacyPolicy');
+    }
+    public function termsOfService()
+    {
+        return Inertia::render('Guest/TermsOfService');
+    }
     public function contactUs()
     {
         return Inertia::render('Guest/ContactUs');
