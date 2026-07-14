@@ -3,6 +3,7 @@
 use App\Http\Controllers\Guest\BookingController;
 use App\Http\Controllers\User\Auth\LoginController;
 use App\Http\Controllers\User\DashboardController;
+use App\Http\Controllers\User\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'user'], function () {
@@ -23,8 +24,10 @@ Route::group(['prefix' => 'user'], function () {
             Route::get('/bookings', 'bookings')->name('user.bookings');
             Route::get('/profile', 'profile')->name('user.profile');
             Route::put('/profile', 'updateProfile')->name('user.profile.update');
-            Route::get('/notifications', 'notifications')->name('user.notifications');
+        });
 
+        Route::controller(NotificationController::class)->group(function () {
+            Route::get('/notifications', 'notifications')->name('user.notifications');
             Route::patch('/notifications/{notification}/read', 'markAsRead')->name('notifications.read');
             Route::patch('/notifications/read-all', 'markAllAsRead')->name('notifications.read-all');
             Route::delete('/notifications/{notification}', 'deleteNotification')->name('notifications.delete');

@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\Auth\LoginController;
 use App\Http\Controllers\Admin\AvailabilityController;
 use App\Http\Controllers\Admin\BookingController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\ServicesController;
 use App\Http\Controllers\Admin\TimeSlotController;
 use App\Http\Controllers\Admin\UserController;
@@ -25,6 +26,14 @@ Route::group(['prefix' => 'admin'], function () {
             Route::put('/settings', 'updateSettings')->name('admin.settings.update');
             Route::get('/website-settings', 'websiteSettings')->name('admin.website-settings');
             Route::put('/website-settings', 'updateWebsiteSettings')->name('admin.website-settings.update');
+        });
+
+        Route::controller(NotificationController::class)->group(function () {
+            Route::get('/notifications', 'notifications')->name('admin.notifications');
+            Route::patch('/notifications/{notification}/read', 'markAsRead')->name('admin.notifications.read');
+            Route::patch('/notifications/read-all', 'markAllAsRead')->name('admin.notifications.read-all');
+            Route::delete('/notifications/{notification}', 'deleteNotification')->name('admin.notifications.delete');
+            Route::delete('/notifications/clear-all', 'clearAllNotifications')->name('admin.notifications.clear-all');
         });
 
         //USER CONTROLLER

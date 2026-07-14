@@ -1,3 +1,4 @@
+import { motion, AnimatePresence } from 'motion/react';
 import {
     Clock,
     Search,
@@ -21,12 +22,11 @@ import {
     Check,
     AlertTriangle,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
 import React, { useEffect, useMemo, useState } from 'react';
+import { Service, Booking, BookingStatus } from '@/types';
 import AdminLayout from '@/layouts/Admin/AdminLayout';
 import { formatTime } from '@/lib/calendar-utils';
 import { usePage } from '@inertiajs/react';
-import { Service, Booking, BookingStatus } from '@/types';
 
 interface BookingsProps {
     bookings: Booking[];

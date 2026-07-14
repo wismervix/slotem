@@ -5,13 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Admin;
 use App\Models\Booking;
 use App\Models\WebsiteSetting;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Cache;
 use App\Http\Requests\AdminSettingsRequest;
 use App\Http\Requests\WebsiteSettingsRequest;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\DB;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
@@ -218,4 +218,5 @@ class DashboardController extends Controller
 
         return back()->with('success', 'Website settings updated successfully.');
     }
+
 }
