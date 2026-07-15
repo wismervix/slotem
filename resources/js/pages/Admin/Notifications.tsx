@@ -118,9 +118,9 @@ export default function UserNotifications({
 
     const filtered = notifications.filter((item) => {
         if (filter === 'unread') return !item.read;
+        if (filter === 'updates') return item.category === 'Updates';
         if (filter === 'bookings') return item.category === 'Bookings';
         if (filter === 'reminders') return item.category === 'Reminders';
-        if (filter === 'updates') return item.category === 'Updates';
         return true;
     });
 
