@@ -8,6 +8,7 @@ import {
     Plus,
     Menu,
     X,
+    LogOut,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -170,7 +171,7 @@ export default function Sidebar({
                 </nav>
 
                 {/* Action Button at bottom */}
-                <button
+                {/* <button
                     onClick={() => {
                         openModal();
                         setMobileSidebarOpen(false);
@@ -179,7 +180,30 @@ export default function Sidebar({
                 >
                     <Plus className="h-4 w-4 shrink-0" />
                     Book New Appointment
-                </button>
+                </button> */}
+
+                <div className="mt-auto space-y-3 border-t border-outline-variant pt-4 dark:border-neutral-800">
+                    <Link
+                        href={route('user.logout')}
+                        method="post"
+                        as="button"
+                        className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600 transition-all hover:bg-red-100 active:scale-[0.98] dark:border-red-900/50 dark:bg-red-950/20 dark:text-red-400 dark:hover:bg-red-950/40"
+                    >
+                        <LogOut className="h-4 w-4" />
+                        Logout
+                    </Link>
+
+                    <button
+                        onClick={() => {
+                            openModal();
+                            setMobileSidebarOpen(false);
+                        }}
+                        className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-xs font-bold text-white shadow-md shadow-primary/10 transition-all hover:shadow-lg active:scale-95"
+                    >
+                        <Plus className="h-4 w-4 shrink-0" />
+                        Book New Appointment
+                    </button>
+                </div>
             </aside>
 
             {/* Backdrop for mobile navigation drawer */}

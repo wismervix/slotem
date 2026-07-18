@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Cache;
 use App\Http\Requests\AdminSettingsRequest;
 use App\Http\Requests\WebsiteSettingsRequest;
+use App\Notifications\Admin\AdminActionNotification;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class DashboardController extends Controller
@@ -54,7 +55,9 @@ class DashboardController extends Controller
         /** @var Admin $admin */
         $admin = auth('admin')->user();
 
-        DB::transaction(function () use ($request, $admin) {
+        $oldData = $admin->toArray();
+
+        DB::transaction(function () use ($request, $admin, $oldData) {
             $validated = $request->validated();
 
             /*
@@ -96,6 +99,14 @@ class DashboardController extends Controller
                 'avatar_url' => $validated['avatar_url'] ?? $admin->avatar_url,
                 'avatar_public_id' => $validated['avatar_public_id'] ?? $admin->avatar_public_id,
             ]);
+
+            $adminActionNotification = new AdminActionNotification(
+                $admin,
+                'Update Admin Profile',
+                $admin->email,
+                ['old' => $oldData, 'new' => $request->validated()]
+            );
+            $adminActionNotification->sendToAllAdmins();
         });
 
         return back()->with('success', 'Admin settings updated successfully.');
@@ -133,13 +144,18 @@ class DashboardController extends Controller
      */
     public function updateWebsiteSettings(WebsiteSettingsRequest $request)
     {
+        /** @var Admin $admin */
+        $admin = auth('admin')->user();
+
         $settings = WebsiteSetting::first();
 
         if (!$settings) {
             $settings = new WebsiteSetting();
         }
 
-        DB::transaction(function () use ($request, $settings) {
+        $oldData = $settings->toArray();
+
+        DB::transaction(function () use ($request, $settings, $admin, $oldData) {
             $validated = $request->validated();
 
             /*
@@ -212,6 +228,14 @@ class DashboardController extends Controller
                 'favicon_url' => $validated['favicon_url'] ?? $settings->favicon_url,
                 'favicon_public_id' => $validated['favicon_public_id'] ?? $settings->favicon_public_id,
             ])->save();
+
+            $adminActionNotification = new AdminActionNotification(
+                $admin,
+                'Update Website Settings',
+                'Website Settings',
+                ['old' => $oldData, 'new' => $request->validated()]
+            );
+            $adminActionNotification->sendToAllAdmins();
 
             Cache::forget('website_settings');
         });

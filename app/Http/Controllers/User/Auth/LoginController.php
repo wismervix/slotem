@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use App\Notifications\User\WelcomeNotification;
 
 class LoginController extends Controller
 {
@@ -76,15 +77,31 @@ class LoginController extends Controller
         );
 
         Auth::login($user);
+
         $request->session()->regenerate();
+
+        /** @var User $user */
+        $user = Auth::user();
+
+        // Send welcome notification on first login
+        if (!$user->hasLoggedInBefore()) {
+            $user->notify(new WelcomeNotification($user));
+            $user->markFirstLogin();
+        }
+
+        // Track last login
+        $user->updateLastLogin();
 
         $otp->delete();
 
         return redirect()->route('user.dashboard');
-    }
-
-    public function logout(Request $request)
-    {
-        // Logout logic here
+        }
+        
+        public function logout(Request $request)
+        {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return redirect()->route('user.login');
     }
 }

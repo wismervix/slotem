@@ -12,12 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->enum('status', [
-                'active',
-                'inactive',
-                'suspended',
-                'deleted'
-            ])->default('active');
+            $table->timestamp('first_login_at')->nullable();
+            $table->timestamp('last_login_at')->nullable();
+            $table->boolean('is_admin')->default(false)->after('status');
         });
     }
 
@@ -27,7 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('status');
+            $table->dropColumn(['first_login_at', 'last_login_at', 'is_admin']);
         });
     }
 };

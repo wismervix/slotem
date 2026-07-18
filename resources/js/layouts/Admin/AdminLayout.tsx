@@ -23,6 +23,15 @@ export default function AdminLayout({ children }: Props) {
 
     const { settings } = usePage<{ settings: WebsiteSettings }>().props;
 
+    const { notifications } = usePage<
+        SharedPageProps & {
+            notifications: {
+                items: Notification[];
+                unreadCount: number;
+            };
+        }
+    >().props;
+
     // Global adaptive search string
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -46,6 +55,7 @@ export default function AdminLayout({ children }: Props) {
     return (
         <div className="flex min-h-screen bg-purple-50/20 font-sans text-zinc-800 antialiased transition-colors duration-250 dark:bg-zinc-950 dark:text-zinc-200">
             <Sidebar
+                unreadCount={notifications.unreadCount}
                 businessName={settings.name}
                 managerName={settings.manager_name}
                 mobileSidebarOpen={mobileSidebarOpen}
@@ -92,9 +102,27 @@ export default function AdminLayout({ children }: Props) {
 
                     {/* Right Header Navigation Panel tools */}
                     <div className="flex items-center gap-4">
-                        <button className="relative cursor-pointer rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-purple-400">
+                        {/* <button className="relative cursor-pointer rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-purple-400">
                             <Bell size={18} />
-                            <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-error" />
+                            {notifications.unreadCount > 0 && (
+                                <span className="absolute -top-0.5 -right-0.5 flex min-h-3.5 min-w-3.5 scale-90 items-center justify-center rounded-full bg-red-600 text-[9px] font-extrabold text-white ring-2 ring-white">
+                                    {notifications.unreadCount}
+                                </span>
+                            )}
+                        </button> */}
+
+                        <button className="cursor-pointer rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-purple-400">
+                            <span className="relative block">
+                                <Bell size={18} />
+
+                                {notifications.unreadCount > 0 && (
+                                    <span className="absolute -top-2 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] leading-none font-bold text-white ring-2 ring-white dark:ring-zinc-950">
+                                        {notifications.unreadCount > 99
+                                            ? '99+'
+                                            : notifications.unreadCount}
+                                    </span>
+                                )}
+                            </span>
                         </button>
 
                         <button className="hidden cursor-pointer rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary sm:inline-block dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-purple-400">

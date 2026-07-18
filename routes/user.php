@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'user'], function () {
 
-    // auth
+    // auth    ✅
     Route::controller(LoginController::class)->group(function () {
         Route::get('/login', 'showLoginForm')->name('user.login');
         Route::post('/login', 'login')->name('user.login.store');
@@ -18,7 +18,7 @@ Route::group(['prefix' => 'user'], function () {
 
     // All authenticated/protected routes
     Route::middleware('auth')->group(function () {
-
+        // DASHBOARD CONTROLLER   ✅
         Route::controller(DashboardController::class)->group(function () {
             Route::get('/dashboard', 'index')->name('user.dashboard');
             Route::get('/bookings', 'bookings')->name('user.bookings');
@@ -34,6 +34,7 @@ Route::group(['prefix' => 'user'], function () {
             Route::delete('/notifications/clear-all', 'clearAllNotifications')->name('notifications.clear-all');
         });
 
+        //BOOKING CONTROLLER    ✅
         Route::controller(BookingController::class)->group(function () {
             Route::post('/booking/modal', 'storeAuthenticated')->name('booking.modal.store');
 

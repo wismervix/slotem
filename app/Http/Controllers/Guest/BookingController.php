@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Guest;
 
 use Inertia\Inertia;
 use App\Models\User;
+use App\Models\Admin;
 use App\Models\Service;
 use App\Models\Booking;
 use App\Models\TimeSlot;
@@ -13,8 +14,12 @@ use App\Services\BookingService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
-use App\Notifications\BookingCancelled;
-use App\Notifications\BookingConfirmed;
+use App\Notifications\Admin\UserCancelledBookingNotification as AdminBookingCancelled;
+use App\Notifications\Admin\UserCreatedBookingNotification;
+use App\Notifications\Booking\NewBooking;
+// use App\Notifications\Booking\BookingConfirmed;
+use App\Notifications\Booking\BookingCancelled;
+use App\Notifications\User\WelcomeNotification;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class BookingController extends Controller
@@ -98,9 +103,25 @@ class BookingController extends Controller
         Auth::login($booking->user);
         $request->session()->regenerate();
 
+        /** @var User $user */
+        $user = Auth::user();
+
+        // Send welcome notification on first login
+        if (!$user->hasLoggedInBefore()) {
+            $user->notify(new WelcomeNotification($user));
+            $user->markFirstLogin();
+        }
+
+        // Track last login
+        $user->updateLastLogin();
+
         $booking->user->notify(
-            new BookingConfirmed()
+            new NewBooking($booking)
         );
+
+        // Notify all admins
+        $adminNotification = new UserCreatedBookingNotification($booking);
+        $adminNotification->sendToAllAdmins();
 
         // return response()->json([
         //     'success' => true,
@@ -147,9 +168,14 @@ class BookingController extends Controller
             'notes' => $validated['notes'] ?? null,
         ]);
 
-        $user->notify(
-            new BookingConfirmed()
+        $booking->user->notify(
+            new NewBooking($booking)
         );
+
+        // Notify all admins
+        $adminNotification = new UserCreatedBookingNotification($booking);
+        $adminNotification->sendToAllAdmins();
+
 
         return back()->with([
             'success' => 'Booking created successfully.',
@@ -186,7 +212,7 @@ class BookingController extends Controller
             ]);
         }
 
-        DB::transaction(function () use ($booking) {
+        DB::transaction(function () use ($booking, $user) {
 
             $booking->update([
                 'status' => 'cancelled',
@@ -195,11 +221,15 @@ class BookingController extends Controller
             $booking->timeSlot()->update([
                 'is_booked' => false,
             ]);
+
+            $user->notify(
+                new BookingCancelled($booking, true)
+            );
         });
 
-        $user->notify(
-            new BookingCancelled()
-        );
+        // Notify all admins
+        $adminNotification = new AdminBookingCancelled($booking);
+        $adminNotification->sendToAllAdmins();
 
         return back()->with(
             'success',

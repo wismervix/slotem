@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Admin;
 use App\Models\Service;
 use Inertia\Middleware;
 use App\Models\Availability;
@@ -50,6 +51,32 @@ class HandleInertiaRequests extends Middleware
                 'user' => Auth::guard('web')->user(),
                 'admin' => Auth::guard('admin')->user(),
             ],
+
+            'notifications' => function () {
+                /** @var Admin|null $admin */
+                $admin = Auth::guard('admin')->user();
+
+                if (! $admin) {
+                    return [
+                        'items' => [],
+                        'unreadCount' => 0,
+                    ];
+                }
+
+                return [
+                    'items' => $admin->notifications()
+                        ->latest()
+                        ->get(),
+                    'unreadCount' => $admin->unreadNotifications()->count(),
+                ];
+            },
+
+            'unreadCount' => function () {
+                /** @var Admin|null $admin */
+                $admin = Auth::guard('admin')->user();
+
+                return $admin?->unreadNotifications()->count() ?? 0;
+            },
 
             'settings' => Cache::remember(
                 'website_settings',

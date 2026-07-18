@@ -2,49 +2,32 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-
 use App\Models\Admin;
-use App\Models\NotificationState;
-// use Illuminate\Support\Facades\Auth;
-use App\Services\NotificationService;
-
+use App\Models\AdminNotification;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
-    public function notifications(NotificationService $notificationService)
+    public function index()
     {
         /** @var Admin $admin */
-        $admin = auth('admin')->user();
+        $admin = auth()->guard('admin')->user();
 
-        $hiddenIds = NotificationState::query()
-        ->where('user_id', $admin->id)
-        ->whereNotNull('hidden_at')
-        ->pluck('notification_id');
-
-        $notifications = $admin
-        ->notifications()
-        ->whereNotIn('id', $hiddenIds)
-        ->latest()
-        ->get();
+        $notifications = $admin->notifications()->latest()->get();
 
         return inertia('Admin/Notifications', [
-            'notifcations' => $notifications,
-
-            'unreadNotificationsCount' =>
-            $notificationService->getUnreadCount($admin),
+            'notifications' => $notifications,
+            'unreadCount' => $admin->unreadNotifications()->count(),
         ]);
     }
 
     public function markAsRead(string $id)
     {
         /** @var Admin $admin */
-        $admin = auth('admin')->user();
+        $admin = auth()->guard('admin')->user();
 
-        $notification = $admin
-            ->notifications()
-            ->findOrFail($id);
-
+        $notification = $admin->notifications()->findOrFail($id);
         $notification->markAsRead();
 
         return back();
@@ -53,54 +36,30 @@ class NotificationController extends Controller
     public function markAllAsRead()
     {
         /** @var Admin $admin */
-        $admin = auth('admin')->user();
+        $admin = auth()->guard('admin')->user();
 
-        $admin
-            ->unreadNotifications
-            ->markAsRead();
+        $admin->unreadNotifications()->update(['read_at' => now()]);
 
         return back();
     }
 
-    public function deleteNotification(string $id)
+    public function delete(string $id)
     {
         /** @var Admin $admin */
-        $admin = auth('admin')->user();
+        $admin = auth()->guard('admin')->user();
 
-        NotificationState::updateOrCreate(
-            [
-                'user_id' => $admin->id,
-                'notification_id' => $id,
-            ],
-            [
-                'hidden_at' => now(),
-            ]
-        );
+        $notification = $admin->notifications()->findOrFail($id);
+        $notification->delete();
 
         return back();
     }
 
-    public function clearAllNotifications()
+    public function clearAll()
     {
         /** @var Admin $admin */
-        $admin = auth('admin')->user();
+        $admin = auth()->guard('admin')->user();
 
-        $notifications = $admin
-            ->notifications()
-            ->pluck('id');
-
-        foreach ($notifications as $notificationId) {
-
-            NotificationState::updateOrCreate(
-                [
-                    'user_id' => $admin->id,
-                    'notification_id' => $notificationId,
-                ],
-                [
-                    'hidden_at' => now(),
-                ]
-            );
-        }
+        $admin->notifications()->delete();
 
         return back();
     }

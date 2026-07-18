@@ -9,14 +9,15 @@ use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
 use App\Services\NotificationService;
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Notifications\User\ProfileUpdated;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class DashboardController extends Controller
 {
     public function index(NotificationService $notificationService)
     {
-        /** @var User $user */
-        $user = Auth::user();
+                /** @var User $user */
+                $user = Auth::user();
 
         $bookings = $user
             ->bookings()
@@ -90,7 +91,9 @@ class DashboardController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        DB::transaction(function () use ($request, $user) {
+        $oldData = $user->toArray();
+
+        DB::transaction(function () use ($request, $user, $oldData) {
 
             $validated = $request->validated();
 
@@ -156,6 +159,11 @@ class DashboardController extends Controller
 
                     'sound_enabled' => $validated['sound_enabled'] ?? false,
                 ]
+            );
+
+            // Notify user of profile update
+            $user->notify(
+                new ProfileUpdated($user, array_diff($validated, $oldData))
             );
         });
 

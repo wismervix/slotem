@@ -4,7 +4,9 @@ import {
     Calendar,
     BriefcaseBusiness,
     CalendarClock,
+    Bell,
     Users,
+    LogOut,
     Settings as SettingsIcon,
     ChevronDown,
     ChevronRight,
@@ -15,6 +17,7 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 
 interface SidebarProps {
+    unreadCount: number;
     businessName: string;
     managerName: string;
     mobileSidebarOpen: boolean;
@@ -37,6 +40,7 @@ type NavItem = {
 };
 
 export default function Sidebar({
+    unreadCount,
     businessName,
     managerName,
     mobileSidebarOpen,
@@ -82,6 +86,11 @@ export default function Sidebar({
             name: 'Users',
             icon: Users,
             route: 'admin.users',
+        },
+        {
+            name: 'Notifications',
+            icon: Bell,
+            route: 'admin.notifications',
         },
 
         {
@@ -132,7 +141,6 @@ export default function Sidebar({
                         </div>
                     </div>
                 </div>
-
                 <nav className="flex-grow space-y-1">
                     {navItems.map((item) => {
                         const Icon = item.icon;
@@ -250,13 +258,34 @@ export default function Sidebar({
                                 <span className="relative z-10">
                                     {item.name}
                                 </span>
+                                {item.name === 'Notifications' &&
+                                    unreadCount > 0 && (
+                                        <span
+                                            className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${
+                                                active
+                                                    ? 'bg-white text-primary'
+                                                    : 'bg-primary text-white'
+                                            }`}
+                                        >
+                                            {unreadCount}
+                                        </span>
+                                    )}
                             </Link>
                         );
                     })}
                 </nav>
 
-                {/* New Booking CTA */}
-                <div className="mt-auto border-t border-purple-100 pt-4 dark:border-zinc-800">
+                <div className="mt-auto space-y-3 border-t border-outline-variant pt-4 dark:border-neutral-800">
+                    <Link
+                        href={route('admin.logout')}
+                        method="post"
+                        as="button"
+                        className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600 transition-all hover:bg-red-100 active:scale-[0.98] dark:border-red-900/50 dark:bg-red-950/20 dark:text-red-400 dark:hover:bg-red-950/40"
+                    >
+                        <LogOut className="h-4 w-4" />
+                        Logout
+                    </Link>
+
                     <Link
                         href={route('home')}
                         className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-purple-600 px-4 py-3 font-semibold text-white transition-all hover:bg-purple-700 hover:shadow-lg hover:shadow-purple-500/20 active:scale-[0.98]"
@@ -265,6 +294,9 @@ export default function Sidebar({
                         Go To Website
                     </Link>
                 </div>
+                {/* New Booking CTA */}
+                {/* <div className="mt-auto border-t border-purple-100 pt-4 dark:border-zinc-800">
+                </div> */}
             </aside>
 
             {/* Backdrop for mobile navigation drawer */}
