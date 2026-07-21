@@ -100,7 +100,7 @@ class UserController extends Controller
                 $admin,
                 'Update User',
                 $user->email,
-                ['user_id' => $user->id, 'old' => $oldData, 'new' => $request->validated()]
+                ['user_id' => $user->id, 'old' => $oldData, 'new' => $validated]
             );
             $adminActionNotification->sendToAllAdmins();
         });
@@ -131,7 +131,7 @@ class UserController extends Controller
             $admin,
             'Update User Status',
             $user->email,
-            ['user_id' => $user->id, 'old' => $oldStatus, 'new' => $request->validated()]
+            ['user_id' => $user->id, 'old' => $oldStatus, 'new' => $validated]
         );
         $adminActionNotification->sendToAllAdmins();
 

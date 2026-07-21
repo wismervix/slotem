@@ -11,7 +11,7 @@ class ProfileUpdated extends BaseNotification
     {
         $this->title = 'Profile Updated ✓';
         $this->message = "Your profile information has been successfully updated.";
-        $this->category = 'profile';
+        $this->category = 'broadcasts';
         $this->url = route('user.profile');
         $this->data = ['changes' => $changes];
     }

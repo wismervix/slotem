@@ -11,7 +11,7 @@ class WelcomeNotification extends BaseNotification
     {
         $this->title = 'Welcome to Slotem! 🎉';
         $this->message = "Welcome {$user->name}! We're excited to have you on board. Start by scheduling your first booking.";
-        $this->category = 'system';
+        $this->category = 'broadcasts';
         $this->url = route('user.dashboard');
         $this->data = ['user_id' => $user->id];
     }

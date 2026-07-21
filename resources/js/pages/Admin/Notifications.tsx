@@ -1,7 +1,6 @@
-// resources/js/Pages/User/Notifications.tsx
-import { router } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import AdminLayout from '@/layouts/Admin/AdminLayout';
-import { NewNotification } from '@/types';
+import { AdminNotification } from '@/types';
 import React, { useState } from 'react';
 import {
     Bell,
@@ -23,7 +22,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { formatDateAndTime } from '@/lib/calendar-utils';
 
 interface NotificationsProps {
-    notifications: NewNotification[];
+    notifications: AdminNotification[];
     unreadCount: number;
     broadcasts?: any[];
 }
@@ -33,8 +32,8 @@ const CATEGORY_ICONS: Record<string, any> = {
     reminders: Clock,
     updates: Megaphone,
     broadcasts: Radio,
-    system: Shield,
-    profile: User,
+    admin_actions: Shield,
+    user_booking_actions: User,
     'admin-actions': Shield,
 };
 
@@ -43,8 +42,8 @@ const CATEGORY_COLORS: Record<string, string> = {
     reminders: 'text-amber-500',
     updates: 'text-blue-500',
     broadcasts: 'text-pink-500',
-    system: 'text-purple-500',
-    profile: 'text-indigo-500',
+    admin_actions: 'text-purple-500',
+    user_booking_actions: 'text-indigo-500',
     'admin-actions': 'text-red-500',
 };
 
@@ -62,7 +61,7 @@ export default function UserNotifications({
         category: notification.data.category || 'system',
         url: notification.data.url,
         priority: notification.data.priority || 'normal',
-        type: notification.data.type || 'info',
+        type: notification.data.type || notification.type || 'info',
     }));
 
     const [notifications, setNotifications] = useState(mappedNotifications);
@@ -71,10 +70,8 @@ export default function UserNotifications({
         | 'all'
         | 'unread'
         | 'bookings'
-        | 'reminders'
-        | 'updates'
-        | 'broadcasts'
-        | 'admin-actions'
+        | 'user_booking_actions'
+        | 'admin_actions'
     >('all');
 
     const markNotificationAsRead = (id: string) => {
@@ -147,12 +144,10 @@ export default function UserNotifications({
 
     const filtered = notifications.filter((item) => {
         if (filter === 'unread') return !item.read;
-        if (filter === 'bookings') return item.category === 'bookings';
-        if (filter === 'reminders') return item.category === 'reminders';
-        if (filter === 'updates') return item.category === 'updates';
-        if (filter === 'broadcasts') return item.category === 'broadcasts';
-        if (filter === 'admin-actions')
-            return item.category === 'admin-actions';
+        if (filter === 'bookings') return item.type === 'bookings';
+        if (filter === 'user_booking_actions')
+            return item.type === 'user_booking_actions';
+        if (filter === 'admin_actions') return item.type === 'admin_actions';
         return true;
     });
 
@@ -167,6 +162,8 @@ export default function UserNotifications({
         );
     };
 
+    console.log('Mapped Notifications: ', mappedNotifications);
+    
     return (
         <AdminLayout>
             <div className="max-w-4xl space-y-6 pb-10">
@@ -211,18 +208,35 @@ export default function UserNotifications({
                             )
                         </button>
                         <button
-                            onClick={() => setFilter('broadcasts')}
+                            onClick={() => setFilter('user_booking_actions')}
                             className={`rounded-lg px-3 py-1.5 transition-all ${
-                                filter === 'broadcasts'
+                                filter === 'user_booking_actions'
                                     ? 'bg-white text-primary shadow-xs dark:bg-neutral-900'
                                     : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                             }`}
                         >
-                            Broadcasts (
+                            User Actions (
                             {
                                 notifications.filter(
                                     (n) =>
-                                        n.category === 'broadcasts' && !n.read,
+                                        n.type === 'user_booking_actions' && !n.read,
+                                ).length
+                            }
+                            )
+                        </button>
+                        <button
+                            onClick={() => setFilter('admin_actions')}
+                            className={`rounded-lg px-3 py-1.5 transition-all ${
+                                filter === 'admin_actions'
+                                    ? 'bg-white text-primary shadow-xs dark:bg-neutral-900'
+                                    : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                            }`}
+                        >
+                            Admin Actions (
+                            {
+                                notifications.filter(
+                                    (n) =>
+                                        n.type === 'admin_actions' && !n.read,
                                 ).length
                             }
                             )
@@ -297,7 +311,7 @@ export default function UserNotifications({
                                     />
                                 )}
                                 <div className="pt-0.5">
-                                    {getIcon(item.category)}
+                                    {getIcon(item.type)}
                                 </div>
 
                                 <div className="flex-grow space-y-1">
@@ -390,9 +404,12 @@ export default function UserNotifications({
                                 Our support team is available 24/7 for
                                 scheduling assistance.
                             </p>
-                            <button className="mt-4 text-xs font-bold text-on-secondary-container underline transition-colors hover:text-primary">
+                            <Link
+                                href={route('help-center')}
+                                className="mt-4 text-xs font-bold text-on-secondary-container underline transition-colors hover:text-primary"
+                            >
                                 Contact Support
-                            </button>
+                            </Link>
                         </div>
                         <CircleHelp
                             size={80}

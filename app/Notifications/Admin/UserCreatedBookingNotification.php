@@ -15,10 +15,10 @@ class UserCreatedBookingNotification extends BaseAdminNotification
         $start_time = Carbon::parse($booking->start_time)->format('g:i A');
 
 
-        $this->type = 'user_created_booking';
+        $this->type = 'user_booking_actions';
         $this->data = [
             'title' => 'New Booking Created 📅',
-            'message' => "{$booking->user->name} has created a new booking for {$booking->service->name} on {$booking->date} at {$booking->start_time}.",
+            'message' => "{$booking->user->name} has created a new booking for {$booking->service->name} on {$date} at {$start_time}.",
             'booking_id' => $booking->id,
             'user_id' => $booking->user_id,
             'user_name' => $booking->user->name,

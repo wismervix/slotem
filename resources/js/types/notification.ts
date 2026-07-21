@@ -6,18 +6,56 @@ export interface Notification {
         message: string;
         url: string;
         category: NotificationCategory;
+        data?: {
+            type?: string;
+            priority?: string;
+        };
     };
     read_at: string | null;
     created_at: string;
 }
-export interface NewNotification {
+
+type NotificationCategory = 'All' | 'bookings' | 'reminders' | 'broadcasts';
+
+export interface AdminNotification {
     id: string;
     type: string;
     data: {
         title: string;
         message: string;
         url: string;
-        category: NewNotificationCategory;
+        category: string;
+        priority: 'normal' | 'high' | 'urgent';
+        type: AdminNotificationType;
+    };
+    read_at: string | null;
+    created_at: string;
+}
+
+type AdminNotificationType =
+    | 'All'
+    | 'bookings'
+    | 'user_booking_actions'
+    | 'admin_actions';
+
+type AdminNotificationCategory =
+    | 'all'
+    | 'unread'
+    | 'bookings'
+    | 'reminders'
+    | 'updates'
+    | 'broadcasts'
+    | 'admin_actions'
+    | 'user_booking_actions';
+    
+export interface OldNotification {
+    id: string;
+    type: string;
+    data: {
+        title: string;
+        message: string;
+        url: string;
+        category: OldNotificationCategory;
         priority: 'normal' | 'high' | 'urgent';
         type: 'info' | 'warning' | 'error' | 'alert' | 'success';
     };
@@ -25,34 +63,12 @@ export interface NewNotification {
     created_at: string;
 }
 
-export interface MappedNotification {
-    id: string;
-    title: string;
-    message: string;
-    timestamp: string;
-    read: boolean;
-    category: NotificationCategory;
-    url: string;
-};
-
-type NotificationCategory = 'All' | 'Bookings' | 'Reminders' | 'Updates';
-
-export interface NewMappedNotification {
-    id: string;
-    title: string;
-    message: string;
-    timestamp: string;
-    read: boolean;
-    category: NewNotificationCategory;
-    priority: 'normal' | 'high' | 'urgent';
-    type: 'info' | 'warning' | 'error' | 'alert' | 'success'; // info, warning, success, alert
-    url: string;
-};
-type NewNotificationCategory =
+type OldNotificationCategory =
     | 'all'
     | 'unread'
     | 'bookings'
     | 'reminders'
     | 'updates'
     | 'broadcasts'
-    | 'admin-actions';
+    | 'admin_actions'
+    | 'user_booking_actions';

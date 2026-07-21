@@ -1,6 +1,6 @@
 import { Link, router } from '@inertiajs/react';
-import UserLayout from '@/layouts/User/UserLayout';
-import { Notification } from '@/types';
+import AdminLayout from '@/layouts/Admin/AdminLayout';
+import { AdminNotification } from '@/types';
 import React, { useState } from 'react';
 import {
     Bell,
@@ -10,46 +10,71 @@ import {
     CheckCircle,
     Bookmark,
     AlertCircle,
-    CalendarCheck2,
     Megaphone,
     CircleHelp,
     CheckCircle2,
+    Radio,
+    Shield,
+    User,
+    Calendar,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { formatDateAndTime } from '@/lib/calendar-utils';
 
 interface NotificationsProps {
-    notifications: Notification[];
-    unreadNotificationsCount: number;
+    notifications: AdminNotification[];
+    unreadCount: number;
+    broadcasts?: any[];
 }
+
+const CATEGORY_ICONS: Record<string, any> = {
+    bookings: Calendar,
+    reminders: Clock,
+    updates: Megaphone,
+    broadcasts: Radio,
+    system: Shield,
+    profile: User,
+    'admin-actions': Shield,
+};
+
+const CATEGORY_COLORS: Record<string, string> = {
+    bookings: 'text-emerald-500',
+    reminders: 'text-amber-500',
+    updates: 'text-blue-500',
+    broadcasts: 'text-pink-500',
+    system: 'text-purple-500',
+    profile: 'text-indigo-500',
+    'admin-actions': 'text-red-500',
+};
 
 export default function UserNotifications({
     notifications: backendNotifications,
-    unreadNotificationsCount,
+    unreadCount,
+    broadcasts = [],
 }: NotificationsProps) {
     const mappedNotifications = backendNotifications.map((notification) => ({
         id: notification.id,
-
         title: notification.data.title,
-
         message: notification.data.message,
-
         timestamp: notification.created_at,
-
         read: notification.read_at !== null,
-
-        category: notification.data.category,
-
-        type: notification.data?.data?.type,
-
-        priority: notification.data?.data?.priority,
-
+        category: notification.data.category || 'system',
         url: notification.data.url,
+        priority: notification.data.priority || 'normal',
+        type: notification.data.type || notification.type || 'info',
     }));
 
     const [notifications, setNotifications] = useState(mappedNotifications);
-
     const [visibleCount, setVisibleCount] = useState(6);
+    const [filter, setFilter] = useState<
+        | 'all'
+        | 'unread'
+        | 'bookings'
+        | 'reminders'
+        | 'updates'
+        | 'broadcasts'
+        | 'admin-actions'
+    >('all');
 
     const markNotificationAsRead = (id: string) => {
         router.patch(
@@ -75,7 +100,9 @@ export default function UserNotifications({
             {
                 preserveScroll: true,
                 onSuccess: () => {
-                    router.visit(notification.url);
+                    if (notification.url) {
+                        router.visit(notification.url);
+                    }
                 },
             },
         );
@@ -117,42 +144,32 @@ export default function UserNotifications({
         );
     };
 
-    const [filter, setFilter] = React.useState<
-        'all' | 'unread' | 'bookings' | 'reminders' | 'broadcasts'
-    >('all');
-
     const filtered = notifications.filter((item) => {
         if (filter === 'unread') return !item.read;
         if (filter === 'bookings') return item.category === 'bookings';
         if (filter === 'reminders') return item.category === 'reminders';
+        if (filter === 'updates') return item.category === 'updates';
         if (filter === 'broadcasts') return item.category === 'broadcasts';
+        if (filter === 'admin-actions')
+            return item.category === 'admin_actions';
         return true;
     });
 
     const visibleNotifications = filtered.slice(0, visibleCount);
 
     const getIcon = (category: string) => {
-        switch (category) {
-            case 'bookings':
-                return (
-                    <CalendarCheck2 className="h-5 w-5 shrink-0 text-emerald-500" />
-                );
-
-            case 'reminders':
-                return <Clock className="h-5 w-5 shrink-0 text-amber-500" />;
-
-            case 'broadcasts':
-                return <Megaphone className="h-5 w-5 shrink-0 text-blue-500" />;
-
-            default:
-                return <Bell className="h-5 w-5 shrink-0 text-gray-500" />;
-        }
+        const Icon = CATEGORY_ICONS[category] || Bell;
+        return (
+            <Icon
+                className={`h-5 w-5 shrink-0 ${CATEGORY_COLORS[category] || 'text-gray-500'}`}
+            />
+        );
     };
 
-    console.log('Notif: ', mappedNotifications);
+    console.log('Mapped Notifications: ', mappedNotifications);
     
     return (
-        <UserLayout unreadNotificationsCount={unreadNotificationsCount}>
+        <AdminLayout>
             <div className="max-w-4xl space-y-6 pb-10">
                 {/* Top action header for filters */}
                 <div className="flex flex-col flex-wrap items-start justify-between gap-4 rounded-2xl border border-outline-variant bg-white p-4 shadow-xs sm:flex-row sm:items-center dark:bg-neutral-900">
@@ -165,7 +182,7 @@ export default function UserNotifications({
                                     : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                             }`}
                         >
-                            All Alerts ({notifications.length})
+                            All ({notifications.length})
                         </button>
                         <button
                             onClick={() => setFilter('unread')}
@@ -190,23 +207,6 @@ export default function UserNotifications({
                             {
                                 notifications.filter(
                                     (n) => n.category === 'bookings' && !n.read,
-                                ).length
-                            }
-                            )
-                        </button>
-                        <button
-                            onClick={() => setFilter('reminders')}
-                            className={`rounded-lg px-3 py-1.5 transition-all ${
-                                filter === 'reminders'
-                                    ? 'bg-white text-primary shadow-xs dark:bg-neutral-900'
-                                    : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
-                            }`}
-                        >
-                            Reminders (
-                            {
-                                notifications.filter(
-                                    (n) =>
-                                        n.category === 'reminders' && !n.read,
                                 ).length
                             }
                             )
@@ -266,12 +266,11 @@ export default function UserNotifications({
                                 <Bell className="h-6 w-6" />
                             </div>
                             <h4 className="text-sm font-bold text-gray-900 dark:text-white">
-                                Quiet as a whisper
+                                All caught up!
                             </h4>
                             <p className="max-w-sm text-xs text-gray-500">
-                                You are completely caught up! We will ping you
-                                here when upcoming bookings are confirmed or
-                                need action.
+                                You have no notifications at the moment. We'll
+                                notify you when something important happens.
                             </p>
                         </div>
                     ) : (
@@ -286,12 +285,16 @@ export default function UserNotifications({
                                 className={`group relative flex cursor-pointer gap-4 overflow-hidden rounded-xl border p-4 transition-all duration-300 ${
                                     item.read
                                         ? 'border-outline-variant bg-white opacity-75 dark:bg-neutral-900'
-                                        : 'border-primary bg-primary/5 ring-1 ring-primary/10'
-                                } ${item.priority === 'urgent' ? 'border-red-500/50 bg-red-50 dark:bg-red-950/20' : ''} ${item.priority === 'high' ? 'border-amber-500/50 bg-amber-50 dark:bg-amber-950/20' : ''}`}
+                                        : 'border-primary bg-primary/5 ring-1 ring-primary/10 dark:bg-primary/10'
+                                } ${item.priority === 'urgent' ? 'border-red-500/50 bg-red-50 dark:bg-red-950/20' : ''}`}
                             >
                                 {!item.read && (
                                     <div
-                                        className={`${item.priority === 'urgent' ? 'bg-red-500' : 'bg-brand-primary'} ${item.priority === 'high' ? 'bg-amber-500' : 'bg-brand-primary'} absolute top-0 bottom-0 left-0 w-1`}
+                                        className={`absolute top-0 bottom-0 left-0 w-1 ${
+                                            item.priority === 'urgent'
+                                                ? 'bg-red-500'
+                                                : 'bg-primary'
+                                        }`}
                                     />
                                 )}
                                 <div className="pt-0.5">
@@ -314,8 +317,16 @@ export default function UserNotifications({
                                         {item.message}
                                     </p>
                                     {!item.read && (
-                                        <span className="mt-1 inline-block rounded-full bg-primary px-2 py-0.5 text-[9px] font-extrabold text-white uppercase">
-                                            NEW alert
+                                        <span
+                                            className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[9px] font-extrabold text-white uppercase ${
+                                                item.priority === 'urgent'
+                                                    ? 'bg-red-500'
+                                                    : 'bg-primary'
+                                            }`}
+                                        >
+                                            {item.priority === 'urgent'
+                                                ? 'Urgent'
+                                                : 'New'}
                                         </span>
                                     )}
                                     <div className="mt-4 flex gap-4 opacity-0 transition-opacity group-hover:opacity-100">
@@ -327,7 +338,7 @@ export default function UserNotifications({
                                                         item.id,
                                                     );
                                                 }}
-                                                className="flex cursor-pointer items-center gap-1.5 text-sm font-semibold text-brand-primary active:scale-95"
+                                                className="flex cursor-pointer items-center gap-1.5 text-sm font-semibold text-primary active:scale-95"
                                             >
                                                 <CheckCircle2 size={14} />
                                                 Mark as read
@@ -338,7 +349,7 @@ export default function UserNotifications({
                                                 e.stopPropagation();
                                                 deleteNotification(item.id);
                                             }}
-                                            className="flex cursor-pointer items-center gap-1.5 text-sm font-semibold text-brand-error active:scale-95"
+                                            className="flex cursor-pointer items-center gap-1.5 text-sm font-semibold text-red-500 active:scale-95"
                                         >
                                             <Trash2 size={14} />
                                             Delete
@@ -354,7 +365,7 @@ export default function UserNotifications({
                     {filtered.length > visibleCount && (
                         <button
                             onClick={() => setVisibleCount((prev) => prev + 6)}
-                            className="rounded-xl px-6 py-3 font-medium text-brand-primary transition-colors hover:bg-brand-primary-container/20"
+                            className="rounded-xl px-6 py-3 font-medium text-primary transition-colors hover:bg-primary/10"
                         >
                             Load older notifications
                         </button>
@@ -371,29 +382,29 @@ export default function UserNotifications({
                 </div>
 
                 <div className="flex">
-                    <div className="group relative ml-auto w-2xs overflow-hidden rounded-2xl bg-brand-secondary-container p-6">
+                    <div className="group relative ml-auto w-2xs overflow-hidden rounded-2xl bg-secondary-container p-6">
                         <div className="relative z-10">
-                            <h4 className="text-lg font-semibold text-brand-on-secondary-container">
+                            <h4 className="text-lg font-semibold text-on-secondary-container">
                                 Need Help?
                             </h4>
-                            <p className="mt-2 text-xs text-brand-on-secondary-container/80">
+                            <p className="mt-2 text-xs text-on-secondary-container/80">
                                 Our support team is available 24/7 for
                                 scheduling assistance.
                             </p>
                             <Link
                                 href={route('help-center')}
-                                className="mt-4 text-xs font-bold text-brand-on-secondary-container underline transition-colors hover:text-brand-primary"
+                                className="mt-4 text-xs font-bold text-on-secondary-container underline transition-colors hover:text-primary"
                             >
                                 Contact Support
                             </Link>
                         </div>
                         <CircleHelp
                             size={80}
-                            className="absolute -right-4 -bottom-4 text-brand-on-secondary-container/10 transition-transform duration-500 group-hover:scale-110"
+                            className="absolute -right-4 -bottom-4 text-on-secondary-container/10 transition-transform duration-500 group-hover:scale-110"
                         />
                     </div>
                 </div>
             </div>
-        </UserLayout>
+        </AdminLayout>
     );
 }

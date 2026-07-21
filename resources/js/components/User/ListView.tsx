@@ -113,17 +113,21 @@ export default function ListView({
         const group = getStatusGroup(status);
 
         if (group === 'confirmed') {
+            const label = status === 'approved' ? 'Approved' : 'Completed';
+
             return (
                 <span className="shrink-0 rounded-full border border-emerald-200/50 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 uppercase dark:bg-emerald-950/20 dark:text-emerald-400">
-                    Confirmed
+                    {label}
                 </span>
             );
         }
 
         if (group === 'failed') {
+            const label = status === 'cancelled' ? 'Cancelled' : 'Rejected';
+
             return (
                 <span className="shrink-0 rounded-full border border-red-200/50 bg-red-50 px-2.5 py-0.5 text-[10px] font-bold text-red-700 uppercase dark:bg-red-950/20 dark:text-red-400">
-                    Failed
+                    {label}
                 </span>
             );
         }
@@ -311,8 +315,8 @@ export default function ListView({
 
                                 <div className="flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
                                     {/* {booking.status === 'completed' ? ( */}
-                                    {getStatusGroup(booking.status) ===
-                                    'confirmed' ? (
+                                    {booking.status === 'approved' ||
+                                    booking.status === 'pending' ? (
                                         <>
                                             <button
                                                 type="button"
@@ -349,6 +353,10 @@ export default function ListView({
                                                 Cancel
                                             </button>
                                         </>
+                                    ) : booking.status === 'completed' ? (
+                                        <span className="py-1 text-[11px] font-bold text-gray-400 italic">
+                                            No actions available
+                                        </span>
                                     ) : booking.status !== 'cancelled' ? (
                                         <button
                                             type="button"

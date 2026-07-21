@@ -15,7 +15,7 @@ class BookingActionNotification extends BaseAdminNotification
         $start_time = Carbon::parse($booking->start_time)->format('g:i A');
 
 
-        $this->type = 'booking_action';
+        $this->type = 'bookings';
         $this->data = [
             'title' => "Booking {$action} 📅",
             'message' => "Booking for {$booking->service->name} by {$booking->user->name} was {$action}." . ($note ? " Note: {$note}" : ''),

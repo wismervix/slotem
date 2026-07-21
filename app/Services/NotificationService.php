@@ -19,4 +19,21 @@ class NotificationService
             ->whereNotIn('id', $hiddenIds)
             ->count();
     }
+
+    public function getNotificationCounts(User $user): array
+    {
+        $hiddenIds = NotificationState::query()
+            ->where('user_id', $user->id)
+            ->whereNotNull('hidden_at')
+            ->pluck('notification_id');
+
+        $notifications = $user
+            ->notifications()
+            ->whereNotIn('id', $hiddenIds);
+
+        return [
+            'total' => $notifications->count(),
+            'unread' => $notifications->whereNull('read_at')->count(),
+        ];
+    }
 }

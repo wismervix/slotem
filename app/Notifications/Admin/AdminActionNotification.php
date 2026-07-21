@@ -13,7 +13,7 @@ class AdminActionNotification extends BaseAdminNotification
         protected string $target,
         protected array $details = []
     ) {
-        $this->type = 'admin_action';
+        $this->type = 'admin_actions';
         $this->data = [
             'title' => 'Admin Action Logged 🔔',
             'message' => "Admin {$admin->name} performed '{$action}' on {$target}.",

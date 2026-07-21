@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import {
     LayoutDashboard,
+    Megaphone,
     Calendar,
     BriefcaseBusiness,
     CalendarClock,
@@ -24,7 +25,7 @@ interface SidebarProps {
     setMobileSidebarOpen: (isOpen: boolean) => void;
 }
 
-type MenuKey = 'settings';
+type MenuKey = 'settings' | 'broadcasts';
 
 type ChildNavItem = {
     name: string;
@@ -48,6 +49,7 @@ export default function Sidebar({
 }: SidebarProps) {
     const [openMenus, setOpenMenus] = useState<Record<MenuKey, boolean>>({
         settings: false,
+        broadcasts: false,
     });
 
     const toggleMenu = (menu: MenuKey) => {
@@ -91,6 +93,22 @@ export default function Sidebar({
             name: 'Notifications',
             icon: Bell,
             route: 'admin.notifications',
+        },
+
+        {
+            name: 'Broadcasts',
+            icon: Megaphone,
+            menuKey: 'broadcasts',
+            children: [
+                {
+                    name: 'All Broadcasts',
+                    route: 'admin.broadcasts',
+                },
+                {
+                    name: 'Create Broadcast',
+                    route: 'admin.broadcasts.create',
+                },
+            ],
         },
 
         {

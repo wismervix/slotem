@@ -16,6 +16,8 @@ class NotificationController extends Controller
 
         $notifications = $admin->notifications()->latest()->get();
 
+        // return $notifications;
+
         return inertia('Admin/Notifications', [
             'notifications' => $notifications,
             'unreadCount' => $admin->unreadNotifications()->count(),
