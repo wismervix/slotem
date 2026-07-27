@@ -52,6 +52,9 @@ class NotificationController extends Controller
             })
             ->latest()
             ->get()
+            ->reject(function ($broadcast) use ($hiddenIds) {
+                return $hiddenIds->contains('broadcast_' . $broadcast->id);
+            })
             ->map(function ($broadcast) use ($user) {
                 return [
                     'id' => 'broadcast_' . $broadcast->id,

@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Notifications\Admin\UserCancelledBookingNotification as AdminBookingCancelled;
 use App\Notifications\Admin\UserCreatedBookingNotification;
+use App\Services\Notification\BookingNotificationService;
 use App\Notifications\Booking\NewBooking;
 // use App\Notifications\Booking\BookingConfirmed;
 use App\Notifications\Booking\BookingCancelled;
@@ -24,6 +25,13 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class BookingController extends Controller
 {
+    protected BookingNotificationService $bookingNotification;
+
+    public function __construct(BookingNotificationService $bookingNotification)
+    {
+        $this->bookingNotification = $bookingNotification;
+    }
+
     public function dateAndTime(Request $request)
     {
         $validated = $request->validate([
@@ -225,6 +233,9 @@ class BookingController extends Controller
             $user->notify(
                 new BookingCancelled($booking, true)
             );
+
+            // Send notification
+            // $this->bookingNotification->notifyCancelled($booking, true);
         });
 
         // Notify all admins

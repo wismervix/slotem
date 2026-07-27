@@ -13,9 +13,18 @@ use App\Notifications\Booking\BookingCancelled;
 use App\Notifications\Booking\BookingCompleted;
 use App\Notifications\Booking\BookingRejected;
 use App\Notifications\Booking\BookingRestored;
+use App\Services\Notification\BookingNotificationService;
+
 
 class BookingController extends Controller
 {
+    protected BookingNotificationService $bookingNotification;
+    
+    public function __construct(BookingNotificationService $bookingNotification)
+    {
+        $this->bookingNotification = $bookingNotification;
+    }
+    
     public function index()
     {
         $bookings = Booking::all();
@@ -58,6 +67,8 @@ class BookingController extends Controller
             // Notify admin who performed action
             $adminNotification = new BookingActionNotification($booking, 'approved', $validated['note'] ?? null);
             $adminNotification->sendToAllAdmins();
+            // Send notification
+            // $this->bookingNotification->notifyConfirmed($booking, $admin);
         });
 
         return back()->with('success', 'Booking approved successfully.');

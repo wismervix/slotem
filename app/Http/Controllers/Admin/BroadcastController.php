@@ -6,12 +6,18 @@ use App\Models\Admin;
 use App\Models\User;
 use App\Models\Broadcast;
 use App\Http\Controllers\Controller;
-use App\Notifications\User\BroadcastNotification;
+use App\Services\Notification\BroadcastService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class BroadcastController extends Controller
 {
+    protected BroadcastService $broadcastService;
+
+    public function __construct(BroadcastService $broadcastService)
+    {
+        $this->broadcastService = $broadcastService;
+    }
+
     public function index()
     {
         /** @var Admin $admin */
@@ -24,6 +30,8 @@ class BroadcastController extends Controller
             ->latest()
             ->get();
 
+        // return $broadcasts;
+
         return inertia('Admin/Broadcasts/Index', [
             'broadcasts' => $broadcasts,
         ]);
@@ -31,7 +39,16 @@ class BroadcastController extends Controller
 
     public function create()
     {
-        return inertia('Admin/Broadcasts/Create');
+        return inertia('Admin/Broadcasts/Create', [
+            'users' => User::select([
+                'id',
+                'name',
+                'email',
+            ])
+                ->where('status', 'active')
+                ->orderBy('name')
+                ->get(),
+        ]);
     }
 
     public function store(Request $request)
@@ -46,58 +63,63 @@ class BroadcastController extends Controller
             'priority' => ['required', 'in:normal,high,urgent'],
             'target_audience' => ['nullable', 'array'],
             'scheduled_at' => ['nullable', 'date'],
+            'target_users' => ['nullable', 'array'],
+            'target_users.*' => ['exists:users,id'],
             'expires_at' => ['nullable', 'date', 'after:scheduled_at'],
         ]);
 
-        DB::transaction(function () use ($validated, $admin) {
-            $broadcast = Broadcast::create([
-                'admin_id' => $admin->id,
-                'title' => $validated['title'],
-                'message' => $validated['message'],
-                'type' => $validated['type'],
-                'priority' => $validated['priority'],
-                'target_audience' => $validated['target_audience'] ?? ['all'],
-                'scheduled_at' => $validated['scheduled_at'] ?? now(),
-                'expires_at' => $validated['expires_at'] ?? null,
-            ]);
+        $this->broadcastService->by($admin);
 
-            $this->sendBroadcast($broadcast);
-        });
+        // Build the targets array
+        $targets = $validated['target_audience'] ?? ['all'];
+        $targetUserIds = $validated['target_users'] ?? [];
+
+        // Handle scheduled broadcasts
+        if (!empty($validated['scheduled_at'])) {
+            $scheduledNotification = $this->broadcastService->schedule(
+                $targets,
+                $validated['title'],
+                $validated['message'],
+                new \DateTime($validated['scheduled_at']),
+                [
+                    'type' => $validated['type'],
+                    'priority' => $validated['priority'],
+                    'user_ids' => $targetUserIds, // Pass user IDs for scheduled broadcasts
+                ]
+            );
+
+            return redirect()
+                ->route('admin.broadcasts')
+                ->with('success', 'Broadcast scheduled successfully for ' . date('Y-m-d H:i', strtotime($validated['scheduled_at'])));
+        }
+
+        // Send immediately
+        if (in_array('all', $targets)) {
+            $this->broadcastService->toAll(
+                $validated['title'],
+                $validated['message'],
+                [
+                    'type' => $validated['type'],
+                    'priority' => $validated['priority'],
+                ]
+            );
+        } elseif (in_array('custom', $targets) && !empty($targetUserIds)) {
+            $users = User::whereIn('id', $targetUserIds)->get();
+            $this->broadcastService->toUsers(
+                $users,
+                $validated['title'],
+                $validated['message'],
+                [
+                    'type' => $validated['type'],
+                    'priority' => $validated['priority'],
+                    'user_ids' => $targetUserIds, // Pass user IDs
+                ]
+            );
+        }
 
         return redirect()
             ->route('admin.broadcasts')
             ->with('success', 'Broadcast sent successfully.');
-    }
-
-    protected function sendBroadcast(Broadcast $broadcast)
-    {
-        $users = $this->getTargetUsers($broadcast->target_audience);
-
-        foreach ($users as $user) {
-            // Attach broadcast to user
-            DB::table('broadcast_user')->insert([
-                'broadcast_id' => $broadcast->id,
-                'user_id' => $user->id,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            // Send notification
-            $user->notify(new BroadcastNotification($broadcast));
-        }
-    }
-
-    protected function getTargetUsers(array $target)
-    {
-        if (in_array('all', $target)) {
-            return User::all();
-        }
-
-        if (isset($target['user_ids'])) {
-            return User::whereIn('id', $target['user_ids'])->get();
-        }
-
-        return User::all();
     }
 
     public function show(Broadcast $broadcast)

@@ -4,9 +4,11 @@ import { useForm, router } from '@inertiajs/react';
 import { useState } from 'react';
 import {
     Megaphone,
+    Search,
     Send,
     Users,
     Clock,
+    Check,
     AlertCircle,
     Info,
     CheckCircle,
@@ -14,18 +16,37 @@ import {
     X,
 } from 'lucide-react';
 
-export default function CreateBroadcast() {
+interface User {
+    id: number;
+    name: string;
+    email: string;
+}
+
+interface PageProps {
+    users: User[];
+}
+
+export default function CreateBroadcast({ users }: PageProps) {
     const { data, setData, post, processing, errors } = useForm({
         title: '',
         message: '',
         type: 'info',
         priority: 'normal',
         target_audience: ['all'],
+        target_users: [] as number[],
         scheduled_at: '',
         expires_at: '',
     });
 
-    const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+    const [userSearch, setUserSearch] = useState('');
+
+    const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+
+    const filteredUsers = users.filter(
+        (user) =>
+            user.name.toLowerCase().includes(userSearch.toLowerCase()) ||
+            user.email.toLowerCase().includes(userSearch.toLowerCase()),
+    );
 
     const audienceOptions = [
         { value: 'all', label: 'All Users' },
@@ -69,6 +90,7 @@ export default function CreateBroadcast() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
+        // Validate custom audience
         if (
             data.target_audience.includes('custom') &&
             selectedUsers.length === 0
@@ -77,6 +99,17 @@ export default function CreateBroadcast() {
             return;
         }
 
+        // Make sure target_users is set
+        if (data.target_audience.includes('custom')) {
+            setData(
+                'target_users',
+                selectedUsers.map((u) => u.id),
+            );
+        } else {
+            setData('target_users', []);
+        }
+
+        // Submit the form
         post(route('admin.broadcasts.store'));
     };
 
@@ -239,6 +272,156 @@ export default function CreateBroadcast() {
                                     ))}
                                 </select>
                             </div>
+
+                            {data.target_audience.includes('custom') && (
+                                <div className="space-y-3">
+                                    <label className="block text-xs font-bold tracking-wider text-on-surface-variant uppercase">
+                                        Select Users
+                                    </label>
+
+                                    {/* User search */}
+                                    <div className="relative">
+                                        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                                        <input
+                                            type="text"
+                                            placeholder="Search users by name or email..."
+                                            value={userSearch}
+                                            onChange={(e) =>
+                                                setUserSearch(e.target.value)
+                                            }
+                                            className="w-full rounded-lg border border-outline-variant py-2 pr-4 pl-10 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                                        />
+                                    </div>
+
+                                    {/* Selected users tags */}
+                                    {selectedUsers.length > 0 && (
+                                        <div className="flex flex-wrap gap-2">
+                                            {selectedUsers.map((user) => (
+                                                <span
+                                                    key={user.id}
+                                                    className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"
+                                                >
+                                                    {user.name}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const exists =
+                                                                selectedUsers.some(
+                                                                    (u) =>
+                                                                        u.id ===
+                                                                        user.id,
+                                                                );
+
+                                                            let updatedUsers;
+
+                                                            if (exists) {
+                                                                updatedUsers =
+                                                                    selectedUsers.filter(
+                                                                        (u) =>
+                                                                            u.id !==
+                                                                            user.id,
+                                                                    );
+                                                            } else {
+                                                                updatedUsers = [
+                                                                    ...selectedUsers,
+                                                                    user,
+                                                                ];
+                                                            }
+
+                                                            setSelectedUsers(
+                                                                updatedUsers,
+                                                            );
+
+                                                            setData(
+                                                                'target_users',
+                                                                updatedUsers.map(
+                                                                    (u) => u.id,
+                                                                ),
+                                                            );
+                                                        }}
+                                                        className="text-primary hover:text-primary/70"
+                                                    >
+                                                        <X className="h-3 w-3" />
+                                                    </button>
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* User list */}
+                                    <div className="max-h-48 overflow-y-auto rounded-lg border border-outline-variant dark:border-slate-700">
+                                        {filteredUsers
+                                            .filter(
+                                                (user) =>
+                                                    user.name
+                                                        .toLowerCase()
+                                                        .includes(
+                                                            userSearch.toLowerCase(),
+                                                        ) ||
+                                                    user.email
+                                                        .toLowerCase()
+                                                        .includes(
+                                                            userSearch.toLowerCase(),
+                                                        ),
+                                            )
+                                            .map((user) => (
+                                                <button
+                                                    key={user.id}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        if (
+                                                            selectedUsers.some(
+                                                                (u) =>
+                                                                    u.id ===
+                                                                    user.id,
+                                                            )
+                                                        ) {
+                                                            setSelectedUsers(
+                                                                (prev) =>
+                                                                    prev.filter(
+                                                                        (u) =>
+                                                                            u.id !==
+                                                                            user.id,
+                                                                    ),
+                                                            );
+                                                        } else {
+                                                            setSelectedUsers(
+                                                                (prev) => [
+                                                                    ...prev,
+                                                                    user,
+                                                                ],
+                                                            );
+                                                        }
+                                                    }}
+                                                    className={`flex w-full items-center justify-between px-4 py-2 text-sm transition-colors hover:bg-surface-container-low ${
+                                                        selectedUsers.some(
+                                                            (u) =>
+                                                                u.id ===
+                                                                user.id,
+                                                        )
+                                                            ? 'bg-primary/5 text-primary'
+                                                            : 'text-on-surface'
+                                                    }`}
+                                                >
+                                                    <span>{user.name}</span>
+                                                    <span className="text-xs text-on-surface-variant">
+                                                        {user.email}
+                                                    </span>
+                                                    {selectedUsers.some(
+                                                        (u) => u.id === user.id,
+                                                    ) && (
+                                                        <Check className="h-4 w-4 text-primary" />
+                                                    )}
+                                                </button>
+                                            ))}
+                                        {filteredUsers.length === 0 && (
+                                            <div className="px-4 py-8 text-center text-sm text-on-surface-variant">
+                                                No users found
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Schedule */}
                             <div>
