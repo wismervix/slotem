@@ -3,21 +3,22 @@
 namespace App\Console\Commands;
 
 use App\Models\BookingReminder;
-use App\Services\Notification\BookingNotificationService;
+use App\Services\Notification\ReminderService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
 class SendBookingReminders extends Command
 {
     protected $signature = 'notifications:send-reminders';
+
     protected $description = 'Send scheduled booking reminders';
 
-    protected BookingNotificationService $notificationService;
+    protected ReminderService $reminderService;
 
-    public function __construct(BookingNotificationService $notificationService)
+    public function __construct(ReminderService $reminderService)
     {
         parent::__construct();
-        $this->notificationService = $notificationService;
+        $this->reminderService = $reminderService;
     }
 
     public function handle()
@@ -31,6 +32,7 @@ class SendBookingReminders extends Command
 
         if ($reminders->isEmpty()) {
             $this->info('No pending reminders to send.');
+
             return 0;
         }
 
@@ -45,20 +47,21 @@ class SendBookingReminders extends Command
         foreach ($reminders as $reminder) {
             try {
                 // Check if booking still exists and is valid
-                if (!$reminder->booking || $reminder->booking->status === 'cancelled') {
+                if (! $reminder->booking || $reminder->booking->status === 'cancelled') {
                     $this->warn("Skipping reminder for cancelled booking #{$reminder->booking_id}");
                     $reminder->update(['status' => 'failed']);
                     $failedCount++;
                     $bar->advance();
+
                     continue;
                 }
 
-                $this->notificationService->sendReminder($reminder);
+                $this->reminderService->sendReminder($reminder);
                 $sentCount++;
                 $this->line("\n✓ Sent {$reminder->type} reminder for booking #{$reminder->booking_id}");
             } catch (\Exception $e) {
                 $failedCount++;
-                Log::error("Failed to send reminder for booking #{$reminder->booking_id}: " . $e->getMessage());
+                Log::error("Failed to send reminder for booking #{$reminder->booking_id}: ".$e->getMessage());
                 $this->error("\n✗ Failed to send reminder for booking #{$reminder->booking_id}");
 
                 // Update reminder with error

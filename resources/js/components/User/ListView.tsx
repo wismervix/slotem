@@ -27,7 +27,7 @@ import { useBookingModalContext } from '@/contexts/BookingModalContext';
 interface ListViewProps {
     bookings: Booking[];
     searchQuery: string;
-    onCancelAppointment: (id: number) => void;
+    onCancelAppointment: (booking: Booking) => void;
 }
 
 type BookingStatusGroup = 'all' | 'pending' | 'confirmed' | 'failed';
@@ -327,7 +327,7 @@ export default function ListView({
                                                         booking.service?.id,
                                                     )
                                                 }
-                                                className="flex cursor-pointer items-center gap-1 rounded-lg border border-outline-variant px-3 py-1.5 text-xs font-bold text-on-surface transition-colors hover:bg-surface-container-dark dark:text-on-surface-dark"
+                                                className="flex cursor-pointer items-center gap-1 rounded-lg border border-outline-variant px-3 py-1.5 text-xs font-bold text-on-surface transition-colors hover:bg-surface-container-dark dark:text-surface-bright"
                                                 title="Reschedule this appointment"
                                             >
                                                 <CalendarClock className="h-3.5 w-3.5" />
@@ -336,15 +336,9 @@ export default function ListView({
                                             <button
                                                 type="button"
                                                 onClick={() => {
-                                                    if (
-                                                        confirm(
-                                                            'Are you sure you want to cancel this appointment? This action cannot be undone.',
-                                                        )
-                                                    ) {
-                                                        onCancelAppointment(
-                                                            booking.id,
-                                                        );
-                                                    }
+                                                    onCancelAppointment(
+                                                        booking,
+                                                    );
                                                 }}
                                                 className="flex cursor-pointer items-center gap-1 rounded-lg bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 transition-colors hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-900/30"
                                                 title="Cancel this appointment"
@@ -361,15 +355,7 @@ export default function ListView({
                                         <button
                                             type="button"
                                             onClick={() => {
-                                                if (
-                                                    confirm(
-                                                        'Are you sure you want to cancel this appointment? This action cannot be undone.',
-                                                    )
-                                                ) {
-                                                    onCancelAppointment(
-                                                        booking.id,
-                                                    );
-                                                }
+                                                onCancelAppointment(booking);
                                             }}
                                             className="flex cursor-pointer items-center gap-1 rounded-lg bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 transition-colors hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-900/30"
                                             title="Cancel this appointment"

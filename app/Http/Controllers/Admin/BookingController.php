@@ -2,29 +2,37 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Admin;
-use App\Models\Booking;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BookingStatusRequest;
+use App\Models\Admin;
+use App\Models\Booking;
 use App\Notifications\Admin\BookingActionNotification;
 use App\Notifications\Booking\BookingApproved;
 use App\Notifications\Booking\BookingCancelled;
 use App\Notifications\Booking\BookingCompleted;
 use App\Notifications\Booking\BookingRejected;
 use App\Notifications\Booking\BookingRestored;
-use App\Services\Notification\BookingNotificationService;
+use App\Services\Notification\ReminderService;
+use Illuminate\Support\Facades\DB;
 
+// use App\Services\Notification\BookingNotificationService;
 
 class BookingController extends Controller
 {
-    protected BookingNotificationService $bookingNotification;
-    
-    public function __construct(BookingNotificationService $bookingNotification)
+    // protected BookingNotificationService $bookingNotification;
+
+    // public function __construct(BookingNotificationService $bookingNotification)
+    // {
+    //     $this->bookingNotification = $bookingNotification;
+    // }
+
+    protected ReminderService $reminderService;
+
+    public function __construct(ReminderService $reminderService)
     {
-        $this->bookingNotification = $bookingNotification;
+        $this->reminderService = $reminderService;
     }
-    
+
     public function index()
     {
         $bookings = Booking::all();
@@ -51,13 +59,14 @@ class BookingController extends Controller
             return back()->with('error', 'Only pending bookings can be approved.');
         }
 
-        DB::transaction(function () use ($request, $booking, $validated, $admin) {
+        DB::transaction(function () use ($booking, $validated, $admin) {
             $booking->update([
                 'status' => 'approved',
                 // 'admin_note' => $validated['note'] ?? null,
             ]);
 
-            // You can add notification logic here
+            // Schedule 2-hour reminder
+            $this->reminderService->scheduleTwoHourReminder($booking);
 
             // Notify user
             $booking->user->notify(
@@ -91,12 +100,11 @@ class BookingController extends Controller
             return back()->with('error', 'Only pending bookings can be rejected.');
         }
 
-        DB::transaction(function () use ($request, $booking, $validated, $admin) {
+        DB::transaction(function () use ($booking, $validated, $admin) {
             $booking->update([
                 'status' => 'rejected',
                 // 'rejection_reason' => $validated['reason'],
             ]);
-
 
             // Free up the time slot
             $booking->timeSlot()->update(['is_booked' => false]);
@@ -129,17 +137,15 @@ class BookingController extends Controller
             return back()->with('error', 'Only approved bookings can be marked as completed.');
         }
 
-        DB::transaction(function () use ($request, $booking, $admin) {
+        DB::transaction(function () use ($booking) {
             $booking->update([
                 'status' => 'completed',
             ]);
-
 
             // Notify user
             $booking->user->notify(
                 new BookingCompleted($booking)
             );
-
 
             // Notify admin who performed action
             $adminNotification = new BookingActionNotification($booking, 'completed');
@@ -163,7 +169,7 @@ class BookingController extends Controller
             return back()->with('error', 'Only approved bookings can be cancelled.');
         }
 
-        DB::transaction(function () use ($request, $booking, $admin) {
+        DB::transaction(function () use ($booking) {
             $booking->update([
                 'status' => 'cancelled',
             ]);
@@ -174,7 +180,6 @@ class BookingController extends Controller
             $booking->user->notify(
                 new BookingCancelled($booking, false)
             );
-
 
             // Notify admin who performed action
             $adminNotification = new BookingActionNotification($booking, 'cancelled by admin');
@@ -198,7 +203,7 @@ class BookingController extends Controller
             return back()->with('error', 'Only rejected bookings can be restored.');
         }
 
-        DB::transaction(function () use ($request, $booking, $admin) {
+        DB::transaction(function () use ($booking, $admin) {
             $booking->update([
                 'status' => 'pending',
             ]);

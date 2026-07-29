@@ -20,6 +20,8 @@ import {
     Mail,
 } from 'lucide-react';
 import { formatDateAndTime } from '@/lib/calendar-utils';
+import { useConfirmation } from '@/hooks/useConfirmation';
+import ConfirmationModal from '@/components/Shared/ConfirmationModal';
 
 interface BroadcastUser {
     id: number;
@@ -54,6 +56,11 @@ interface BroadcastShowProps {
 }
 
 export default function BroadcastShow({ broadcast }: BroadcastShowProps) {
+    // ─── 1. STATE ──────────────────────────────────────────────────
+
+    // Use the confirmation hook
+    const confirmation = useConfirmation();
+
     const [showUsers, setShowUsers] = useState(false);
     const [searchUser, setSearchUser] = useState('');
 
@@ -109,12 +116,22 @@ export default function BroadcastShow({ broadcast }: BroadcastShowProps) {
             user.name.toLowerCase().includes(searchUser.toLowerCase()) ||
             user.email.toLowerCase().includes(searchUser.toLowerCase()),
     );
-
-    const handleDelete = () => {
-        if (confirm('Are you sure you want to delete this broadcast?')) {
-            router.delete(route('admin.broadcasts.destroy', broadcast.id));
-        }
-    };
+    
+        const performHandleDelete = () => {
+            router.delete(route('admin.broadcasts.destroy', broadcast.id), {
+                preserveScroll: true,
+            });
+        };
+    
+        const handleDelete = () => {
+            confirmation.confirm({
+                title: 'Delete this broadcast?',
+                message: `You're about to delete the broadcast "${broadcast.title}". This action cannot be undone.`,
+                confirmLabel: 'Yes, Delete Broadcast',
+                variant: 'danger',
+                onConfirm: performHandleDelete,
+            });
+        };
 
     return (
         <AdminLayout>
@@ -373,6 +390,18 @@ export default function BroadcastShow({ broadcast }: BroadcastShowProps) {
                         </p>
                     </div>
                 </div>
+
+                <ConfirmationModal
+                    isOpen={confirmation.isOpen}
+                    onClose={confirmation.close}
+                    onConfirm={confirmation.handleConfirm}
+                    title={confirmation.options?.title || ''}
+                    message={confirmation.options?.message || ''}
+                    confirmLabel={confirmation.options?.confirmLabel}
+                    cancelLabel={confirmation.options?.cancelLabel}
+                    variant={confirmation.options?.variant}
+                    isLoading={confirmation.isLoading}
+                />
             </div>
         </AdminLayout>
     );

@@ -256,7 +256,6 @@ export default function AdminUsers({ users, flash }: AdminUsersProps) {
         const nextStatus = user.status === 'active' ? 'suspended' : 'active';
         const verb = nextStatus === 'suspended' ? 'suspend' : 'reactivate';
 
-        // Use the confirmation hook instead of setConfirmState
         confirmation.confirm({
             title: `Are you sure you want to ${verb} ${user.name}?`,
             message: `Are you absolutely sure you want to ${verb} ${user.name}? This cannot be undone.`,

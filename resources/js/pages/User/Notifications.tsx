@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { formatDateAndTime } from '@/lib/calendar-utils';
+import { useConfirmation } from '@/hooks/useConfirmation';
+import ConfirmationModal from '@/components/Shared/ConfirmationModal';
 
 interface NotificationsProps {
     notifications: Notification[];
@@ -27,6 +29,11 @@ export default function UserNotifications({
     notifications: backendNotifications,
     unreadNotificationsCount,
 }: NotificationsProps) {
+    // ─── 1. STATE ──────────────────────────────────────────────────
+
+    // Use the confirmation hook
+    const confirmation = useConfirmation();
+
     const mappedNotifications = backendNotifications.map((notification) => ({
         id: notification.id,
 
@@ -81,12 +88,22 @@ export default function UserNotifications({
         );
     };
 
-    const deleteNotification = (id: string) => {
+    const performDeleteNotification = (id: string) => {
         router.delete(route('notifications.delete', id), {
             preserveScroll: true,
             onSuccess: () => {
                 setNotifications((prev) => prev.filter((n) => n.id !== id));
             },
+        });
+    };
+
+    const deleteNotification = (id: string) => {
+        confirmation.confirm({
+            title: `Are you sure you want to delete this notification?`,
+            message: `Are you absolutely sure you want to delete this notification? This cannot be undone.`,
+            confirmLabel: `Delete Notification`,
+            variant: 'danger',
+            onConfirm: () => performDeleteNotification(id),
         });
     };
 
@@ -150,7 +167,7 @@ export default function UserNotifications({
     };
 
     console.log('Notif: ', mappedNotifications);
-    
+
     return (
         <UserLayout unreadNotificationsCount={unreadNotificationsCount}>
             <div className="max-w-4xl space-y-6 pb-10">
@@ -298,7 +315,7 @@ export default function UserNotifications({
                                     {getIcon(item.category)}
                                 </div>
 
-                                <div className="flex-grow space-y-1">
+                                <div className="grow space-y-1">
                                     <div className="flex items-start justify-between gap-4">
                                         <h4
                                             className={`text-xs font-bold text-gray-900 dark:text-white ${!item.read ? 'font-extrabold' : ''}`}
@@ -393,6 +410,18 @@ export default function UserNotifications({
                         />
                     </div>
                 </div>
+
+                <ConfirmationModal
+                    isOpen={confirmation.isOpen}
+                    onClose={confirmation.close}
+                    onConfirm={confirmation.handleConfirm}
+                    title={confirmation.options?.title || ''}
+                    message={confirmation.options?.message || ''}
+                    confirmLabel={confirmation.options?.confirmLabel}
+                    cancelLabel={confirmation.options?.cancelLabel}
+                    variant={confirmation.options?.variant}
+                    isLoading={confirmation.isLoading}
+                />
             </div>
         </UserLayout>
     );

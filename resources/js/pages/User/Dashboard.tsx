@@ -1,12 +1,6 @@
 import { router, usePage } from '@inertiajs/react';
 import UserLayout from '@/layouts/User/UserLayout';
-import {
-    Availability,
-    Booking,
-    Service,
-    ServiceBadge,
-    MappedNotification,
-} from '@/types';
+import { Availability, Booking, Service, ServiceBadge } from '@/types';
 import { useState } from 'react';
 import {
     Calendar,
@@ -25,6 +19,8 @@ import { motion } from 'motion/react';
 import { Link } from '@inertiajs/react';
 import { getServiceIcon, getServiceIconTheme } from '@/lib/service-icons';
 import { formatDateAndTime, formatTime } from '@/lib/calendar-utils';
+import { useConfirmation } from '@/hooks/useConfirmation';
+import ConfirmationModal from '@/components/Shared/ConfirmationModal';
 import { useBookingModalContext } from '@/contexts/BookingModalContext';
 
 interface UserDashboardProps {
@@ -38,6 +34,11 @@ export default function UserDashboard({
     bookings,
     unreadNotificationsCount,
 }: UserDashboardProps) {
+    // ─── 1. STATE ──────────────────────────────────────────────────
+
+    // Use the confirmation hook
+    const confirmation = useConfirmation();
+
     const { services } = usePage<{ services: Service[] }>().props;
 
     const { availabilities } = usePage<{ availabilities: Availability[] }>()
@@ -49,7 +50,7 @@ export default function UserDashboard({
 
     const { openModal } = useBookingModalContext();
 
-    const handleCancelAppointment = (id: number) => {
+    const performHandleCancelAppointment = (id: number) => {
         router.patch(
             route('booking.cancel', id),
             {},
@@ -57,6 +58,20 @@ export default function UserDashboard({
                 preserveScroll: true,
             },
         );
+    };
+
+    const handleCancelAppointment = (booking: Booking) => {
+        confirmation.confirm({
+            title: 'Cancel this booking?',
+            message: `You're about to cancel ${booking.client_name}'s appointment${
+                booking.service ? ` for ${booking.service.name}` : ''
+            } on ${booking.date} from ${booking.start_time} to ${
+                booking.end_time
+            }. This cannot be undone.`,
+            confirmLabel: 'Yes, Cancel Booking',
+            variant: 'danger',
+            onConfirm: () => performHandleCancelAppointment(booking.id),
+        });
     };
 
     const downloadReport = () => {
@@ -822,15 +837,9 @@ export default function UserDashboard({
 
                                                 <button
                                                     onClick={() => {
-                                                        if (
-                                                            confirm(
-                                                                'Are you sure you want to cancel this appointment? This action cannot be undone.',
-                                                            )
-                                                        ) {
-                                                            handleCancelAppointment(
-                                                                booking.id,
-                                                            );
-                                                        }
+                                                        handleCancelAppointment(
+                                                            booking,
+                                                        );
                                                     }}
                                                     title="Cancel Booking"
                                                     className="cursor-pointer rounded-xl border border-red-500/20 bg-transparent p-2 text-red-500 transition hover:bg-red-500/10 dark:border-red-400/20 dark:text-red-400 dark:hover:bg-red-500/10"
@@ -947,6 +956,18 @@ export default function UserDashboard({
                         </div>
                     </section>
                 </div>
+
+                <ConfirmationModal
+                    isOpen={confirmation.isOpen}
+                    onClose={confirmation.close}
+                    onConfirm={confirmation.handleConfirm}
+                    title={confirmation.options?.title || ''}
+                    message={confirmation.options?.message || ''}
+                    confirmLabel={confirmation.options?.confirmLabel}
+                    cancelLabel={confirmation.options?.cancelLabel}
+                    variant={confirmation.options?.variant}
+                    isLoading={confirmation.isLoading}
+                />
             </div>
         </UserLayout>
     );

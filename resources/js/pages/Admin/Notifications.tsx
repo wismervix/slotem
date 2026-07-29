@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { formatDateAndTime } from '@/lib/calendar-utils';
+import { useConfirmation } from '@/hooks/useConfirmation';
+import ConfirmationModal from '@/components/Shared/ConfirmationModal';
 
 interface NotificationsProps {
     notifications: AdminNotification[];
@@ -52,6 +54,11 @@ export default function UserNotifications({
     unreadCount,
     broadcasts = [],
 }: NotificationsProps) {
+    // ─── 1. STATE ──────────────────────────────────────────────────
+
+    // Use the confirmation hook
+    const confirmation = useConfirmation();
+
     const mappedNotifications = backendNotifications.map((notification) => ({
         id: notification.id,
         title: notification.data.title,
@@ -67,16 +74,12 @@ export default function UserNotifications({
     const [notifications, setNotifications] = useState(mappedNotifications);
     const [visibleCount, setVisibleCount] = useState(6);
     const [filter, setFilter] = useState<
-        | 'all'
-        | 'unread'
-        | 'bookings'
-        | 'user_booking_actions'
-        | 'admin_actions'
+        'all' | 'unread' | 'bookings' | 'user_booking_actions' | 'admin_actions'
     >('all');
 
     const markNotificationAsRead = (id: string) => {
         router.patch(
-            route('notifications.read', id),
+            route('admin.notifications.read', id),
             {},
             {
                 preserveScroll: true,
@@ -93,7 +96,7 @@ export default function UserNotifications({
 
     const handleOpenNotification = (notification: any) => {
         router.patch(
-            route('notifications.read', notification.id),
+            route('admin.notifications.read', notification.id),
             {},
             {
                 preserveScroll: true,
@@ -106,8 +109,8 @@ export default function UserNotifications({
         );
     };
 
-    const deleteNotification = (id: string) => {
-        router.delete(route('notifications.delete', id), {
+    const performDeleteNotification = (id: string) => {
+        router.delete(route('admin.notifications.delete', id), {
             preserveScroll: true,
             onSuccess: () => {
                 setNotifications((prev) => prev.filter((n) => n.id !== id));
@@ -115,8 +118,18 @@ export default function UserNotifications({
         });
     };
 
+    const deleteNotification = (id: string) => {
+        confirmation.confirm({
+            title: `Are you sure you want to delete this notification?`,
+            message: `Are you absolutely sure you want to delete this notification? This cannot be undone.`,
+            confirmLabel: `Delete Notification`,
+            variant: 'danger',
+            onConfirm: () => performDeleteNotification(id),
+        });
+    };
+
     const handleClearAllNotifications = () => {
-        router.delete(route('notifications.clear-all'), {
+        router.delete(route('admin.notifications.clear-all'), {
             preserveScroll: true,
             onSuccess: () => {
                 setNotifications([]);
@@ -126,7 +139,7 @@ export default function UserNotifications({
 
     const handleMarkAllReadNotifications = () => {
         router.patch(
-            route('notifications.read-all'),
+            route('admin.notifications.read-all'),
             {},
             {
                 preserveScroll: true,
@@ -163,7 +176,7 @@ export default function UserNotifications({
     };
 
     console.log('Mapped Notifications: ', mappedNotifications);
-    
+
     return (
         <AdminLayout>
             <div className="max-w-4xl space-y-6 pb-10">
@@ -219,7 +232,8 @@ export default function UserNotifications({
                             {
                                 notifications.filter(
                                     (n) =>
-                                        n.type === 'user_booking_actions' && !n.read,
+                                        n.type === 'user_booking_actions' &&
+                                        !n.read,
                                 ).length
                             }
                             )
@@ -314,7 +328,7 @@ export default function UserNotifications({
                                     {getIcon(item.type)}
                                 </div>
 
-                                <div className="flex-grow space-y-1">
+                                <div className="grow space-y-1">
                                     <div className="flex items-start justify-between gap-4">
                                         <h4
                                             className={`text-xs font-bold text-gray-900 dark:text-white ${!item.read ? 'font-extrabold' : ''}`}
@@ -417,6 +431,18 @@ export default function UserNotifications({
                         />
                     </div>
                 </div>
+
+                <ConfirmationModal
+                    isOpen={confirmation.isOpen}
+                    onClose={confirmation.close}
+                    onConfirm={confirmation.handleConfirm}
+                    title={confirmation.options?.title || ''}
+                    message={confirmation.options?.message || ''}
+                    confirmLabel={confirmation.options?.confirmLabel}
+                    cancelLabel={confirmation.options?.cancelLabel}
+                    variant={confirmation.options?.variant}
+                    isLoading={confirmation.isLoading}
+                />
             </div>
         </AdminLayout>
     );

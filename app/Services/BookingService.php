@@ -5,11 +5,19 @@ namespace App\Services;
 use App\Models\Booking;
 use App\Models\TimeSlot;
 use App\Models\User;
+use App\Services\Notification\ReminderService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class BookingService
 {
+    protected ReminderService $reminderService;
+
+    public function __construct(ReminderService $reminderService)
+    {
+        $this->reminderService = $reminderService;
+    }
+
     public function createBooking(array $data): Booking
     {
         return DB::transaction(function () use ($data) {
@@ -18,7 +26,7 @@ class BookingService
 
             if ($slot->is_booked) {
                 throw ValidationException::withMessages([
-                    'slot' => 'This slot has already been booked.'
+                    'slot' => 'This slot has already been booked.',
                 ]);
             }
 
@@ -41,8 +49,11 @@ class BookingService
             ]);
 
             $slot->update([
-                'is_booked' => true
+                'is_booked' => true,
             ]);
+
+            // Schedule reminders for this booking
+            $this->reminderService->scheduleReminders($booking);
 
             return $booking;
         });

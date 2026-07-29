@@ -2,19 +2,23 @@ import { router, usePage } from '@inertiajs/react';
 import CalendarView from '@/components/User/CalendarView';
 import ListView from '@/components/User/ListView';
 import UserLayout from '@/layouts/User/UserLayout';
-import type { Booking, Availability, MappedNotification } from '@/types';
+import type { Booking, Availability } from '@/types';
 import { useState } from 'react';
 import { CalendarDays, List } from 'lucide-react';
+import { useConfirmation } from '@/hooks/useConfirmation';
+import ConfirmationModal from '@/components/Shared/ConfirmationModal';
 
 type ViewBookingsProps = {
     bookings: Booking[];
     unreadNotificationsCount: number;
 };
 
-const ViewBookings = ({
-    bookings,
-    unreadNotificationsCount,
-}: ViewBookingsProps) => {
+const ViewBookings = ({ bookings, unreadNotificationsCount }: ViewBookingsProps) => {
+    // ─── 1. STATE ──────────────────────────────────────────────────
+
+    // Use the confirmation hook
+    const confirmation = useConfirmation();
+
     const { availabilities } = usePage<{ availabilities: Availability[] }>()
         .props;
 
@@ -24,7 +28,7 @@ const ViewBookings = ({
 
     const [selectedDate, setSelectedDate] = useState('2023-10-26');
 
-    const handleCancelAppointment = (id: number) => {
+    const performHandleCancelAppointment = (id: number) => {
         router.patch(
             route('booking.cancel', id),
             {},
@@ -32,6 +36,20 @@ const ViewBookings = ({
                 preserveScroll: true,
             },
         );
+    };
+
+    const handleCancelAppointment = (booking: Booking) => {
+        confirmation.confirm({
+            title: 'Cancel this booking?',
+            message: `You're about to cancel ${booking.client_name}'s appointment${
+                booking.service ? ` for ${booking.service.name}` : ''
+            } on ${booking.date} from ${booking.start_time} to ${
+                booking.end_time
+            }. This cannot be undone.`,
+            confirmLabel: 'Yes, Cancel Booking',
+            variant: 'danger',
+            onConfirm: () => performHandleCancelAppointment(booking.id),
+        });
     };
 
     return (
@@ -48,7 +66,7 @@ const ViewBookings = ({
                     <button
                         type="button"
                         onClick={() => setSubView('list')}
-                        className={`cursor-pointer flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs transition-all ${
+                        className={`flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs transition-all ${
                             subView === 'list'
                                 ? 'bg-white text-primary shadow-xs dark:bg-neutral-900'
                                 : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
@@ -60,7 +78,7 @@ const ViewBookings = ({
                     <button
                         type="button"
                         onClick={() => setSubView('calendar')}
-                        className={`cursor-pointer flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs transition-all ${
+                        className={`flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs transition-all ${
                             subView === 'calendar'
                                 ? 'bg-white text-primary shadow-xs dark:bg-neutral-900'
                                 : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
@@ -87,8 +105,20 @@ const ViewBookings = ({
                     onCancelAppointment={handleCancelAppointment}
                 />
             )}
+            
+                            <ConfirmationModal
+                                isOpen={confirmation.isOpen}
+                                onClose={confirmation.close}
+                                onConfirm={confirmation.handleConfirm}
+                                title={confirmation.options?.title || ''}
+                                message={confirmation.options?.message || ''}
+                                confirmLabel={confirmation.options?.confirmLabel}
+                                cancelLabel={confirmation.options?.cancelLabel}
+                                variant={confirmation.options?.variant}
+                                isLoading={confirmation.isLoading}
+                            />
         </UserLayout>
     );
-};
+};;
 
 export default ViewBookings;

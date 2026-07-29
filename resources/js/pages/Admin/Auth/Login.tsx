@@ -52,7 +52,7 @@ export default function AdminLogin() {
                             }}
                             className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-primary-container shadow-lg shadow-primary/20"
                         >
-                            <ShieldAlert className="text-on-primary-container h-8 w-8" />
+                            <ShieldAlert className="h-8 w-8 text-on-primary-container" />
                         </motion.div>
                         <h1 className="mb-2 text-3xl font-bold text-on-surface dark:text-on-surface-dark">
                             Admin Portal
@@ -67,7 +67,7 @@ export default function AdminLogin() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
-                        className="rounded-3xl border border-outline-variant bg-surface-container-low p-8 shadow-xl shadow-black/[0.03] dark:border-outline-variant-dark dark:bg-surface-container-high"
+                        className="rounded-3xl border border-outline-variant bg-surface-container-low p-8 shadow-xl shadow-black/3 dark:border-outline-variant-dark dark:bg-surface-container-high"
                     >
                         <form
                             className="flex flex-col gap-6"
@@ -81,7 +81,7 @@ export default function AdminLogin() {
                                     Administrative Email
                                 </label>
                                 <div className="group relative">
-                                    <Mail className="text-outline absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transition-colors group-focus-within:text-primary" />
+                                    <Mail className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-outline transition-colors group-focus-within:text-primary" />
                                     <input
                                         className={`font-body-md w-full rounded-lg border bg-white py-3 pr-4 pl-10 text-on-surface transition-all placeholder:text-neutral-400 focus:outline-none dark:border-outline-variant-dark dark:text-gray-400 ${
                                             errors.email
@@ -123,7 +123,7 @@ export default function AdminLogin() {
                                     </a>
                                 </div>
                                 <div className="group relative">
-                                    <Lock className="text-outline absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transition-colors group-focus-within:text-primary" />
+                                    <Lock className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-outline transition-colors group-focus-within:text-primary" />
                                     <input
                                         id="password"
                                         placeholder="••••••••"

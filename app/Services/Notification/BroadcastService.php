@@ -2,18 +2,19 @@
 
 namespace App\Services\Notification;
 
-use App\Models\User;
 use App\Models\Admin;
 use App\Models\Broadcast;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use App\Models\ScheduledNotification;
-use App\Notifications\User\BroadcastNotification;
-use App\Services\Notification\NotificationDispatcher;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
+// use App\Notifications\User\BroadcastNotification;
+use Illuminate\Support\Facades\Log;
 
-class  BroadcastService
+class BroadcastService
 {
     protected NotificationDispatcher $dispatcher;
+
     protected Admin $admin;
 
     public function __construct(NotificationDispatcher $dispatcher)
@@ -27,6 +28,7 @@ class  BroadcastService
     public function by(Admin $admin): self
     {
         $this->admin = $admin;
+
         return $this;
     }
 
@@ -37,6 +39,7 @@ class  BroadcastService
     {
         $users = User::all();
         $options['target_audience'] = ['all'];
+
         return $this->sendToUsers($users, $title, $message, $options);
     }
 
@@ -47,6 +50,7 @@ class  BroadcastService
     {
         $options['target_audience'] = ['custom'];
         $options['user_ids'] = [$user->id];
+
         return $this->sendToUsers([$user], $title, $message, $options);
     }
 
@@ -56,10 +60,10 @@ class  BroadcastService
     public function toUsers($users, string $title, string $message, array $options = []): bool
     {
         // If users is a collection or array, convert to array
-        if ($users instanceof \Illuminate\Database\Eloquent\Collection) {
+        if ($users instanceof Collection) {
             $userIds = $users->pluck('id')->toArray();
             $users = $users->toArray();
-        } else if (is_array($users)) {
+        } elseif (is_array($users)) {
             $userIds = array_column($users, 'id');
         } else {
             $users = [$users];
@@ -105,6 +109,7 @@ class  BroadcastService
         }
 
         $users = $query->get();
+
         return $this->sendToUsers($users, $title, $message, $options);
     }
 
@@ -117,7 +122,7 @@ class  BroadcastService
         $validatedTargets = $this->validateAndFormatTargets($targets);
 
         // If we have user IDs, store them in the targets
-        if (isset($options['user_ids']) && !empty($options['user_ids'])) {
+        if (isset($options['user_ids']) && ! empty($options['user_ids'])) {
             $validatedTargets['user_ids'] = $options['user_ids'];
         }
 
@@ -206,7 +211,7 @@ class  BroadcastService
                     $user = User::find($user['id']);
                 }
 
-                if (!$user) {
+                if (! $user) {
                     continue;
                 }
 
@@ -227,7 +232,7 @@ class  BroadcastService
                     $sentCount++;
                 }
             } catch (\Exception $e) {
-                Log::error("Failed to send broadcast to user " . ($user->id ?? 'unknown') . ": " . $e->getMessage());
+                Log::error('Failed to send broadcast to user '.($user->id ?? 'unknown').': '.$e->getMessage());
                 $success = false;
             }
         }

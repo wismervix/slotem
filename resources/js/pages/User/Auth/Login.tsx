@@ -146,11 +146,11 @@ export default function UserAuth() {
         <div className="relative flex min-h-screen flex-col overflow-hidden">
             {/* Background Decorative Elements */}
             <div className="pointer-events-none fixed top-0 left-0 -z-10 h-full w-full">
-                <div className="absolute -top-[10%] -left-[5%] h-[40%] w-[40%] rounded-full bg-primary/5 blur-[120px]"></div>
+                <div className="absolute top-[-10%] left-[-5%] h-[40%] w-[40%] rounded-full bg-primary/5 blur-[120px]"></div>
                 <div className="absolute right-[5%] bottom-[5%] h-[30%] w-[30%] rounded-full bg-secondary-container/20 blur-[100px]"></div>
             </div>
 
-            <main className="px-margin-page py-stack-lg flex flex-grow items-center justify-center">
+            <main className="px-margin-page py-stack-lg flex grow items-center justify-center">
                 <div className="gap-gutter grid w-full max-w-7xl grid-cols-1 items-center md:grid-cols-12">
                     {/* Left Branding Section */}
                     <motion.div
@@ -393,39 +393,39 @@ export default function UserAuth() {
             {/* Footer */}
             <footer className="py-stack-lg px-margin-page bg-surface-container-lowest w-full border-t border-outline-variant">
                 <div className="gap-stack-md mx-auto flex max-w-7xl flex-col items-center justify-between md:flex-row">
-                    <div className="text-center md:text-left">
+                    <Link href={route('home')} className="text-center md:text-left">
                         <span className="font-h3 font-bold text-primary">
                             Slotem
                         </span>
                         <p className="font-label-sm text-secondary mt-1">
                             © 2024 Slotem Booking Systems. All rights reserved.
                         </p>
-                    </div>
+                    </Link>
                     <nav className="gap-x-gutter flex flex-wrap justify-center gap-y-2">
                         <Link
                             className="font-label-sm text-secondary transition-colors hover:text-primary"
-                            href="#"
+                            href={route('privacy-policy')}
                         >
                             Privacy Policy
                         </Link>
-                        <a
+                        <Link
                             className="font-label-sm text-secondary transition-colors hover:text-primary"
-                            href="#"
+                            href={route('terms-of-service')}
                         >
                             Terms of Service
-                        </a>
-                        <a
+                        </Link>
+                        <Link
                             className="font-label-sm text-secondary transition-colors hover:text-primary"
-                            href="#"
+                            href={route('help-center')}
                         >
                             Help Center
-                        </a>
-                        <a
+                        </Link>
+                        <Link
                             className="font-label-sm text-secondary transition-colors hover:text-primary"
-                            href="#"
+                            href={route('contact-sales')}
                         >
                             Contact Sales
-                        </a>
+                        </Link>
                     </nav>
                 </div>
             </footer>

@@ -19,6 +19,8 @@ import {
     RefreshCw,
 } from 'lucide-react';
 import { formatDateAndTime } from '@/lib/calendar-utils';
+import { useConfirmation } from '@/hooks/useConfirmation';
+import ConfirmationModal from '@/components/Shared/ConfirmationModal';
 
 interface Broadcast {
     id: number;
@@ -44,9 +46,18 @@ interface BroadcastsIndexProps {
 }
 
 export default function BroadcastsIndex({ broadcasts }: BroadcastsIndexProps) {
+    // ─── 1. STATE ──────────────────────────────────────────────────
+
+    // Use the confirmation hook
+    const confirmation = useConfirmation();
+
     const [searchQuery, setSearchQuery] = useState('');
-    const [filterType, setFilterType] = useState<'all' | 'info' | 'warning' | 'success' | 'alert'>('all');
-    const [filterPriority, setFilterPriority] = useState<'all' | 'normal' | 'high' | 'urgent'>('all');
+    const [filterType, setFilterType] = useState<
+        'all' | 'info' | 'warning' | 'success' | 'alert'
+    >('all');
+    const [filterPriority, setFilterPriority] = useState<
+        'all' | 'normal' | 'high' | 'urgent'
+    >('all');
 
     const getTypeIcon = (type: string) => {
         switch (type) {
@@ -90,23 +101,34 @@ export default function BroadcastsIndex({ broadcasts }: BroadcastsIndexProps) {
     };
 
     const filteredBroadcasts = broadcasts.filter((broadcast) => {
-        const matchesSearch = broadcast.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        const matchesSearch =
+            broadcast.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             broadcast.message.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesType = filterType === 'all' || broadcast.type === filterType;
-        const matchesPriority = filterPriority === 'all' || broadcast.priority === filterPriority;
+        const matchesType =
+            filterType === 'all' || broadcast.type === filterType;
+        const matchesPriority =
+            filterPriority === 'all' || broadcast.priority === filterPriority;
         return matchesSearch && matchesType && matchesPriority;
     });
 
-    const handleDelete = (id: number) => {
-        if (confirm('Are you sure you want to delete this broadcast?')) {
-            router.delete(route('admin.broadcasts.destroy', id), {
-                preserveScroll: true,
-            });
-        }
+    const performHandleDelete = (id: number) => {
+        router.delete(route('admin.broadcasts.destroy', id), {
+            preserveScroll: true,
+        });
     };
 
-    const handleView = (broadcast: Broadcast) => {
-        router.post(route('admin.broadcasts.show', broadcast.id), {
+    const handleDelete = (broadcast: Broadcast) => {
+        confirmation.confirm({
+            title: 'Delete this broadcast?',
+            message: `You're about to delete the broadcast "${broadcast.title}". This action cannot be undone.`,
+            confirmLabel: 'Yes, Delete Broadcast',
+            variant: 'danger',
+            onConfirm: () => performHandleDelete(broadcast.id),
+        });
+    };
+
+    const handleView = (id: number) => {
+        router.post(route('admin.broadcasts.show', id), {
             preserveScroll: true,
         });
     };
@@ -125,7 +147,9 @@ export default function BroadcastsIndex({ broadcasts }: BroadcastsIndexProps) {
                         </p>
                     </div>
                     <button
-                        onClick={() => router.visit(route('admin.broadcasts.create'))}
+                        onClick={() =>
+                            router.visit(route('admin.broadcasts.create'))
+                        }
                         className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-on-primary shadow-sm shadow-primary/20 transition-all hover:bg-primary-container dark:bg-purple-600 dark:hover:bg-purple-700"
                     >
                         <Plus className="h-4 w-4" />
@@ -135,21 +159,21 @@ export default function BroadcastsIndex({ broadcasts }: BroadcastsIndexProps) {
 
                 {/* Filters */}
                 <div className="flex flex-wrap items-center gap-4 rounded-xl border border-outline-variant bg-surface p-4 dark:bg-slate-900">
-                    <div className="relative flex-1 min-w-[200px]">
-                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <div className="relative min-w-[200px] flex-1">
+                        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
                         <input
                             type="text"
                             placeholder="Search broadcasts..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-10 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:bg-slate-800 dark:text-white"
+                            className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-10 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none dark:bg-slate-800 dark:text-white"
                         />
                     </div>
 
                     <select
                         value={filterType}
                         onChange={(e) => setFilterType(e.target.value as any)}
-                        className="rounded-lg border border-outline-variant bg-surface-container-low px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:bg-slate-800 dark:text-white"
+                        className="rounded-lg border border-outline-variant bg-surface-container-low px-4 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none dark:bg-slate-800 dark:text-white"
                     >
                         <option value="all">All Types</option>
                         <option value="info">Information</option>
@@ -160,8 +184,10 @@ export default function BroadcastsIndex({ broadcasts }: BroadcastsIndexProps) {
 
                     <select
                         value={filterPriority}
-                        onChange={(e) => setFilterPriority(e.target.value as any)}
-                        className="rounded-lg border border-outline-variant bg-surface-container-low px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:bg-slate-800 dark:text-white"
+                        onChange={(e) =>
+                            setFilterPriority(e.target.value as any)
+                        }
+                        className="rounded-lg border border-outline-variant bg-surface-container-low px-4 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none dark:bg-slate-800 dark:text-white"
                     >
                         <option value="all">All Priorities</option>
                         <option value="normal">Normal</option>
@@ -190,10 +216,13 @@ export default function BroadcastsIndex({ broadcasts }: BroadcastsIndexProps) {
                             No Broadcasts Yet
                         </h3>
                         <p className="mt-1 text-sm text-on-surface-variant dark:text-slate-400">
-                            Create your first broadcast to communicate with your users.
+                            Create your first broadcast to communicate with your
+                            users.
                         </p>
                         <button
-                            onClick={() => router.visit(route('admin.broadcasts.create'))}
+                            onClick={() =>
+                                router.visit(route('admin.broadcasts.create'))
+                            }
                             className="mt-4 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-on-primary hover:bg-primary-container"
                         >
                             Create Broadcast
@@ -204,9 +233,13 @@ export default function BroadcastsIndex({ broadcasts }: BroadcastsIndexProps) {
                         {filteredBroadcasts.map((broadcast) => {
                             const TypeIcon = getTypeIcon(broadcast.type);
                             const totalUsers = broadcast.users_count || 0;
-                            const readPercentage = totalUsers > 0 
-                                ? Math.round((broadcast.read_count / totalUsers) * 100) 
-                                : 0;
+                            const readPercentage =
+                                totalUsers > 0
+                                    ? Math.round(
+                                          (broadcast.read_count / totalUsers) *
+                                              100,
+                                      )
+                                    : 0;
 
                             return (
                                 <div
@@ -216,23 +249,29 @@ export default function BroadcastsIndex({ broadcasts }: BroadcastsIndexProps) {
                                     {/* Header */}
                                     <div className="flex items-start justify-between">
                                         <div className="flex items-center gap-2">
-                                            <div className={`rounded-lg p-1.5 ${getTypeColor(broadcast.type)}`}>
+                                            <div
+                                                className={`rounded-lg p-1.5 ${getTypeColor(broadcast.type)}`}
+                                            >
                                                 <TypeIcon className="h-4 w-4" />
                                             </div>
-                                            <span className={`rounded px-2 py-0.5 text-[10px] font-bold uppercase ${getPriorityColor(broadcast.priority)}`}>
+                                            <span
+                                                className={`rounded px-2 py-0.5 text-[10px] font-bold uppercase ${getPriorityColor(broadcast.priority)}`}
+                                            >
                                                 {broadcast.priority}
                                             </span>
                                         </div>
                                         <span className="text-[10px] text-slate-400">
-                                            {formatDateAndTime(broadcast.created_at)}
+                                            {formatDateAndTime(
+                                                broadcast.created_at,
+                                            )}
                                         </span>
                                     </div>
 
                                     {/* Content */}
-                                    <h3 className="mt-3 font-bold text-on-surface dark:text-white line-clamp-1">
+                                    <h3 className="mt-3 line-clamp-1 font-bold text-on-surface dark:text-white">
                                         {broadcast.title}
                                     </h3>
-                                    <p className="mt-1 text-sm text-on-surface-variant dark:text-slate-400 line-clamp-2">
+                                    <p className="mt-1 line-clamp-2 text-sm text-on-surface-variant dark:text-slate-400">
                                         {broadcast.message}
                                     </p>
 
@@ -244,24 +283,32 @@ export default function BroadcastsIndex({ broadcasts }: BroadcastsIndexProps) {
                                         </div>
                                         <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
                                             <CheckCircle className="h-3.5 w-3.5" />
-                                            <span>{broadcast.read_count} read</span>
+                                            <span>
+                                                {broadcast.read_count} read
+                                            </span>
                                         </div>
                                         <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
-                                            <span className="font-bold text-primary">{readPercentage}%</span>
+                                            <span className="font-bold text-primary">
+                                                {readPercentage}%
+                                            </span>
                                         </div>
                                     </div>
 
                                     {/* Actions */}
                                     <div className="mt-4 flex items-center justify-end gap-2 opacity-0 transition-opacity group-hover:opacity-100">
                                         <button
-                                            onClick={() => handleView(broadcast)}
+                                            onClick={() =>
+                                                handleView(broadcast.id)
+                                            }
                                             className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-primary/10 hover:text-primary"
                                             title="View Details"
                                         >
                                             <Eye className="h-4 w-4" />
                                         </button>
                                         <button
-                                            onClick={() => handleDelete(broadcast.id)}
+                                            onClick={() =>
+                                                handleDelete(broadcast)
+                                            }
                                             className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/20"
                                             title="Delete"
                                         >
@@ -273,6 +320,18 @@ export default function BroadcastsIndex({ broadcasts }: BroadcastsIndexProps) {
                         })}
                     </div>
                 )}
+
+                <ConfirmationModal
+                    isOpen={confirmation.isOpen}
+                    onClose={confirmation.close}
+                    onConfirm={confirmation.handleConfirm}
+                    title={confirmation.options?.title || ''}
+                    message={confirmation.options?.message || ''}
+                    confirmLabel={confirmation.options?.confirmLabel}
+                    cancelLabel={confirmation.options?.cancelLabel}
+                    variant={confirmation.options?.variant}
+                    isLoading={confirmation.isLoading}
+                />
             </div>
         </AdminLayout>
     );
