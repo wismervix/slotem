@@ -43,12 +43,12 @@ export default function ContactUs() {
                     </Link>
 
                     <div className="hidden items-center space-x-8 md:flex">
-                        <a
-                            href="/#how-it-works"
+                        <Link
+                            href={route('features')}
                             className="text-sm font-medium text-white/70 transition-colors hover:text-white"
                         >
-                            How It Works
-                        </a>
+                            Features
+                        </Link>
 
                         <Link
                             href={route('services')}
@@ -85,7 +85,7 @@ export default function ContactUs() {
                         {auth.user ? (
                             <>
                                 <Link href={route('user.dashboard')}>
-                                    <div className="flex h-14 w-14 items-center justify-center rounded-full border border-primary/20 bg-primary-fixed text-2xl font-extrabold text-primary">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-full border border-primary/20 bg-primary-fixed text-2xl font-extrabold text-primary">
                                         {auth.user.name ? (
                                             <img
                                                 alt="Profile Avatar"

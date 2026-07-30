@@ -231,7 +231,7 @@ export default function AdminBookingIndex({ bookings }: BookingsProps) {
         return labels[action] || 'Confirm action?';
     };
 
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
 
     const [selectedStatusFilter, setSelectedStatusFilter] =
         useState<string>('All');
@@ -262,13 +262,16 @@ export default function AdminBookingIndex({ bookings }: BookingsProps) {
                 const matchesSearch =
                     b.client_name
                         .toLowerCase()
-                        .includes(searchTerm.toLowerCase()) ||
+                        .includes(searchQuery.toLowerCase()) ||
                     b.client_email
                         .toLowerCase()
-                        .includes(searchTerm.toLowerCase()) ||
+                        .includes(searchQuery.toLowerCase()) ||
+                    b.status
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase()) ||
                     b.service?.name
                         ?.toLowerCase()
-                        .includes(searchTerm.toLowerCase());
+                        .includes(searchQuery.toLowerCase());
 
                 const matchesStatus =
                     selectedStatusFilter === 'All' ||
@@ -276,7 +279,7 @@ export default function AdminBookingIndex({ bookings }: BookingsProps) {
 
                 return matchesSearch && matchesStatus;
             });
-    }, [bookings, services, searchTerm, selectedStatusFilter]);
+    }, [bookings, services, searchQuery, selectedStatusFilter]);
 
     // Pagination criteria
     const totalPages = Math.max(
@@ -322,7 +325,7 @@ export default function AdminBookingIndex({ bookings }: BookingsProps) {
     // console.log('Bookings from backend: ', bookings);
 
     return (
-        <AdminLayout>
+        <AdminLayout searchQuery={searchQuery} setSearchQuery={setSearchQuery}>
             {/* Toast Notification */}
             {showToast && toastMessage && (
                 <div
@@ -349,7 +352,7 @@ export default function AdminBookingIndex({ bookings }: BookingsProps) {
                 </div>
                 <div className="flex items-center gap-2 rounded-full border border-purple-100 bg-purple-50 px-4 py-2 transition-colors select-none hover:bg-purple-100/50 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-900/50">
                     <Calendar className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                    <span className="text-[11px] leading-none pt-1 font-bold tracking-widest text-purple-900 uppercase dark:text-purple-300">
+                    <span className="pt-1 text-[11px] leading-none font-bold tracking-widest text-purple-900 uppercase dark:text-purple-300">
                         {new Date().toLocaleDateString('en-US', {
                             month: 'long',
                             day: 'numeric',
@@ -428,12 +431,12 @@ export default function AdminBookingIndex({ bookings }: BookingsProps) {
                             <input
                                 type="text"
                                 placeholder="Search client or service..."
-                                value={searchTerm}
+                                value={searchQuery}
                                 onChange={(e) => {
-                                    setSearchTerm(e.target.value);
+                                    setSearchQuery(e.target.value);
                                     setCurrentPage(1);
                                 }}
-                                className="dark:bg-zinc-850 focus:ring-1.5 w-full rounded-xl border border-zinc-200 bg-white py-2 pr-4 pl-10 text-xs transition-all focus:ring-purple-500 focus:outline-none sm:w-64 dark:border-zinc-800 dark:text-white"
+                                className="focus:ring-1.5 w-full rounded-xl border border-zinc-200 bg-white py-2 pr-4 pl-10 text-xs transition-all focus:ring-purple-500 focus:outline-none sm:w-64 dark:border-zinc-800 dark:bg-transparent dark:text-white"
                             />
                         </div>
 
@@ -446,7 +449,7 @@ export default function AdminBookingIndex({ bookings }: BookingsProps) {
                                 className={`flex cursor-pointer items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800 ${
                                     selectedStatusFilter !== 'All'
                                         ? 'border-purple-300 bg-purple-50/50 text-purple-700 dark:bg-purple-950/20'
-                                        : 'dark:bg-zinc-850 border-zinc-200 bg-white text-zinc-600 dark:border-zinc-800 dark:text-zinc-300'
+                                        : 'border-zinc-200 bg-white text-zinc-600 dark:border-zinc-800 dark:bg-transparent dark:text-zinc-300'
                                 }`}
                                 id="btn-filter-toggle"
                             >

@@ -122,7 +122,13 @@ export default function ServicesView() {
         return services.filter((service) => {
             const matchesSearch =
                 service.name.toLowerCase().includes(query) ||
-                (service.description ?? '').toLowerCase().includes(query);
+                (service.description ?? '').toLowerCase().includes(query) ||
+                (service.price ?? '').toLowerCase().includes(query) ||
+                (service.variant ?? '').toLowerCase().includes(query) ||
+                (service.duration?.toString() ?? '').includes(query) ||
+                (service.badges ?? []).some((badge) =>
+                    badge.toLowerCase().includes(query),
+                );
 
             const matchesBadge = doesBadgeMatch(service.badges, activeFilter);
 
@@ -273,16 +279,19 @@ export default function ServicesView() {
         if (serviceToDelete) {
             // // Using Inertia's delete method
             // const { router } = require('@inertiajs/react');
-            inertiaRouter.delete(route('admin.services.destroy', serviceToDelete.id), {
-                preserveScroll: true,
-                onSuccess: () => {
-                    setIsDeleteModalOpen(false);
-                    setServiceToDelete(null);
+            inertiaRouter.delete(
+                route('admin.services.destroy', serviceToDelete.id),
+                {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        setIsDeleteModalOpen(false);
+                        setServiceToDelete(null);
+                    },
+                    onError: (errors: any) => {
+                        console.error('Error deleting service:', errors);
+                    },
                 },
-                onError: (errors: any) => {
-                    console.error('Error deleting service:', errors);
-                },
-            });
+            );
         }
     };
 
@@ -295,7 +304,6 @@ export default function ServicesView() {
         };
     }, [imagePreview]);
 
-
     // Handle Delete Confirmation
     const triggerDelete = (service: Service) => {
         setServiceToDelete(service);
@@ -303,7 +311,7 @@ export default function ServicesView() {
     };
 
     return (
-        <AdminLayout>
+        <AdminLayout searchQuery={searchQuery} setSearchQuery={setSearchQuery}>
             <div className="space-y-6">
                 {/* Toast Notification */}
                 {showToast && toastMessage && (

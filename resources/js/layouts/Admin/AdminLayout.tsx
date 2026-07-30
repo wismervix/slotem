@@ -1,4 +1,4 @@
-import { usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import type { ReactNode } from 'react';
 import Footer from '@/components/Admin/Footer';
 import Sidebar from '@/components/Admin/Sidebar';
@@ -14,9 +14,15 @@ interface Toast {
 }
 interface Props {
     children: ReactNode;
+    searchQuery?: string;
+    setSearchQuery?: (query: string) => void;
 }
 
-export default function AdminLayout({ children }: Props) {
+export default function AdminLayout({
+    children,
+    searchQuery = '',
+    setSearchQuery = () => {},
+}: Props) {
     const { url } = usePage();
 
     const { auth } = usePage<SharedPageProps>().props;
@@ -32,25 +38,46 @@ export default function AdminLayout({ children }: Props) {
         }
     >().props;
 
-    // Global adaptive search string
-    const [searchQuery, setSearchQuery] = useState('');
-
     // Responsive sidebar toggle for smaller viewports
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
     // Determine header search input placeholder adaptively
     const getSearchPlaceholder = () => {
-        switch (url) {
-            case 'dashboard':
-                return 'Search global operations...';
-            case 'bookings':
-                return 'Search bookings client registry...';
-            case 'availability':
-                return 'Search services...';
-            case 'settings':
-                return 'Search system parameters...';
+        if (route().current('admin.dashboard')) {
+            return 'Search global operations...';
         }
+
+        if (route().current('admin.bookings')) {
+            return 'Search bookings client registry...';
+        }
+
+        if (route().current('admin.services')) {
+            return 'Search services...';
+        }
+
+        if (route().current('admin.users')) {
+            return 'Search users registry...';
+        }
+
+        if (route().current('admin.settings')) {
+            return 'Search system parameters...';
+        }
+
+        return 'Search...';
     };
+
+    const hideSearchRoutes = [
+        'admin.availability',
+        'admin.users.details',
+        'admin.notifications',
+        'admin.broadcasts.show',
+        'admin.settings',
+        'admin.website-settings',
+    ];
+
+    const shouldShowSearch = !hideSearchRoutes.some((routeName) =>
+        route().current(routeName),
+    );
 
     return (
         <div className="flex min-h-screen bg-purple-50/20 font-sans text-zinc-800 antialiased transition-colors duration-250 dark:bg-zinc-950 dark:text-zinc-200">
@@ -77,27 +104,31 @@ export default function AdminLayout({ children }: Props) {
                         </button>
 
                         {/* Active search bar */}
-                        <div className="flex w-44 items-center rounded-full border border-outline-variant bg-surface-container-low px-4 py-1.5 sm:w-80 md:w-96 dark:border-slate-700 dark:bg-zinc-950">
-                            <Search
-                                className="shrink-0 animate-pulse text-outline dark:text-slate-600"
-                                size={16}
-                            />
-                            <input
-                                type="text"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="ml-2 w-full border-none bg-transparent text-xs font-medium text-on-surface outline-none placeholder:text-outline focus:ring-0 dark:bg-transparent dark:text-white dark:placeholder:text-slate-500"
-                                placeholder={getSearchPlaceholder()}
-                            />
-                            {searchQuery && (
-                                <button
-                                    onClick={() => setSearchQuery('')}
-                                    className="text-outline hover:text-on-surface dark:text-slate-500 dark:hover:text-slate-300"
-                                >
-                                    <X size={12} />
-                                </button>
-                            )}
-                        </div>
+                        {shouldShowSearch && (
+                            <div className="flex w-44 items-center rounded-full border border-outline-variant bg-surface-container-low px-4 py-1.5 sm:w-80 md:w-96 dark:border-slate-700 dark:bg-zinc-950">
+                                <Search
+                                    className="shrink-0 animate-pulse text-outline dark:text-slate-600"
+                                    size={16}
+                                />
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) =>
+                                        setSearchQuery(e.target.value)
+                                    }
+                                    className="ml-2 w-full border-none bg-transparent text-xs font-medium text-on-surface outline-none placeholder:text-outline focus:ring-0 dark:bg-transparent dark:text-white dark:placeholder:text-slate-500"
+                                    placeholder={getSearchPlaceholder()}
+                                />
+                                {searchQuery && (
+                                    <button
+                                        onClick={() => setSearchQuery('')}
+                                        className="text-outline hover:text-on-surface dark:text-slate-500 dark:hover:text-slate-300"
+                                    >
+                                        <X size={12} />
+                                    </button>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     {/* Right Header Navigation Panel tools */}
@@ -125,9 +156,12 @@ export default function AdminLayout({ children }: Props) {
                             </span>
                         </button>
 
-                        <button className="hidden cursor-pointer rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary sm:inline-block dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-purple-400">
+                        <Link
+                            href={route('help-center')}
+                            className="hidden cursor-pointer rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary sm:inline-block dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-purple-400"
+                        >
                             <HelpCircle size={18} />
-                        </button>
+                        </Link>
 
                         {/* Avatar block */}
                         <div className="flex items-center gap-3 border-l border-outline-variant pl-4 select-none dark:border-slate-700">

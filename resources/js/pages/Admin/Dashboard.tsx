@@ -45,7 +45,8 @@ interface Toast {
 export default function AdminDashboard({ bookings }: AdminDashboardProps) {
     const { services } = usePage<{ services: Service[] }>().props;
 
-    // Modal states
+    const [searchQuery, setSearchQuery] = useState('');
+
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(
         null,
     );
@@ -266,7 +267,6 @@ export default function AdminDashboard({ bookings }: AdminDashboardProps) {
         rejected: 'bg-rose-500',
     };
 
-
     // PDF Export Handler
     const handleExportPDF = async () => {
         setIsExporting(true);
@@ -401,10 +401,32 @@ export default function AdminDashboard({ bookings }: AdminDashboardProps) {
         }
     };
 
+    const filtered = bookings.slice(0, 4).filter((booking) => {
+        // Search match
+        const matchesSearch =
+            booking.service?.name
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase()) ||
+            (booking.service?.description ?? '')
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase()) ||
+            (booking.client_name ?? '')
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase()) ||
+            (booking.client_email ?? '')
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase()) ||
+            (booking.status ?? '')
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase());
+
+        return matchesSearch;
+    });
+
     // console.log('Bookings from backend: ', bookings);
 
     return (
-        <AdminLayout>
+        <AdminLayout searchQuery={searchQuery} setSearchQuery={setSearchQuery}>
             <div className="space-y-6">
                 {/* Header Info */}
                 <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
@@ -717,7 +739,7 @@ export default function AdminDashboard({ bookings }: AdminDashboardProps) {
                             </thead>
 
                             <tbody className="divide-y divide-gray-50 text-sm dark:divide-zinc-800">
-                                {bookings.slice(0, 4).map((b) => (
+                                {filtered.map((b) => (
                                     <tr
                                         key={b.id}
                                         className="transition-colors hover:bg-slate-50/70 dark:hover:bg-zinc-800/40"

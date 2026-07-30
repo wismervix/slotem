@@ -64,7 +64,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                                     href={route('user.dashboard')}
                                     // className="hidden text-sm font-medium text-purple-600 transition hover:text-purple-500 sm:block"
                                 >
-                                    <div className="flex h-14 w-14 items-center justify-center rounded-full border border-primary/20 bg-primary-fixed text-2xl font-extrabold text-primary">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-full border border-primary/20 bg-primary-fixed text-2xl font-extrabold text-primary">
                                         {auth.user.name ? (
                                             <img
                                                 alt="Profile Avatar"

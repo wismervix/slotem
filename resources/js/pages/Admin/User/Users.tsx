@@ -330,7 +330,8 @@ export default function AdminUsers({ users, flash }: AdminUsersProps) {
                     !query ||
                     user.name.toLowerCase().includes(query) ||
                     user.email.toLowerCase().includes(query) ||
-                    user.id.toString().includes(query);
+                    user.id.toString().includes(query) ||
+                    user.status.toLowerCase().includes(query);
 
                 // 🏷️ Status filter
                 const matchesStatus = doesStatusMatch(
@@ -385,7 +386,8 @@ export default function AdminUsers({ users, flash }: AdminUsersProps) {
     // ─── 7. RENDER ─────────────────────────────────────────────────
 
     return (
-        <AdminLayout>
+        <AdminLayout searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}>
             <div className="space-y-6">
                 {/* ─── Toast Notification ────────────────────────── */}
                 {showToast && toastMessage && (

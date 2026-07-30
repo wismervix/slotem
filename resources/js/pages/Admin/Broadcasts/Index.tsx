@@ -103,7 +103,13 @@ export default function BroadcastsIndex({ broadcasts }: BroadcastsIndexProps) {
     const filteredBroadcasts = broadcasts.filter((broadcast) => {
         const matchesSearch =
             broadcast.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            broadcast.message.toLowerCase().includes(searchQuery.toLowerCase());
+            broadcast.message
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase()) ||
+            broadcast.priority
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase()) ||
+            broadcast.type.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesType =
             filterType === 'all' || broadcast.type === filterType;
         const matchesPriority =
@@ -134,7 +140,7 @@ export default function BroadcastsIndex({ broadcasts }: BroadcastsIndexProps) {
     };
 
     return (
-        <AdminLayout>
+        <AdminLayout searchQuery={searchQuery} setSearchQuery={setSearchQuery}>
             <div className="space-y-6 py-6">
                 {/* Header */}
                 <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">

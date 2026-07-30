@@ -44,7 +44,7 @@ Route::group(['prefix' => 'admin'], function () {
             Route::get('/', 'index')->name('admin.broadcasts');
             Route::get('/create', 'create')->name('admin.broadcasts.create');
             Route::post('/store', 'store')->name('admin.broadcasts.store');
-            Route::post('/show/{broadcast}', 'show')->name('admin.broadcasts.show');
+            Route::get('/show/{broadcast}', 'show')->name('admin.broadcasts.show');
             Route::delete('/destroy/{broadcast}', 'destroy')->name('admin.broadcasts.destroy');
         });
 

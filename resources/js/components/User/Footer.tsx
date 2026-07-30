@@ -13,18 +13,18 @@ export default function Footer() {
 
             <div className="flex gap-8">
                 {[
-                    'Privacy Policy',
-                    'Terms of Service',
-                    'Help Center',
-                    'Contact Sales',
-                ].map((link) => (
-                    <a
-                        key={link}
-                        href="#"
+                    { label: 'Privacy Policy', href: '/privacy-policy' },
+                    { label: 'Terms of Service', href: '/terms-of-service' },
+                    { label: 'Help Center', href: '/help-center' },
+                    { label: 'Contact Sales', href: '/contact-sales' },
+                ].map(({ label, href }) => (
+                    <Link
+                        key={label}
+                        href={href}
                         className="text-[11px] font-semibold text-on-surface-variant transition-colors hover:text-primary"
                     >
-                        {link}
-                    </a>
+                        {label}
+                    </Link>
                 ))}
             </div>
         </footer>
