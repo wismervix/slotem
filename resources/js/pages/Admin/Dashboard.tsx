@@ -15,6 +15,7 @@ import {
     Download,
 } from 'lucide-react';
 import {
+    ComposedChart,
     BarChart,
     Bar,
     XAxis,
@@ -25,6 +26,7 @@ import {
     PieChart,
     Pie,
     Cell,
+    Line,
     Legend,
 } from 'recharts';
 import { motion, AnimatePresence } from 'motion/react';
@@ -195,41 +197,48 @@ export default function AdminDashboard({ bookings }: AdminDashboardProps) {
     // 2. Charts Data
     // Weekly Load Analysis
     const weeklyLoadData = useMemo(() => {
-        const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-        // Aggregate bookings by day or distribute them realistically
-        return [
-            { name: 'Mon', bookings: 14, revenue: 2100 },
-            { name: 'Tue', bookings: 18, revenue: 2900 },
-            { name: 'Wed', bookings: 22, revenue: 3800 },
-            { name: 'Thu', bookings: 19, revenue: 3100 },
-            { name: 'Fri', bookings: 25, revenue: 4200 },
-            { name: 'Sat', bookings: 8, revenue: 1400 },
-            { name: 'Sun', bookings: 3, revenue: 450 },
-        ];
-    }, []);
+        const result = [];
+
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+
+            const dateString = date.toISOString().split('T')[0];
+
+            const dayBookings = bookings.filter((b) => b.date === dateString);
+
+            result.push({
+                name: date.toLocaleDateString('en-US', {
+                    weekday: 'short',
+                }),
+                date: dateString,
+                bookings: dayBookings.length,
+                revenue: dayBookings.reduce(
+                    (total, booking) =>
+                        total + Number(booking.service?.price ?? 0),
+                    0,
+                ),
+            });
+        }
+
+        return result;
+    }, [bookings]);
+
+    // const weeklyLoadData = useMemo(() => {
+    //     const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    //     // Aggregate bookings by day or distribute them realistically
+    //     return [
+    //         { name: 'Mon', bookings: 14, revenue: 2100 },
+    //         { name: 'Tue', bookings: 18, revenue: 2900 },
+    //         { name: 'Wed', bookings: 22, revenue: 3800 },
+    //         { name: 'Thu', bookings: 19, revenue: 3100 },
+    //         { name: 'Fri', bookings: 25, revenue: 4200 },
+    //         { name: 'Sat', bookings: 8, revenue: 1400 },
+    //         { name: 'Sun', bookings: 3, revenue: 450 },
+    //     ];
+    // }, []);
 
     // Services distribution data
-    const servicesDistribution = useMemo(() => {
-        const categoryCounts: { [key: string]: number } = {};
-        services.forEach((s) => {
-            categoryCounts[s.name] = (categoryCounts[s.name] || 0) + 1;
-        });
-
-        const colors = [
-            '#7c3aed',
-            '#5b21b6',
-            '#4c1d95',
-            '#a78bfa',
-            '#c084fc',
-            '#e9d5ff',
-        ];
-        return Object.entries(categoryCounts).map(([name, value], idx) => ({
-            name,
-            value,
-            color: colors[idx % colors.length],
-        }));
-    }, [services]);
-
     const COLORS = [
         '#7c3aed',
         '#6366f1',
@@ -238,6 +247,31 @@ export default function AdminDashboard({ bookings }: AdminDashboardProps) {
         '#ec4899',
         '#14b8a6',
     ];
+
+    const servicesDistribution = useMemo(() => {
+        const counts: Record<number, { name: string; value: number }> = {};
+
+        bookings.forEach((booking) => {
+            const service = booking.service;
+            if (!service) return;
+
+            if (!counts[service.id]) {
+                counts[service.id] = {
+                    name: service.name,
+                    value: 0,
+                };
+            }
+
+            counts[service.id].value++;
+        });
+
+        return Object.values(counts)
+            .map((item, index) => ({
+                ...item,
+                color: COLORS[index % COLORS.length],
+            }))
+            .sort((a, b) => b.value - a.value);
+    }, [bookings]);
 
     // Upcoming Active schedule (filter on Pending or Confirmed and limit to 4 items)
     const upcomingQueue = useMemo(() => {
@@ -564,8 +598,8 @@ export default function AdminDashboard({ bookings }: AdminDashboardProps) {
                                 Live Feed
                             </span>
                         </div>
-                        <div className="mt-2 h-64">
-                            <ResponsiveContainer width="100%" height="100%">
+                        <div className="mt-2 h-70">
+                            {/* <ResponsiveContainer width="100%" height="100%">
                                 <BarChart
                                     data={weeklyLoadData}
                                     margin={{
@@ -606,7 +640,70 @@ export default function AdminDashboard({ bookings }: AdminDashboardProps) {
                                         radius={[4, 4, 0, 0]}
                                         barSize={24}
                                     />
+
+                                    <Bar
+                                        dataKey="revenue"
+                                        fill="#10b981"
+                                        radius={[6, 6, 0, 0]}
+                                        barSize={18}
+                                        name="Revenue"
+                                    />
                                 </BarChart>
+                            </ResponsiveContainer> */}
+
+                            <ResponsiveContainer width="100%" height="100%">
+                                <ComposedChart
+                                    data={weeklyLoadData}
+                                    margin={{
+                                        top: 20,
+                                        right: 20,
+                                        left: 0,
+                                        bottom: 10,
+                                    }}
+                                >
+                                    <CartesianGrid strokeDasharray="3 3" />
+
+                                    <XAxis dataKey="name" />
+
+                                    <YAxis
+                                        yAxisId="left"
+                                        tick={{ fontSize: 11 }}
+                                        tickLine={false}
+                                        axisLine={false}
+                                        // label={{
+                                        //     value: 'Bookings',
+                                        //     angle: -90,
+                                        // }}
+                                    />
+
+                                    <YAxis
+                                        yAxisId="right"
+                                        orientation="right"
+                                        tick={{ fontSize: 11 }}
+                                        tickLine={false}
+                                        axisLine={false}
+                                        tickFormatter={(value) => `$${value}`}
+                                        // label={{
+                                        //     value: 'Revenue ($)',
+                                        //     angle: 90,
+                                        // }}
+                                        />
+
+                                    <Tooltip />
+
+                                    <Bar
+                                        yAxisId="left"
+                                        dataKey="bookings"
+                                        fill="#8b5cf6"
+                                    />
+
+                                    <Line
+                                        yAxisId="right"
+                                        dataKey="revenue"
+                                        stroke="#10b981"
+                                        strokeWidth={3}
+                                    />
+                                </ComposedChart>
                             </ResponsiveContainer>
                         </div>
                     </div>

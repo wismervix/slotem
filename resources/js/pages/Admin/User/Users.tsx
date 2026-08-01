@@ -386,8 +386,7 @@ export default function AdminUsers({ users, flash }: AdminUsersProps) {
     // ─── 7. RENDER ─────────────────────────────────────────────────
 
     return (
-        <AdminLayout searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}>
+        <AdminLayout searchQuery={searchQuery} setSearchQuery={setSearchQuery}>
             <div className="space-y-6">
                 {/* ─── Toast Notification ────────────────────────── */}
                 {showToast && toastMessage && (
