@@ -199,7 +199,11 @@ export default function AdminUsers({ users, flash }: AdminUsersProps) {
         a.click();
 
         setShowExportSuccess(true);
-        setTimeout(() => setShowExportSuccess(false), 3000);
+        const timer = setTimeout(() => setShowExportSuccess(false), 3000);
+        // setShowToast(true);
+        // setToastMessage('CSV exported. Check your downloads folder.');
+        // const timer = setTimeout(() => setShowToast(false), 4000);
+        return () => clearTimeout(timer);
     };
 
     // 💾 Save edited user
@@ -234,6 +238,10 @@ export default function AdminUsers({ users, flash }: AdminUsersProps) {
                 console.error('❌ Validation errors:', errors);
             },
         });
+
+        setShowToast(true);
+        setToastMessage(`User profile updated successfully.`);
+        setTimeout(() => setShowToast(false), 4000);
     };
 
     const performToggleStatus = (userId: number, nextStatus: string) => {
@@ -241,12 +249,19 @@ export default function AdminUsers({ users, flash }: AdminUsersProps) {
             route('admin.users.status', userId),
             { status: nextStatus },
             {
+                onSuccess: () => {
+                    console.log('✅ Update successful');
+                },
                 preserveScroll: true,
                 onError: (errors) => {
                     console.error('❌ Failed to update status:', errors);
                 },
             },
         );
+
+        setShowToast(true);
+        setToastMessage(`User status updated to ${nextStatus}.`);
+        setTimeout(() => setShowToast(false), 4000);
     };
 
     // 🔄 Toggle user status (Active ↔ Suspended)
@@ -274,6 +289,10 @@ export default function AdminUsers({ users, flash }: AdminUsersProps) {
                 setViewingUser(null);
             },
         });
+
+        setShowToast(true);
+        setToastMessage(`User deleted successfully.`);
+        setTimeout(() => setShowToast(false), 4000);
     };
     const handleDeleteUser = (user: User) => {
         if (!user) return;
@@ -382,6 +401,62 @@ export default function AdminUsers({ users, flash }: AdminUsersProps) {
             ).length,
         [users],
     );
+
+    // 📈 New Registrations - Month-over-Month
+    const newRegistrationsStats = useMemo(() => {
+        const now = new Date();
+        const currentMonthStart = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            1,
+        );
+        const lastMonthStart = new Date(
+            now.getFullYear(),
+            now.getMonth() - 1,
+            1,
+        );
+        const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+
+        // Count users registered this month
+        const currentMonthRegistrations = users.filter((user) => {
+            const createdAt = new Date(user.created_at);
+            return createdAt >= currentMonthStart;
+        }).length;
+
+        // Count users registered last month
+        const lastMonthRegistrations = users.filter((user) => {
+            const createdAt = new Date(user.created_at);
+            return createdAt >= lastMonthStart && createdAt <= lastMonthEnd;
+        }).length;
+
+        // Calculate percentage change
+        let percentageChange = 0;
+        let trend = 'neutral';
+
+        if (lastMonthRegistrations > 0) {
+            percentageChange =
+                ((currentMonthRegistrations - lastMonthRegistrations) /
+                    lastMonthRegistrations) *
+                100;
+            trend =
+                percentageChange > 0
+                    ? 'up'
+                    : percentageChange < 0
+                      ? 'down'
+                      : 'neutral';
+        } else if (currentMonthRegistrations > 0) {
+            percentageChange = 100;
+            trend = 'up';
+        }
+
+        return {
+            currentMonth: currentMonthRegistrations,
+            lastMonth: lastMonthRegistrations,
+            percentageChange: Math.round(percentageChange),
+            trend,
+            label: `${currentMonthRegistrations} new this month`,
+        };
+    }, [users]);
 
     // ─── 7. RENDER ─────────────────────────────────────────────────
 
@@ -801,15 +876,47 @@ export default function AdminUsers({ users, flash }: AdminUsersProps) {
                     {/* New Registrations */}
                     <div className="flex items-center gap-4 rounded-2xl border border-outline-variant bg-surface-container-low p-5 dark:border-slate-700 dark:bg-slate-800">
                         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary-container text-on-secondary-container dark:bg-slate-700 dark:text-purple-400">
-                            <TrendingUp className="h-6 w-6 text-primary dark:text-purple-400" />
+                            <TrendingUp
+                                className={`h-6 w-6 ${
+                                    newRegistrationsStats.trend === 'up'
+                                        ? 'text-emerald-500'
+                                        : newRegistrationsStats.trend === 'down'
+                                          ? 'text-red-500'
+                                          : 'text-primary'
+                                }`}
+                            />
                         </div>
                         <div>
                             <p className="text-[11px] font-semibold tracking-wider text-on-surface-variant uppercase dark:text-slate-500">
                                 New Registrations
                             </p>
                             <h4 className="text-xl leading-tight font-bold text-on-surface dark:text-white">
-                                +12.5% Month-over-Month
+                                {newRegistrationsStats.currentMonth}
                             </h4>
+                            <p className="text-xs text-on-surface-variant dark:text-slate-400">
+                                {newRegistrationsStats.lastMonth > 0 ? (
+                                    <span
+                                        className={
+                                            newRegistrationsStats.trend === 'up'
+                                                ? 'text-emerald-500'
+                                                : 'text-red-500'
+                                        }
+                                    >
+                                        {newRegistrationsStats.percentageChange >
+                                        0
+                                            ? '+'
+                                            : ''}
+                                        {newRegistrationsStats.percentageChange}
+                                        %
+                                        {newRegistrationsStats.trend === 'up'
+                                            ? '↑'
+                                            : '↓'}
+                                    </span>
+                                ) : (
+                                    'No previous data'
+                                )}{' '}
+                                vs last month
+                            </p>
                         </div>
                     </div>
 

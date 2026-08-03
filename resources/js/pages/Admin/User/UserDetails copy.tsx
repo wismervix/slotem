@@ -22,10 +22,9 @@ import {
     Sparkles,
     UserCheck,
     CreditCard,
+    // User,
     Info,
     Phone,
-    Ban,
-    FileCheck,
 } from 'lucide-react';
 
 import EditProfileModal from '@/components/Admin/EditProfileModal';
@@ -215,12 +214,13 @@ export default function DashboardView({
                 rejected: `admin.bookings.reject`,
                 completed: `admin.bookings.complete`,
                 cancelled: `admin.bookings.cancel`,
-                pending: `admin.bookings.restore`,
+                pending: `admin.bookings.restore`, // For restoring rejected bookings
             };
 
             const routeName = actionRoutes[action];
 
             if (action === 'pending') {
+                // Restore action
                 inertiaRouter.put(
                     route(routeName, booking.id),
                     {},
@@ -241,6 +241,7 @@ export default function DashboardView({
                     },
                 );
             } else if (action === 'completed') {
+                // Complete action with optional notes
                 inertiaRouter.put(
                     route(routeName, booking.id),
                     { notes },
@@ -261,6 +262,7 @@ export default function DashboardView({
                     },
                 );
             } else {
+                // Approve, Reject, Cancel actions
                 inertiaRouter.put(
                     route(routeName, booking.id),
                     {},
@@ -292,87 +294,13 @@ export default function DashboardView({
         setActiveMenuId(activeMenuId === id ? null : id);
     };
 
-    // ─── Get available actions based on booking status ──────────
-    const getAvailableActions = (
-        status: BookingStatus,
-    ): {
-        action: BookingStatus;
-        label: string;
-        icon: React.ReactNode;
-        color: string;
-    }[] => {
-        switch (status) {
-            case 'pending':
-                return [
-                    {
-                        action: 'approved',
-                        label: 'Approve Booking',
-                        icon: <Check className="h-3.5 w-3.5" />,
-                        color: 'text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-slate-700',
-                    },
-                    {
-                        action: 'rejected',
-                        label: 'Reject Booking',
-                        icon: <X className="h-3.5 w-3.5" />,
-                        color: 'text-rose-700 hover:bg-rose-50 dark:text-red-400 dark:hover:bg-slate-700',
-                    },
-                ];
-            case 'approved':
-                return [
-                    {
-                        action: 'completed',
-                        label: 'Mark Completed',
-                        icon: <FileCheck className="h-3.5 w-3.5" />,
-                        color: 'text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-slate-700',
-                    },
-                    {
-                        action: 'cancelled',
-                        label: 'Cancel Booking',
-                        icon: <Ban className="h-3.5 w-3.5" />,
-                        color: 'text-rose-700 hover:bg-rose-50 dark:text-red-400 dark:hover:bg-slate-700',
-                    },
-                ];
-            case 'rejected':
-                return [
-                    {
-                        action: 'pending',
-                        label: 'Restore to Pending',
-                        icon: <RotateCcw className="h-3.5 w-3.5" />,
-                        color: 'text-amber-700 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-slate-700',
-                    },
-                ];
-            case 'completed':
-                return []; // No actions for completed bookings
-            case 'cancelled':
-                return []; // No actions for cancelled bookings
-            default:
-                return [];
-        }
-    };
-
-    // ─── Render placeholder for no actions ──────────────────────
-    const renderNoActionsPlaceholder = (status: BookingStatus) => {
-        if (status === 'completed') {
-            return (
-                <div className="flex items-center justify-end gap-1.5">
-                    <span className="flex items-center gap-1 rounded-full bg-emerald-100/60 px-2.5 py-0.5 text-[9px] font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">
-                        <CheckCircle className="h-3 w-3" />
-                        Completed
-                    </span>
-                </div>
-            );
-        }
-        if (status === 'cancelled') {
-            return (
-                <div className="flex items-center justify-end gap-1.5">
-                    <span className="flex items-center gap-1 rounded-full bg-rose-100/60 px-2.5 py-0.5 text-[9px] font-semibold text-rose-700 dark:bg-rose-950/40 dark:text-rose-400">
-                        <XCircle className="h-3 w-3" />
-                        Cancelled
-                    </span>
-                </div>
-            );
-        }
-        return null;
+    const handleStatusChange = (
+        id: number,
+        status: 'completed' | 'pending' | 'cancelled',
+        serviceName: string,
+    ) => {
+        // handleUpdateBookingStatus(id, status);
+        setActiveMenuId(null);
     };
 
     const getNotificationIcon = (type: string) => {
@@ -414,6 +342,9 @@ export default function DashboardView({
                 return 'bg-neutral-100 text-neutral-800 dark:bg-slate-800 dark:text-slate-400';
         }
     };
+
+    // console.log('User Prop: ', user);
+    // console.log('Notifications Prop: ', notifications);
 
     return (
         <AdminLayout>
@@ -655,13 +586,6 @@ export default function DashboardView({
                                                         bk?.service?.icon ??
                                                             'scissors'
                                                     ];
-                                                const availableActions =
-                                                    getAvailableActions(
-                                                        bk.status,
-                                                    );
-                                                const hasActions =
-                                                    availableActions.length > 0;
-
                                                 return (
                                                     <tr
                                                         key={bk.id}
@@ -675,6 +599,7 @@ export default function DashboardView({
                                                         <td className="px-6 py-4">
                                                             <p className="flex gap-2 text-sm font-bold text-on-surface dark:text-white">
                                                                 <Icon className="h-5 w-5" />
+
                                                                 {
                                                                     bk?.service
                                                                         ?.name
@@ -719,13 +644,7 @@ export default function DashboardView({
                                                                         : bk.status ===
                                                                             'pending'
                                                                           ? 'bg-amber-100/80 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400'
-                                                                          : bk.status ===
-                                                                              'approved'
-                                                                            ? 'bg-blue-100/80 text-blue-800 dark:bg-blue-950/40 dark:text-blue-400'
-                                                                            : bk.status ===
-                                                                                'rejected'
-                                                                              ? 'bg-rose-100/80 text-rose-800 dark:bg-red-950/40 dark:text-red-400'
-                                                                              : 'bg-gray-100/80 text-gray-800 dark:bg-gray-950/40 dark:text-gray-400'
+                                                                          : 'bg-rose-100/80 text-rose-800 dark:bg-red-950/40 dark:text-red-400'
                                                                 }`}
                                                             >
                                                                 {bk.status}
@@ -737,61 +656,85 @@ export default function DashboardView({
                                                                 e.stopPropagation()
                                                             }
                                                         >
-                                                            {hasActions ? (
-                                                                <div className="relative inline-block text-left">
-                                                                    <button
-                                                                        onClick={(
+                                                            <div className="relative inline-block text-left">
+                                                                <button
+                                                                    onClick={(
+                                                                        e,
+                                                                    ) =>
+                                                                        handleToggleMenu(
+                                                                            bk.id,
                                                                             e,
-                                                                        ) =>
-                                                                            handleToggleMenu(
-                                                                                bk.id,
-                                                                                e,
-                                                                            )
-                                                                        }
-                                                                        className="cursor-pointer rounded-full p-1 text-on-surface-variant/70 transition-all outline-none hover:bg-surface-container/50 hover:text-primary dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-purple-400"
-                                                                    >
-                                                                        <MoreVertical className="h-4 w-4" />
-                                                                    </button>
+                                                                        )
+                                                                    }
+                                                                    className="cursor-pointer rounded-full p-1 text-on-surface-variant/70 transition-all outline-none hover:bg-surface-container/50 hover:text-primary dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-purple-400"
+                                                                >
+                                                                    <MoreVertical className="h-4 w-4" />
+                                                                </button>
 
-                                                                    {activeMenuId ===
-                                                                        bk.id && (
-                                                                        <div className="animate-in fade-in absolute right-0 z-20 mt-1.5 w-36 overflow-hidden rounded-xl border border-outline-variant bg-surface shadow-xl dark:border-slate-700 dark:bg-slate-800">
-                                                                            <div className="py-1">
-                                                                                {availableActions.map(
-                                                                                    (
-                                                                                        action,
-                                                                                        index,
-                                                                                    ) => (
-                                                                                        <button
-                                                                                            key={
-                                                                                                action.action
-                                                                                            }
-                                                                                            onClick={() =>
-                                                                                                handleActionClick(
-                                                                                                    bk,
-                                                                                                    action.action,
-                                                                                                )
-                                                                                            }
-                                                                                            className={`flex w-full cursor-pointer items-center gap-1.5 px-3 py-2 text-left text-xs font-medium transition-colors ${action.color} ${index > 0 ? 'border-t border-gray-100 dark:border-slate-700' : ''}`}
-                                                                                        >
-                                                                                            {
-                                                                                                action.icon
-                                                                                            }
-                                                                                            {
-                                                                                                action.label
-                                                                                            }
-                                                                                        </button>
-                                                                                    ),
-                                                                                )}
-                                                                            </div>
+                                                                {activeMenuId ===
+                                                                    bk.id && (
+                                                                    <div className="animate-in fade-in absolute right-0 z-20 mt-1.5 w-36 overflow-hidden rounded-xl border border-outline-variant bg-surface shadow-xl dark:border-slate-700 dark:bg-slate-800">
+                                                                        <div className="py-1">
+                                                                            <button
+                                                                                onClick={() =>
+                                                                                    handleActionClick(
+                                                                                        bk,
+                                                                                        'approved',
+                                                                                    )
+                                                                                }
+                                                                                className="flex w-full cursor-pointer items-center gap-1.5 px-3 py-2 text-left text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-slate-700"
+                                                                            >
+                                                                                <Check className="h-3.5 w-3.5" />{' '}
+                                                                                Approve
+                                                                                Booking
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={() =>
+                                                                                    handleActionClick(
+                                                                                        bk,
+                                                                                        'completed',
+                                                                                    )
+                                                                                }
+                                                                                className="flex w-full cursor-pointer items-center gap-1.5 px-3 py-2 text-left text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-slate-700"
+                                                                            >
+                                                                                <Check className="h-3.5 w-3.5" />{' '}
+                                                                                Confirm
+                                                                                Booking
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={() =>
+                                                                                    handleStatusChange(
+                                                                                        bk.id,
+                                                                                        'pending',
+                                                                                        bk
+                                                                                            ?.service
+                                                                                            ?.name ??
+                                                                                            '',
+                                                                                    )
+                                                                                }
+                                                                                className="flex w-full cursor-pointer items-center gap-1.5 px-3 py-2 text-left text-xs font-medium text-amber-700 transition-colors hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-slate-700"
+                                                                            >
+                                                                                <RotateCcw className="h-3.5 w-3.5" />{' '}
+                                                                                Set
+                                                                                Pending
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={() =>
+                                                                                    handleActionClick(
+                                                                                        bk,
+                                                                                        'rejected',
+                                                                                    )
+                                                                                }
+                                                                                className="flex w-full cursor-pointer items-center gap-1.5 border-t border-gray-100 px-3 py-2 text-left text-xs font-medium text-rose-700 transition-colors hover:bg-rose-50 dark:border-slate-700 dark:text-red-400 dark:hover:bg-slate-700"
+                                                                            >
+                                                                                <X className="h-3.5 w-3.5" />{' '}
+                                                                                Reject
+                                                                                Booking
+                                                                            </button>
                                                                         </div>
-                                                                    )}
-                                                                </div>
-                                                            ) : (
-                                                                renderNoActionsPlaceholder(
-                                                                    bk.status,
-                                                                )
-                                                            )}
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 );
@@ -1002,13 +945,7 @@ export default function DashboardView({
                                                     : selectedBookingForDetails.status ===
                                                         'pending'
                                                       ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400'
-                                                      : selectedBookingForDetails.status ===
-                                                          'approved'
-                                                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-400'
-                                                        : selectedBookingForDetails.status ===
-                                                            'rejected'
-                                                          ? 'bg-rose-100 text-rose-800 dark:bg-red-950/40 dark:text-red-400'
-                                                          : 'bg-gray-100 text-gray-800 dark:bg-gray-950/40 dark:text-gray-400'
+                                                      : 'bg-rose-100 text-rose-800 dark:bg-red-950/40 dark:text-red-400'
                                             }`}
                                         >
                                             {selectedBookingForDetails.status}

@@ -1191,7 +1191,7 @@ export default function AdminAvailability() {
 
             {/* Toast notification */}
             {isToastVisible && (
-                <div className="fixed right-6 bottom-6 left-6 rounded-lg border border-outline-variant bg-surface-container-low p-4 text-xs font-semibold text-on-surface shadow-lg dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                <div className="fixed top-26 right-6 max-w-4xl rounded-lg border border-outline-variant bg-primary p-4 text-lg font-semibold text-on-surface shadow-[0_0_30px_rgba(0,0,0,0.35)] shadow-lg dark:border-slate-700 dark:bg-primary dark:text-white dark:shadow-[0_0_30px_rgba(255,255,255,0.25)]">
                     {toastMessage}
                 </div>
             )}

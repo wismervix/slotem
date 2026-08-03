@@ -217,6 +217,7 @@ export default function UserDashboard({
             (booking) =>
                 booking.status !== 'cancelled' &&
                 booking.status !== 'rejected' &&
+                booking.status !== 'completed' &&
                 booking.date >= new Date().toISOString().split('T')[0],
         )
         .sort((a, b) => a.date.localeCompare(b.date))
@@ -227,9 +228,8 @@ export default function UserDashboard({
     const bookingHistory = bookings
         .filter(
             (booking) =>
-                booking.status !== 'cancelled' &&
-                booking.status !== 'rejected' &&
-                booking.date >= new Date().toISOString().split('T')[0],
+                booking.status === 'completed' &&
+                booking.date <= new Date().toISOString().split('T')[0],
         )
         .sort((b, a) => b.date.localeCompare(a.date))
         .slice(0, 3);

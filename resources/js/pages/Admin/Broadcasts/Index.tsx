@@ -51,6 +51,7 @@ export default function BroadcastsIndex({ broadcasts }: BroadcastsIndexProps) {
     // Use the confirmation hook
     const confirmation = useConfirmation();
 
+    const [visibleCount, setVisibleCount] = useState(6);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterType, setFilterType] = useState<
         'all' | 'info' | 'warning' | 'success' | 'alert'
@@ -116,6 +117,8 @@ export default function BroadcastsIndex({ broadcasts }: BroadcastsIndexProps) {
             filterPriority === 'all' || broadcast.priority === filterPriority;
         return matchesSearch && matchesType && matchesPriority;
     });
+
+    const visibleBroadcasts = filteredBroadcasts.slice(0, visibleCount);
 
     const performHandleDelete = (id: number) => {
         router.delete(route('admin.broadcasts.destroy', id), {
@@ -215,7 +218,7 @@ export default function BroadcastsIndex({ broadcasts }: BroadcastsIndexProps) {
                 </div>
 
                 {/* Broadcasts Grid */}
-                {filteredBroadcasts.length === 0 ? (
+                {visibleBroadcasts.length === 0 ? (
                     <div className="flex flex-col items-center justify-center rounded-xl border border-outline-variant bg-surface p-12 dark:bg-slate-900">
                         <Megaphone className="h-16 w-16 text-slate-300 dark:text-slate-600" />
                         <h3 className="mt-4 text-lg font-bold text-on-surface dark:text-white">
@@ -236,7 +239,7 @@ export default function BroadcastsIndex({ broadcasts }: BroadcastsIndexProps) {
                     </div>
                 ) : (
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        {filteredBroadcasts.map((broadcast) => {
+                        {visibleBroadcasts.map((broadcast) => {
                             const TypeIcon = getTypeIcon(broadcast.type);
                             const totalUsers = broadcast.users_count || 0;
                             const readPercentage =
@@ -326,6 +329,26 @@ export default function BroadcastsIndex({ broadcasts }: BroadcastsIndexProps) {
                         })}
                     </div>
                 )}
+
+                <div className="flex justify-center gap-3 pt-4">
+                    {filteredBroadcasts.length > visibleCount && (
+                        <button
+                            onClick={() => setVisibleCount((prev) => prev + 6)}
+                            className="rounded-xl px-6 py-3 font-medium text-primary transition-colors hover:bg-primary/10"
+                        >
+                            Load older broadcasts
+                        </button>
+                    )}
+
+                    {visibleCount > 6 && (
+                        <button
+                            onClick={() => setVisibleCount(6)}
+                            className="rounded-xl px-6 py-3 font-medium text-gray-500 transition-colors hover:bg-gray-100"
+                        >
+                            Show Less
+                        </button>
+                    )}
+                </div>
 
                 <ConfirmationModal
                     isOpen={confirmation.isOpen}
