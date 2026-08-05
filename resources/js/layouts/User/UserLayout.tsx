@@ -8,11 +8,11 @@ import {
     Search,
     CalendarDays,
     Info,
-    Smile,
-    Sparkles,
+    AlertCircle,
+    CheckCircle,
     Clock,
     Ban,
-    Scissors,
+    XCircle,
     UserCheck,
     ShieldCheck,
     Paintbrush,
@@ -94,6 +94,153 @@ export default function UserLayout({
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
     // Handler functions
+
+    // Helper function to check if a booking can be cancelled
+    const canCancelBooking = (booking: Booking): boolean => {
+        // Can't cancel if already cancelled or completed
+        if (
+            booking.status === 'cancelled' ||
+            booking.status === 'completed' ||
+            booking.status === 'rejected'
+        ) {
+            return false;
+        }
+
+        // Check if the booking is at least 24 hours away
+        const appointmentDateTime = new Date(
+            `${booking.date}T${booking.start_time}`,
+        );
+        const now = new Date();
+        const hoursDiff =
+            (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+        return hoursDiff >= 24;
+    };
+
+    // Helper to get booking status display info
+    const getBookingStatusInfo = (booking: Booking) => {
+        switch (booking.status) {
+            case 'pending':
+                return {
+                    label: 'Pending Approval',
+                    icon: <AlertCircle className="h-3 w-3" />,
+                    color: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800/50',
+                };
+            case 'approved':
+                return {
+                    label: 'Confirmed',
+                    icon: <CheckCircle className="h-3 w-3" />,
+                    color: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800/50',
+                };
+            case 'completed':
+                return {
+                    label: 'Completed',
+                    icon: <CheckCircle className="h-3 w-3" />,
+                    color: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800/50',
+                };
+            case 'cancelled':
+                return {
+                    label: 'Cancelled',
+                    icon: <XCircle className="h-3 w-3" />,
+                    color: 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-950/30 dark:text-gray-400 dark:border-gray-800/50',
+                };
+            case 'rejected':
+                return {
+                    label: 'Rejected',
+                    icon: <XCircle className="h-3 w-3" />,
+                    color: 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800/50',
+                };
+            default:
+                return {
+                    label: booking.status,
+                    icon: null,
+                    color: 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-950/30 dark:text-gray-400 dark:border-gray-800/50',
+                };
+        }
+    };
+
+    // Helper to render the appropriate CTA button for a booking
+    const renderBookingAction = (booking: Booking) => {
+        const statusInfo = getBookingStatusInfo(booking);
+        const isCancellable = canCancelBooking(booking);
+
+        // If booking is completed, show a "Completed" badge with no action
+        if (booking.status === 'completed') {
+            return (
+                <div className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-50 py-2 text-xs font-bold text-blue-700 dark:bg-blue-950/20 dark:text-blue-400">
+                    <CheckCircle className="h-4 w-4" />
+                    Booking Completed
+                </div>
+            );
+        }
+
+        // If booking is cancelled, show a "Cancelled" badge with no action
+        if (booking.status === 'cancelled') {
+            return (
+                <div className="flex w-full items-center justify-center gap-2 rounded-lg bg-gray-50 py-2 text-xs font-bold text-gray-700 dark:bg-gray-950/20 dark:text-gray-400">
+                    <XCircle className="h-4 w-4" />
+                    Booking Cancelled
+                </div>
+            );
+        }
+
+        // If booking is rejected, show a "Rejected" badge with no action
+        if (booking.status === 'rejected') {
+            return (
+                <div className="flex w-full items-center justify-center gap-2 rounded-lg bg-red-50 py-2 text-xs font-bold text-red-700 dark:bg-red-950/20 dark:text-red-400">
+                    <XCircle className="h-4 w-4" />
+                    Booking Rejected
+                </div>
+            );
+        }
+
+        // If booking is pending, show a "Pending Approval" badge with no action
+        if (booking.status === 'pending') {
+            return (
+                <div className="flex w-full items-center justify-center gap-2 rounded-lg bg-amber-50 py-2 text-xs font-bold text-amber-700 dark:bg-amber-950/20 dark:text-amber-400">
+                    <AlertCircle className="h-4 w-4" />
+                    Awaiting Approval
+                </div>
+            );
+        }
+
+        // If booking is approved but not cancellable (less than 24h away)
+        if (booking.status === 'approved' && !isCancellable) {
+            return (
+                <div className="flex w-full items-center justify-center gap-2 rounded-lg bg-amber-50 py-2 text-xs font-bold text-amber-700 dark:bg-amber-950/20 dark:text-amber-400">
+                    <Clock className="h-4 w-4" />
+                    Cannot Cancel (within 24h)
+                </div>
+            );
+        }
+
+        // If booking is approved and cancellable, show the cancel button
+        if (booking.status === 'approved' && isCancellable) {
+            return (
+                <button
+                    type="button"
+                    onClick={() => handleCancelAppointment(booking)}
+                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-red-200/40 bg-red-50 py-2 text-xs font-bold text-red-600 transition-colors hover:bg-red-100 dark:border-transparent dark:bg-red-950/20 dark:hover:bg-red-900/30"
+                >
+                    <Ban className="h-4 w-4" />
+                    Cancel Booking
+                </button>
+            );
+        }
+
+        // Fallback: show the cancel button if somehow we get here
+        return (
+            <button
+                type="button"
+                onClick={() => handleCancelAppointment(booking)}
+                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-red-200/40 bg-red-50 py-2 text-xs font-bold text-red-600 transition-colors hover:bg-red-100 dark:border-transparent dark:bg-red-950/20 dark:hover:bg-red-900/30"
+            >
+                <Ban className="h-4 w-4" />
+                Cancel Booking
+            </button>
+        );
+    };
+
     // Quick helper to format selected date nicely, e.g. "Tuesday, Oct 24"
     const formatSelectedDateHeading = (dateStr: string) => {
         const parts = dateStr.split('-');
@@ -121,14 +268,13 @@ export default function UserLayout({
             booking.status !== 'rejected',
     );
 
-    const upcomingBookings = bookings
+    const bookingHistory = bookings
         .filter(
             (booking) =>
-                booking.status !== 'cancelled' &&
-                booking.status !== 'rejected' &&
-                booking.date >= new Date().toISOString().split('T')[0],
+                booking.status === 'completed' &&
+                booking.date <= new Date().toISOString().split('T')[0],
         )
-        .sort((a, b) => a.date.localeCompare(b.date));
+        .sort((b, a) => b.date.localeCompare(a.date));
 
     return (
         <div className="flex min-h-screen flex-col bg-[#fef7ff] font-sans text-gray-900 antialiased transition-colors duration-200 md:flex-row dark:bg-neutral-950 dark:text-neutral-100">
@@ -169,20 +315,25 @@ export default function UserLayout({
                     </div>
 
                     <div className="flex w-full flex-col items-center gap-4 sm:flex-row lg:w-auto">
-                        {/* Real Search Input bar */}
-                        <div className="relative w-full sm:w-64">
-                            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                            <input
-                                type="text"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Search booking appointments..."
-                                className="w-full rounded-xl border border-outline-variant bg-white py-2.5 pr-4 pl-9 text-xs font-medium focus:border-transparent focus:ring-2 focus:ring-primary focus:outline-none dark:border-neutral-800 dark:bg-neutral-900"
-                            />
-                        </div>
-
-                        {/* View Switcher is renderable only on the bookings tab */}
-                        {isBookingsPage && headerActions}
+                        {isBookingsPage && (
+                            <>
+                                {/* Real Search Input bar */}
+                                <div className="relative w-full sm:w-64">
+                                    <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                                    <input
+                                        type="text"
+                                        value={searchQuery}
+                                        onChange={(e) =>
+                                            setSearchQuery(e.target.value)
+                                        }
+                                        placeholder="Search booking appointments..."
+                                        className="w-full rounded-xl border border-outline-variant bg-white py-2.5 pr-4 pl-9 text-xs font-medium focus:border-transparent focus:ring-2 focus:ring-primary focus:outline-none dark:border-neutral-800 dark:bg-neutral-900"
+                                    />
+                                </div>
+                                {/* View Switcher is renderable only on the bookings tab */}
+                                {headerActions}
+                            </>
+                        )}
                     </div>
                 </header>
                 {/* Central screen content viewport */}
@@ -225,6 +376,8 @@ export default function UserLayout({
                                         const IconComponent = getServiceIcon(
                                             booking.service?.icon,
                                         );
+                                        const statusInfo =
+                                            getBookingStatusInfo(booking);
 
                                         return (
                                             <div
@@ -238,13 +391,26 @@ export default function UserLayout({
                                                         }
                                                     </div>
 
-                                                    <div>
-                                                        <h4 className="text-xs font-extrabold text-gray-900 dark:text-white">
-                                                            {
-                                                                booking.service
-                                                                    ?.name
-                                                            }
-                                                        </h4>
+                                                    <div className="flex-1">
+                                                        <div className="flex items-start justify-between gap-2">
+                                                            <h4 className="text-xs font-extrabold text-gray-900 dark:text-white">
+                                                                {
+                                                                    booking
+                                                                        .service
+                                                                        ?.name
+                                                                }
+                                                            </h4>
+                                                            <span
+                                                                className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[8px] font-bold ${statusInfo.color}`}
+                                                            >
+                                                                {
+                                                                    statusInfo.icon
+                                                                }
+                                                                {
+                                                                    statusInfo.label
+                                                                }
+                                                            </span>
+                                                        </div>
 
                                                         <p className="max-w-[160px] truncate text-[10px] font-medium text-gray-500">
                                                             {
@@ -282,18 +448,8 @@ export default function UserLayout({
                                                     </p>
                                                 </div>
 
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        handleCancelAppointment(
-                                                            booking,
-                                                        );
-                                                    }}
-                                                    className="cursor-pointer flex w-full items-center justify-center gap-1 rounded-lg border border-red-200/40 bg-red-50 py-1.5 text-[10px] font-bold text-red-600 transition-colors hover:bg-red-100 dark:border-transparent dark:bg-red-950/20 dark:hover:bg-red-900/30"
-                                                >
-                                                    <Ban className="h-3 w-3" />
-                                                    Cancel Booking
-                                                </button>
+                                                {/* Render the appropriate action button */}
+                                                {renderBookingAction(booking)}
                                             </div>
                                         );
                                     })
@@ -305,17 +461,17 @@ export default function UserLayout({
                             {/* Upcoming Bookings matches the screenshot exactly */}
                             <div className="min-h-[300px] flex-grow space-y-3 overflow-y-auto pr-1">
                                 <h3 className="text-xs font-black tracking-wider text-gray-500 uppercase">
-                                    Upcoming Bookings
+                                    Booking History
                                 </h3>
 
                                 <div className="flex flex-col gap-3">
-                                    {upcomingBookings.length === 0 ? (
+                                    {bookingHistory.length === 0 ? (
                                         <p className="py-4 text-center text-[10px] font-bold text-gray-400 italic">
-                                            No future sessions scheduled.
+                                            No booking history available.
                                         </p>
                                     ) : (
-                                        upcomingBookings
-                                            .slice(0, 3)
+                                        bookingHistory
+                                            // .slice(0, 3)
                                             .map((booking) => {
                                                 const IconComponent =
                                                     getServiceIcon(

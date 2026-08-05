@@ -189,7 +189,7 @@ const Create = ({ service, selectedDate, slot }: CreateProps) => {
                                 </div>
 
                                 <button
-                                    className="hover:bg-primary-hover flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl bg-primary py-4 text-lg font-semibold text-white transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
+                                    className="hover:bg-primary-hover flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl bg-primary py-4 text-lg font-semibold text-white transition-all active:scale-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
                                     type="submit"
                                     disabled={processing || isBooked}
                                 >
@@ -219,7 +219,7 @@ const Create = ({ service, selectedDate, slot }: CreateProps) => {
                                         href={route('booking.date-time', {
                                             service: service.id,
                                         })}
-                                        className="flex items-center gap-1.5 text-sm font-medium text-on-surface-variant transition-colors hover:text-primary dark:text-on-surface-variant-dark"
+                                        className="flex items-center gap-1.5 text-sm font-medium text-on-surface-variant transition-all transition-colors hover:text-primary active:scale-95 dark:text-on-surface-variant-dark"
                                     >
                                         <SquarePen className="h-4 w-4" />
                                         Edit
@@ -229,7 +229,7 @@ const Create = ({ service, selectedDate, slot }: CreateProps) => {
                                 <div className="space-y-3">
                                     <Link
                                         href={route('services')}
-                                        className="group flex w-full items-start gap-4 rounded-xl p-3 text-left transition-all hover:bg-surface-accent/40 hover:shadow-sm dark:hover:bg-surface-accent-dark/40"
+                                        className="group flex w-full items-start gap-4 rounded-xl p-3 text-left transition-all hover:bg-surface-accent/40 hover:shadow-sm active:scale-95 dark:hover:bg-surface-accent-dark/40"
                                     >
                                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-accent transition-all group-hover:scale-105 group-hover:bg-primary/10 dark:bg-surface-accent-dark">
                                             <Scissors className="h-5 w-5 text-primary" />
@@ -250,7 +250,7 @@ const Create = ({ service, selectedDate, slot }: CreateProps) => {
                                         href={route('booking.date-time', {
                                             service: service.id,
                                         })}
-                                        className="group flex w-full items-start gap-4 rounded-xl p-3 text-left transition-all hover:bg-surface-accent/40 hover:shadow-sm dark:hover:bg-surface-accent-dark/40"
+                                        className="group flex w-full items-start gap-4 rounded-xl p-3 text-left transition-all hover:bg-surface-accent/40 hover:shadow-sm active:scale-95 dark:hover:bg-surface-accent-dark/40"
                                     >
                                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-accent transition-all group-hover:scale-105 group-hover:bg-primary/10 dark:bg-surface-accent-dark">
                                             <Calendar className="h-5 w-5 text-primary" />
@@ -282,7 +282,7 @@ const Create = ({ service, selectedDate, slot }: CreateProps) => {
                                         href={route('booking.date-time', {
                                             service: service.id,
                                         })}
-                                        className="group flex w-full items-start gap-4 rounded-xl p-3 text-left transition-all hover:bg-surface-accent/40 hover:shadow-sm dark:hover:bg-surface-accent-dark/40"
+                                        className="group flex w-full items-start gap-4 rounded-xl p-3 text-left transition-all hover:bg-surface-accent/40 hover:shadow-sm active:scale-95 dark:hover:bg-surface-accent-dark/40"
                                     >
                                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-accent transition-all group-hover:scale-105 group-hover:bg-primary/10 dark:bg-surface-accent-dark">
                                             <Clock className="h-5 w-5 text-primary" />

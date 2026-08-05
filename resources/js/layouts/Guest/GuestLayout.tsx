@@ -92,7 +92,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
 
                         <Link
                             href={route('services')}
-                            className="rounded-xl bg-purple-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-purple-500/20 transition hover:scale-[1.02] hover:bg-purple-500"
+                            className="rounded-xl bg-purple-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-purple-500/20 transition transition-all hover:scale-[1.02] hover:bg-purple-500 active:scale-95"
                         >
                             Book Now
                         </Link>
@@ -117,19 +117,31 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                     </Link>
 
                     <div className="flex flex-wrap justify-center gap-6 text-sm text-slate-500">
-                        <Link href={route('privacy-policy')} className="hover:text-purple-600">
+                        <Link
+                            href={route('privacy-policy')}
+                            className="hover:text-purple-600"
+                        >
                             Privacy Policy
                         </Link>
 
-                        <Link href={route('terms-of-service')} className="hover:text-purple-600">
+                        <Link
+                            href={route('terms-of-service')}
+                            className="hover:text-purple-600"
+                        >
                             Terms of Service
                         </Link>
 
-                        <Link href={route('help-center')} className="hover:text-purple-600">
+                        <Link
+                            href={route('help-center')}
+                            className="hover:text-purple-600"
+                        >
                             Help Center
                         </Link>
 
-                        <Link href={route('contact-sales')} className="hover:text-purple-600">
+                        <Link
+                            href={route('contact-sales')}
+                            className="hover:text-purple-600"
+                        >
                             Contact Sales
                         </Link>
                     </div>

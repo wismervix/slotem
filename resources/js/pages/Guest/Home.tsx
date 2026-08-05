@@ -46,11 +46,11 @@ const Home = () => {
                         </div>
 
                         <div className="flex flex-wrap gap-4">
-                            <button className="rounded-2xl bg-purple-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-purple-500/20 transition hover:bg-purple-500">
+                            <button className="cursor-pointer rounded-2xl bg-purple-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-purple-500/20 transition transition-all hover:bg-purple-500 active:scale-95">
                                 Book Now
                             </button>
 
-                            <button className="rounded-2xl border border-slate-300 px-8 py-4 text-lg font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-white dark:hover:bg-slate-800">
+                            <button className="cursor-pointer rounded-2xl border border-slate-300 px-8 py-4 text-lg font-semibold text-slate-700 transition transition-all hover:bg-slate-100 active:scale-95 dark:border-slate-700 dark:text-white dark:hover:bg-slate-800">
                                 View Pricing
                             </button>
                         </div>
@@ -265,11 +265,11 @@ const Home = () => {
                             </p>
 
                             <div className="mt-10 flex flex-wrap justify-center gap-4">
-                                <button className="rounded-2xl bg-white px-10 py-4 text-lg font-semibold text-purple-600 transition hover:bg-slate-100">
+                                <button className="cursor-pointer rounded-2xl bg-white px-10 py-4 text-lg font-semibold text-purple-600 transition transition-all hover:bg-slate-100 active:scale-95">
                                     Get Started for Free
                                 </button>
 
-                                <button className="rounded-2xl border border-white/30 px-10 py-4 text-lg font-semibold text-white transition hover:bg-white/10">
+                                <button className="cursor-pointer rounded-2xl border border-white/30 px-10 py-4 text-lg font-semibold text-white transition transition-all hover:bg-white/10 active:scale-95">
                                     Talk to Sales
                                 </button>
                             </div>

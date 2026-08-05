@@ -130,7 +130,7 @@ export function TimeSlotPicker({
                 <div className="flex gap-4">
                     <Link
                         href={route('services')}
-                        className="flex-1 rounded-full border border-gray-200 px-6 py-4 text-center text-sm font-bold text-gray-500 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                        className="flex-1 rounded-full border border-gray-200 px-6 py-4 text-center text-sm font-bold text-gray-500 transition-all transition-colors hover:bg-gray-50 active:scale-95 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
                         id="back-btn"
                     >
                         Back
@@ -143,7 +143,7 @@ export function TimeSlotPicker({
                                 slot: selectedSlot?.id,
                             })}
                             id="next-step-btn"
-                            className="flex-[2] transform rounded-full bg-purple-600 px-6 py-4 text-center text-sm font-bold text-white shadow-lg shadow-purple-200 transition-all hover:bg-purple-700 active:scale-[0.98]"
+                            className="flex-[2] transform rounded-full bg-purple-600 px-6 py-4 text-center text-sm font-bold text-white shadow-lg shadow-purple-200 transition-all hover:bg-purple-700 active:scale-95 active:scale-[0.98]"
                         >
                             Next Step
                         </Link>

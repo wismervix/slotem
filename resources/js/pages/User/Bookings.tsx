@@ -65,18 +65,6 @@ const ViewBookings = ({ bookings, unreadNotificationsCount }: ViewBookingsProps)
                 <div className="flex shrink-0 rounded-xl bg-gray-100 p-1 text-xs font-semibold dark:bg-neutral-800">
                     <button
                         type="button"
-                        onClick={() => setSubView('list')}
-                        className={`flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs transition-all ${
-                            subView === 'list'
-                                ? 'bg-white text-primary shadow-xs dark:bg-neutral-900'
-                                : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
-                        }`}
-                    >
-                        <List className="h-4 w-4" />
-                        List View
-                    </button>
-                    <button
-                        type="button"
                         onClick={() => setSubView('calendar')}
                         className={`flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs transition-all ${
                             subView === 'calendar'
@@ -86,6 +74,18 @@ const ViewBookings = ({ bookings, unreadNotificationsCount }: ViewBookingsProps)
                     >
                         <CalendarDays className="h-4 w-4" />
                         Calendar View
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setSubView('list')}
+                        className={`flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs transition-all ${
+                            subView === 'list'
+                                ? 'bg-white text-primary shadow-xs dark:bg-neutral-900'
+                                : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                        }`}
+                    >
+                        <List className="h-4 w-4" />
+                        List View
                     </button>
                 </div>
             }
@@ -105,18 +105,18 @@ const ViewBookings = ({ bookings, unreadNotificationsCount }: ViewBookingsProps)
                     onCancelAppointment={handleCancelAppointment}
                 />
             )}
-            
-                            <ConfirmationModal
-                                isOpen={confirmation.isOpen}
-                                onClose={confirmation.close}
-                                onConfirm={confirmation.handleConfirm}
-                                title={confirmation.options?.title || ''}
-                                message={confirmation.options?.message || ''}
-                                confirmLabel={confirmation.options?.confirmLabel}
-                                cancelLabel={confirmation.options?.cancelLabel}
-                                variant={confirmation.options?.variant}
-                                isLoading={confirmation.isLoading}
-                            />
+
+            <ConfirmationModal
+                isOpen={confirmation.isOpen}
+                onClose={confirmation.close}
+                onConfirm={confirmation.handleConfirm}
+                title={confirmation.options?.title || ''}
+                message={confirmation.options?.message || ''}
+                confirmLabel={confirmation.options?.confirmLabel}
+                cancelLabel={confirmation.options?.cancelLabel}
+                variant={confirmation.options?.variant}
+                isLoading={confirmation.isLoading}
+            />
         </UserLayout>
     );
 };;

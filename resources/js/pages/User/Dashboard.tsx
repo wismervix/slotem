@@ -11,6 +11,7 @@ import {
     TrendingUp,
     CheckCircle,
     XCircle,
+    HelpCircle,
     Eye,
     Flame,
     ChevronRight,
@@ -717,140 +718,165 @@ export default function UserDashboard({
                         </div>
 
                         <div className="flex flex-col gap-4">
-                            {upcomingBookings.map((booking, idx) => {
-                                const IconComponent = getServiceIcon(
-                                    booking.service?.icon,
-                                );
-
-                                return (
-                                    <motion.div
-                                        key={idx}
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: idx * 0.08 }}
-                                        className="group rounded-2xl border border-zinc-200/60 bg-white/80 p-5 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:border-white/10 dark:bg-zinc-900/60 dark:shadow-black/30 dark:hover:bg-zinc-900/80"
+                            {upcomingBookings.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center space-y-3 rounded-2xl border border-outline-variant bg-white p-12 text-center dark:bg-neutral-900">
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-50 text-gray-400 dark:bg-neutral-800">
+                                        <HelpCircle className="h-6 w-6" />
+                                    </div>
+                                    <h4 className="text-sm font-bold text-gray-900 dark:text-white">
+                                        No upcoming booking appointments
+                                    </h4>
+                                    <p className="max-w-xs text-xs leading-normal text-secondary">
+                                        Try creating a brand new appointment!
+                                    </p>
+                                    <button
+                                        onClick={() => {
+                                            openModal();
+                                        }}
+                                        className="mt-2 rounded-lg bg-primary px-4 py-2 text-xs font-bold text-white"
                                     >
-                                        <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-                                            {/* LEFT */}
-                                            <div className="flex items-center gap-4">
-                                                <div
-                                                    className={getServiceIconTheme(
-                                                        booking.service?.icon ??
-                                                            '',
-                                                    )}
-                                                >
-                                                    <IconComponent size={26} />
-                                                </div>
+                                        Start New Appointment
+                                    </button>
+                                </div>
+                            ) : (
+                                upcomingBookings.map((booking, idx) => {
+                                    const IconComponent = getServiceIcon(
+                                        booking.service?.icon,
+                                    );
 
-                                                <div className="max-w-[120px] min-w-0">
-                                                    <h4
-                                                        title={
+                                    return (
+                                        <motion.div
+                                            key={idx}
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: idx * 0.08 }}
+                                            className="group rounded-2xl border border-zinc-200/60 bg-white/80 p-5 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:border-white/10 dark:bg-zinc-900/60 dark:shadow-black/30 dark:hover:bg-zinc-900/80"
+                                        >
+                                            <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+                                                {/* LEFT */}
+                                                <div className="flex items-center gap-4">
+                                                    <div
+                                                        className={getServiceIconTheme(
                                                             booking.service
-                                                                ?.name ??
-                                                            'No service name'
-                                                        }
-                                                        className="truncate text-lg font-semibold text-zinc-900 dark:text-zinc-100"
-                                                    >
-                                                        {booking.service
-                                                            ?.name ??
-                                                            'No service name'}
-                                                    </h4>
-
-                                                    <p
-                                                        title={
-                                                            booking.service
-                                                                ?.description ??
-                                                            'No description'
-                                                        }
-                                                        className="line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400"
-                                                    >
-                                                        {booking.service
-                                                            ?.description ??
-                                                            'No description'}
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            {/* MIDDLE */}
-                                            <div className="flex items-center gap-10">
-                                                <div className="flex flex-col">
-                                                    <span className="text-[11px] font-medium tracking-wider text-zinc-500 uppercase dark:text-zinc-400">
-                                                        Date
-                                                    </span>
-
-                                                    <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                                                        {new Intl.DateTimeFormat(
-                                                            'en-US',
-                                                            {
-                                                                weekday:
-                                                                    'short',
-                                                                month: 'short',
-                                                                day: 'numeric',
-                                                                year: 'numeric',
-                                                            },
-                                                        ).format(
-                                                            new Date(
-                                                                booking.date,
-                                                            ),
+                                                                ?.icon ?? '',
                                                         )}
-                                                    </span>
+                                                    >
+                                                        <IconComponent
+                                                            size={26}
+                                                        />
+                                                    </div>
+
+                                                    <div className="max-w-[120px] min-w-0">
+                                                        <h4
+                                                            title={
+                                                                booking.service
+                                                                    ?.name ??
+                                                                'No service name'
+                                                            }
+                                                            className="truncate text-lg font-semibold text-zinc-900 dark:text-zinc-100"
+                                                        >
+                                                            {booking.service
+                                                                ?.name ??
+                                                                'No service name'}
+                                                        </h4>
+
+                                                        <p
+                                                            title={
+                                                                booking.service
+                                                                    ?.description ??
+                                                                'No description'
+                                                            }
+                                                            className="line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400"
+                                                        >
+                                                            {booking.service
+                                                                ?.description ??
+                                                                'No description'}
+                                                        </p>
+                                                    </div>
                                                 </div>
 
-                                                <div className="flex flex-col">
-                                                    <span className="text-[11px] font-medium tracking-wider text-zinc-500 uppercase dark:text-zinc-400">
-                                                        Time
-                                                    </span>
+                                                {/* MIDDLE */}
+                                                <div className="flex items-center gap-10">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[11px] font-medium tracking-wider text-zinc-500 uppercase dark:text-zinc-400">
+                                                            Date
+                                                        </span>
 
-                                                    <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                                                        {formatTime(
-                                                            booking.start_time,
-                                                        )}{' '}
-                                                        -{' '}
-                                                        {formatTime(
-                                                            booking.end_time,
-                                                        )}{' '}
-                                                        (
-                                                        {
-                                                            booking.service
-                                                                ?.duration
-                                                        }{' '}
-                                                        mins)
-                                                    </span>
+                                                        <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                                                            {new Intl.DateTimeFormat(
+                                                                'en-US',
+                                                                {
+                                                                    weekday:
+                                                                        'short',
+                                                                    month: 'short',
+                                                                    day: 'numeric',
+                                                                    year: 'numeric',
+                                                                },
+                                                            ).format(
+                                                                new Date(
+                                                                    booking.date,
+                                                                ),
+                                                            )}
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[11px] font-medium tracking-wider text-zinc-500 uppercase dark:text-zinc-400">
+                                                            Time
+                                                        </span>
+
+                                                        <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                                                            {formatTime(
+                                                                booking.start_time,
+                                                            )}{' '}
+                                                            -{' '}
+                                                            {formatTime(
+                                                                booking.end_time,
+                                                            )}{' '}
+                                                            (
+                                                            {
+                                                                booking.service
+                                                                    ?.duration
+                                                            }{' '}
+                                                            mins)
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {/* ACTIONS */}
+                                                <div className="flex gap-2 opacity-80 transition group-hover:opacity-100">
+                                                    <button
+                                                        onClick={() =>
+                                                            openModal(
+                                                                booking.date,
+                                                                booking.time_slot_id,
+                                                                booking.service
+                                                                    ?.id,
+                                                            )
+                                                        }
+                                                        title="Reschedule Booking"
+                                                        className="cursor-pointer rounded-xl border border-zinc-200 bg-white p-2 text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10 dark:hover:text-white"
+                                                    >
+                                                        <Clock size={18} />
+                                                    </button>
+
+                                                    <button
+                                                        onClick={() => {
+                                                            handleCancelAppointment(
+                                                                booking,
+                                                            );
+                                                        }}
+                                                        title="Cancel Booking"
+                                                        className="cursor-pointer rounded-xl border border-red-500/20 bg-transparent p-2 text-red-500 transition hover:bg-red-500/10 dark:border-red-400/20 dark:text-red-400 dark:hover:bg-red-500/10"
+                                                    >
+                                                        <XCircle size={18} />
+                                                    </button>
                                                 </div>
                                             </div>
-
-                                            {/* ACTIONS */}
-                                            <div className="flex gap-2 opacity-80 transition group-hover:opacity-100">
-                                                <button
-                                                    onClick={() =>
-                                                        openModal(
-                                                            booking.date,
-                                                            booking.time_slot_id,
-                                                            booking.service?.id,
-                                                        )
-                                                    }
-                                                    title="Reschedule Booking"
-                                                    className="cursor-pointer rounded-xl border border-zinc-200 bg-white p-2 text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10 dark:hover:text-white"
-                                                >
-                                                    <Clock size={18} />
-                                                </button>
-
-                                                <button
-                                                    onClick={() => {
-                                                        handleCancelAppointment(
-                                                            booking,
-                                                        );
-                                                    }}
-                                                    title="Cancel Booking"
-                                                    className="cursor-pointer rounded-xl border border-red-500/20 bg-transparent p-2 text-red-500 transition hover:bg-red-500/10 dark:border-red-400/20 dark:text-red-400 dark:hover:bg-red-500/10"
-                                                >
-                                                    <XCircle size={18} />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </motion.div>
-                                );
-                            })}
+                                        </motion.div>
+                                    );
+                                })
+                            )}
                         </div>
                     </section>
 
@@ -883,65 +909,75 @@ export default function UserDashboard({
                                 </thead>
 
                                 <tbody className="divide-y divide-outline-variant/20 dark:divide-white/5">
-                                    {bookingHistory.map((row, idx) => (
-                                        <tr
-                                            key={idx}
-                                            className="group transition-all duration-200 hover:bg-surface-container-low dark:hover:bg-white/[0.03]"
-                                        >
-                                            <td className="max-w-[220px] px-4 py-4">
-                                                <div className="min-w-0">
-                                                    <span
-                                                        title={
-                                                            row.service?.name
-                                                        }
-                                                        className="block truncate text-sm font-semibold text-on-surface dark:text-zinc-100"
-                                                    >
-                                                        {row.service?.name}
-                                                    </span>
-
-                                                    <span
-                                                        title={
-                                                            row.service
-                                                                ?.description ??
-                                                            'No description'
-                                                        }
-                                                        className="mt-1 line-clamp-2 text-xs leading-relaxed text-on-surface-variant dark:text-zinc-400"
-                                                    >
-                                                        {
-                                                            row.service
-                                                                ?.description
-                                                        }
-                                                    </span>
-                                                </div>
-                                            </td>
-
-                                            <td className="px-4 py-4">
-                                                <span className="text-sm text-on-surface dark:text-zinc-300">
-                                                    {new Intl.DateTimeFormat(
-                                                        'en-US',
-                                                        {
-                                                            weekday: 'short',
-                                                            month: 'short',
-                                                            day: 'numeric',
-                                                            year: 'numeric',
-                                                        },
-                                                    ).format(
-                                                        new Date(row.date),
-                                                    )}
-                                                </span>
-                                            </td>
-
-                                            <td className="px-4 py-4">
-                                                <span
-                                                    className={`inline-flex items-center ${getStatusColor(
-                                                        row.status,
-                                                    )}`}
-                                                >
-                                                    {row.status}
-                                                </span>
+                                    {bookingHistory.length === 0 ? (
+                                        <tr>
+                                            <td className="px-4 py-4 text-center text-sm text-on-surface-variant dark:text-zinc-400">
+                                                No booking history available.
                                             </td>
                                         </tr>
-                                    ))}
+                                    ) : (
+                                        bookingHistory.map((row, idx) => (
+                                            <tr
+                                                key={idx}
+                                                className="group transition-all duration-200 hover:bg-surface-container-low dark:hover:bg-white/[0.03]"
+                                            >
+                                                <td className="max-w-[220px] px-4 py-4">
+                                                    <div className="min-w-0">
+                                                        <span
+                                                            title={
+                                                                row.service
+                                                                    ?.name
+                                                            }
+                                                            className="block truncate text-sm font-semibold text-on-surface dark:text-zinc-100"
+                                                        >
+                                                            {row.service?.name}
+                                                        </span>
+
+                                                        <span
+                                                            title={
+                                                                row.service
+                                                                    ?.description ??
+                                                                'No description'
+                                                            }
+                                                            className="mt-1 line-clamp-2 text-xs leading-relaxed text-on-surface-variant dark:text-zinc-400"
+                                                        >
+                                                            {
+                                                                row.service
+                                                                    ?.description
+                                                            }
+                                                        </span>
+                                                    </div>
+                                                </td>
+
+                                                <td className="px-4 py-4">
+                                                    <span className="text-sm text-on-surface dark:text-zinc-300">
+                                                        {new Intl.DateTimeFormat(
+                                                            'en-US',
+                                                            {
+                                                                weekday:
+                                                                    'short',
+                                                                month: 'short',
+                                                                day: 'numeric',
+                                                                year: 'numeric',
+                                                            },
+                                                        ).format(
+                                                            new Date(row.date),
+                                                        )}
+                                                    </span>
+                                                </td>
+
+                                                <td className="px-4 py-4">
+                                                    <span
+                                                        className={`inline-flex items-center ${getStatusColor(
+                                                            row.status,
+                                                        )}`}
+                                                    >
+                                                        {row.status}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
                                 </tbody>
                             </table>
 

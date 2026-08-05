@@ -1,10 +1,11 @@
 import { useBookingModalContext } from '@/contexts/BookingModalContext';
-import { Link } from '@inertiajs/react';
+import { AdminProfile, User } from '@/types';
+import { Link, usePage } from '@inertiajs/react';
 import {
     LayoutDashboard,
     Calendar,
     Bell,
-    User,
+    User as UserIcon,
     Plus,
     Menu,
     X,
@@ -24,11 +25,22 @@ interface SidebarProps {
     setMobileSidebarOpen: (isOpen: boolean) => void;
 }
 
+type PageProps = {
+    auth: {
+        user: User | null;
+        admin: AdminProfile | null;
+    };
+};
+
 export default function Sidebar({
     unreadNotificationsCount,
     mobileSidebarOpen,
     setMobileSidebarOpen,
 }: SidebarProps) {
+    const { auth } = usePage<PageProps>().props;
+
+    const user = auth.user;
+
     const navItems: NavItem[] = [
         {
             name: 'Dashboard',
@@ -44,7 +56,7 @@ export default function Sidebar({
 
         {
             name: 'Profile',
-            icon: User,
+            icon: UserIcon,
             route: 'user.profile',
         },
         {
@@ -108,13 +120,33 @@ export default function Sidebar({
                 }`}
             >
                 <div className="mb-6 flex items-center justify-between">
-                    <div className="space-y-0.5">
+                    {/* <div className="space-y-0.5">
                         <h1 className="text-2xl font-black tracking-tight text-primary dark:text-primary-fixed">
                             Slotem
                         </h1>
                         <p className="text-xs font-medium tracking-wide text-secondary opacity-80 dark:text-secondary-fixed">
                             Management Suite
                         </p>
+                    </div> */}
+
+                    <div className="flex items-center gap-3 space-y-0.5">
+                        {user?.avatar_url && (
+                            <img
+                                src={user?.avatar_url}
+                                alt={user?.name}
+                                className="h-10 w-10 rounded-full object-cover"
+                            />
+                        )}
+
+                        <div>
+                            <h1 className="text-2xl font-black tracking-tight text-primary dark:text-primary-fixed">
+                                Slotem
+                            </h1>
+
+                            <p className="text-xs font-medium tracking-wide text-secondary opacity-80 dark:text-secondary-fixed">
+                                {user?.name}
+                            </p>
+                        </div>
                     </div>
 
                     <button

@@ -1,4 +1,4 @@
-import { useForm, usePage } from '@inertiajs/react';
+import { Link, useForm, usePage } from '@inertiajs/react';
 import UserLayout from '@/layouts/User/UserLayout';
 import { UserProfile } from '@/types';
 import { useEffect, useState } from 'react';
@@ -541,7 +541,10 @@ export default function Profile({
                                 Need Assistance?
                             </h4>
                             <p className="text-[11px] leading-relaxed text-gray-600 dark:text-gray-300">
-                                Having trouble with a booking? Contact support
+                                Having trouble with a booking?{' '}
+                                <Link className="font-bold text-amber-800 underline transition-colors hover:text-amber-800/50 dark:text-amber-300 dark:hover:text-amber-300/90">
+                                    Contact support
+                                </Link>{' '}
                                 and we'll help you reschedule or resolve issues.
                             </p>
                         </div>

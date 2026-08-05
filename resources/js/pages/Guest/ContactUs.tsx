@@ -113,7 +113,7 @@ export default function ContactUs() {
 
                         <Link
                             href={route('services')}
-                            className="rounded-xl bg-purple-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-purple-500/20 transition hover:scale-[1.02] hover:bg-purple-500"
+                            className="rounded-xl bg-purple-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-purple-500/20 transition transition-all hover:scale-[1.02] hover:bg-purple-500 active:scale-95"
                         >
                             Book Now
                         </Link>
@@ -188,7 +188,7 @@ export default function ContactUs() {
                                         className="w-full resize-none border-b border-white/20 bg-white/5 p-4 text-white transition-all outline-none placeholder:text-white/40 focus:border-primary-container focus:bg-white/10"
                                     />
 
-                                    <button className="w-full rounded-xl bg-primary-container py-4 font-heading text-3xl tracking-widest text-white shadow-xl shadow-primary/30 transition-all hover:bg-primary active:scale-[0.98]">
+                                    <button className="active:scale-95 rounded-xl w-full bg-primary-container py-4 font-heading text-3xl tracking-widest text-white shadow-xl shadow-primary/30 transition-all hover:bg-primary active:scale-[0.98]">
                                         SEND INQUIRY
                                     </button>
                                 </form>
@@ -221,13 +221,13 @@ export default function ContactUs() {
                                     SOCIAL
                                 </h3>
                                 <div className="flex gap-6">
-                                    <button className="rounded-full bg-white/5 p-4 text-white/70 transition-all hover:bg-white/10 hover:text-primary">
+                                    <button className="rounded-full transition-all active:scale-95 bg-white/5 p-4 text-white/70 transition-all hover:bg-white/10 hover:text-primary">
                                         <Share2 className="h-6 w-6" />
                                     </button>
-                                    <button className="rounded-full bg-white/5 p-4 text-white/70 transition-all hover:bg-white/10 hover:text-primary">
+                                    <button className="rounded-full transition-all active:scale-95 bg-white/5 p-4 text-white/70 transition-all hover:bg-white/10 hover:text-primary">
                                         <Globe className="h-6 w-6" />
                                     </button>
-                                    <button className="rounded-full bg-white/5 p-4 text-white/70 transition-all hover:bg-white/10 hover:text-primary">
+                                    <button className="rounded-full transition-all active:scale-95 bg-white/5 p-4 text-white/70 transition-all hover:bg-white/10 hover:text-primary">
                                         <MessageSquare className="h-6 w-6" />
                                     </button>
                                 </div>
