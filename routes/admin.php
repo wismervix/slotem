@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AvailabilityController;
+use App\Http\Controllers\Admin\ContactController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\Auth\LoginController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -94,6 +95,16 @@ Route::group(['prefix' => 'admin'], function () {
 
             Route::post('/bulk', 'bulkCreate')->name('admin.time-slots.bulk-create');
             Route::post('/copy', 'copySchedule')->name('admin.time-slots.copy-schedule');
+        });
+
+        // CONTACT CONTROLLER
+        Route::controller(ContactController::class)->prefix('contacts')->group(function () {
+            Route::get('/', 'index')->name('admin.contacts.index');
+            Route::get('/{contact}', 'show')->name('admin.contacts.show');
+            Route::patch('/{contact}/read', 'markAsRead')->name('admin.contacts.read');
+            Route::patch('/{contact}/replied', 'markAsReplied')->name('admin.contacts.replied');
+            Route::patch('/{contact}/archive', 'archive')->name('admin.contacts.archive');
+            Route::delete('/{contact}', 'destroy')->name('admin.contacts.destroy');
         });
     });
 });

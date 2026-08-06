@@ -1,9 +1,56 @@
-import { Link, usePage } from '@inertiajs/react';
-import { Mail, Share2, Globe, MessageSquare } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Link, usePage, useForm } from '@inertiajs/react';
+import { Mail, Check, Share2, Globe, MessageSquare } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export default function ContactUs() {
-    const { auth } = usePage().props as any;
+    const { auth, flash } = usePage().props as any;
+
+    // Toast state
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
+    const [toastType, setToastType] = useState<'success' | 'error'>('success');
+
+    const { data, setData, post, processing, errors, reset } = useForm({
+        name: '',
+        email: '',
+        subject: '',
+        message: '',
+    });
+    
+        // Watch for flash messages
+        useEffect(() => {
+            if (flash?.success) {
+                setToastMessage(flash.success);
+                setToastType('success');
+                setShowToast(true);
+                const timer = setTimeout(() => setShowToast(false), 4000);
+                return () => clearTimeout(timer);
+            }
+            if (flash?.error) {
+                setToastMessage(flash.error);
+                setToastType('error');
+                setShowToast(true);
+                const timer = setTimeout(() => setShowToast(false), 4000);
+                return () => clearTimeout(timer);
+            }
+        }, [flash]);
+
+            // Handle form submission
+            const handleSave = (e: React.FormEvent) => {
+                e.preventDefault();
+        
+                post(route('contact-us.store'), {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        reset();
+                    },
+                    onError: (errors) => {
+                        console.error('Validation errors:', errors);
+                    },
+                });
+            };
+    
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -129,6 +176,20 @@ export default function ContactUs() {
                     initial="hidden"
                     animate="visible"
                 >
+                    {/* Toast Notification */}
+                    {showToast && toastMessage && (
+                        <div
+                            className={`animate-slide-in fixed right-6 bottom-6 z-50 flex items-center gap-3 rounded-xl border px-5 py-3 text-white shadow-2xl ${
+                                toastType === 'success'
+                                    ? 'border-emerald-500/30 bg-emerald-600'
+                                    : 'border-red-500/30 bg-red-600'
+                            }`}
+                        >
+                            <Check className="h-5 w-5 shrink-0" />
+                            <p className="text-xs font-bold">{toastMessage}</p>
+                        </div>
+                    )}
+
                     {/* Hero Section */}
                     <div className="mb-16 text-center">
                         <motion.h1
@@ -157,39 +218,83 @@ export default function ContactUs() {
                             <div className="relative overflow-hidden rounded-3xl border border-white/20 bg-white/10 p-8 shadow-2xl backdrop-blur-2xl md:p-12">
                                 <form
                                     className="space-y-6"
-                                    onSubmit={(e) => e.preventDefault()}
+                                    onSubmit={handleSave}
                                 >
                                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                                         <div className="space-y-1">
                                             <input
                                                 type="text"
+                                                value={data.name}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        'name',
+                                                        e.target.value,
+                                                    )
+                                                }
                                                 placeholder="Your Name"
                                                 className="w-full border-b border-white/20 bg-white/5 p-4 text-white transition-all outline-none placeholder:text-white/40 focus:border-primary-container focus:bg-white/10"
                                             />
+                                            {errors.name && (
+                                                <p className="mt-1 text-xs text-red-500">
+                                                    {errors.name}
+                                                </p>
+                                            )}
                                         </div>
                                         <div className="space-y-1">
                                             <input
                                                 type="email"
+                                                value={data.email}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        'email',
+                                                        e.target.value,
+                                                    )
+                                                }
                                                 placeholder="Email Address"
                                                 className="w-full border-b border-white/20 bg-white/5 p-4 text-white transition-all outline-none placeholder:text-white/40 focus:border-primary-container focus:bg-white/10"
                                             />
+                                            {errors.email && (
+                                                <p className="mt-1 text-xs text-red-500">
+                                                    {errors.email}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
 
                                     <input
                                         type="text"
+                                        value={data.subject}
+                                        onChange={(e) =>
+                                            setData('subject', e.target.value)
+                                        }
                                         placeholder="Subject"
                                         className="w-full border-b border-white/20 bg-white/5 p-4 text-white transition-all outline-none placeholder:text-white/40 focus:border-primary-container focus:bg-white/10"
                                     />
+                                    {errors.subject && (
+                                        <p className="mt-1 text-xs text-red-500">
+                                            {errors.subject}
+                                        </p>
+                                    )}
 
                                     <textarea
+                                        value={data.message}
+                                        onChange={(e) =>
+                                            setData('message', e.target.value)
+                                        }
                                         placeholder="Message"
                                         rows={4}
                                         className="w-full resize-none border-b border-white/20 bg-white/5 p-4 text-white transition-all outline-none placeholder:text-white/40 focus:border-primary-container focus:bg-white/10"
                                     />
+                                    {errors.message && (
+                                        <p className="mt-1 text-xs text-red-500">
+                                            {errors.message}
+                                        </p>
+                                    )}
 
-                                    <button className="active:scale-95 rounded-xl w-full bg-primary-container py-4 font-heading text-3xl tracking-widest text-white shadow-xl shadow-primary/30 transition-all hover:bg-primary active:scale-[0.98]">
-                                        SEND INQUIRY
+                                    <button className="w-full rounded-xl bg-primary-container py-4 font-heading text-3xl tracking-widest text-white shadow-xl shadow-primary/30 transition-all hover:bg-primary active:scale-95 active:scale-[0.98]">
+                                        {processing
+                                            ? 'SENDING INQUIRY'
+                                            : 'SEND INQUIRY'}
                                     </button>
                                 </form>
                             </div>
@@ -221,13 +326,13 @@ export default function ContactUs() {
                                     SOCIAL
                                 </h3>
                                 <div className="flex gap-6">
-                                    <button className="rounded-full transition-all active:scale-95 bg-white/5 p-4 text-white/70 transition-all hover:bg-white/10 hover:text-primary">
+                                    <button className="rounded-full bg-white/5 p-4 text-white/70 transition-all hover:bg-white/10 hover:text-primary active:scale-95">
                                         <Share2 className="h-6 w-6" />
                                     </button>
-                                    <button className="rounded-full transition-all active:scale-95 bg-white/5 p-4 text-white/70 transition-all hover:bg-white/10 hover:text-primary">
+                                    <button className="rounded-full bg-white/5 p-4 text-white/70 transition-all hover:bg-white/10 hover:text-primary active:scale-95">
                                         <Globe className="h-6 w-6" />
                                     </button>
-                                    <button className="rounded-full transition-all active:scale-95 bg-white/5 p-4 text-white/70 transition-all hover:bg-white/10 hover:text-primary">
+                                    <button className="rounded-full bg-white/5 p-4 text-white/70 transition-all hover:bg-white/10 hover:text-primary active:scale-95">
                                         <MessageSquare className="h-6 w-6" />
                                     </button>
                                 </div>

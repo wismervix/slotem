@@ -19,10 +19,6 @@ class PagesController extends Controller
     {
         return Inertia::render('Guest/Services');
     }
-    public function contactSales()
-    {
-        return Inertia::render('Guest/ContactSales');
-    }
     public function helpCenter()
     {
         return Inertia::render('Guest/HelpCenter');
@@ -34,9 +30,5 @@ class PagesController extends Controller
     public function termsOfService()
     {
         return Inertia::render('Guest/TermsOfService');
-    }
-    public function contactUs()
-    {
-        return Inertia::render('Guest/ContactUs');
     }
 }

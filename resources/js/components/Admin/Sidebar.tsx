@@ -5,6 +5,7 @@ import {
     Calendar,
     BriefcaseBusiness,
     CalendarClock,
+    Contact,
     Bell,
     Users,
     LogOut,
@@ -89,6 +90,13 @@ export default function Sidebar({
             icon: Users,
             route: 'admin.users',
         },
+
+        {
+            name: 'Contacts',
+            icon: Contact,
+            route: 'admin.contacts.index',
+        },
+
         {
             name: 'Notifications',
             icon: Bell,
@@ -105,8 +113,8 @@ export default function Sidebar({
                     route: 'admin.broadcasts',
                 },
                 {
-                    name: 'Create Broadcast',
-                    route: 'admin.broadcasts.create',
+                    name: 'Show Broadcast',
+                    route: 'admin.broadcasts.show',
                 },
             ],
         },

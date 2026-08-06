@@ -95,7 +95,7 @@ export default function ContactSalesPage() {
       <GuestLayout>
           {/* ----------------- Hero / Form Main Section ----------------- */}
           <main className="flex-1 dark:bg-slate-900">
-              <div className="mx-auto grid max-w-7xl items-start gap-12 px-6 py-12 lg:grid-cols-2 lg:gap-16 lg:py-20">
+              <div className="mx-auto grid max-w-7xl items-start gap-12 px-6 pt-20 pb-12 lg:grid-cols-2 lg:gap-16 lg:pb-20 lg:pt-32">
                   {/* Left Side: Pitch and Benefits */}
                   <section className="space-y-10">
                       <div className="space-y-5">
