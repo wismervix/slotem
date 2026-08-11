@@ -1,7 +1,8 @@
 <?php
 
-use App\Http\Controllers\Api\ChatController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\ChatController;
+use App\Http\Controllers\Api\HelpCenterChatController;
 
 Route::prefix('api')->group(function () {
 
@@ -11,6 +12,10 @@ Route::prefix('api')->group(function () {
             'message' => 'API working'
         ]);
     });
-    // AI Chat
+
+    // Sales AI Chat
     Route::post('/chat', [ChatController::class, 'sendMessage']);
+
+    // Help Center AI Chat
+    Route::post('/help-center/chat', [HelpCenterChatController::class, 'sendMessage']);
 });

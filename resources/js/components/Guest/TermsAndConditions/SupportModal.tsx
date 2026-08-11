@@ -21,19 +21,132 @@ const FAQ_SUGGESTIONS = [
     'Can I use Slotem for commercial purposes?',
 ];
 
-const BOT_ANSWERS: Record<string, string> = {
-    'can i cancel my subscription at any time?':
-        'Yes, absolutely. You can cancel your Slotem subscription at any time from your account settings. Cancellation will take effect at the end of your current billing period. No cancellation fees apply.',
-    'what happens to my data if i terminate my account?':
-        'Upon account termination, your data will be securely deleted from our active systems within 30 days, subject to any legal or regulatory retention requirements. You can request a data export before termination.',
-    'are there any hidden fees?':
-        'No, Slotem is transparent about pricing. There are no hidden fees. You will only be charged the subscription fees as displayed on our pricing page. All taxes are clearly stated at checkout.',
-    'can i use slotem for commercial purposes?':
-        'Yes, Slotem is designed for both personal and commercial use. Our commercial plans are available for teams and enterprises. Please review our pricing page for detailed commercial licensing options.',
+const normalizeQuery = (text: string) =>
+    text.trim().toLowerCase().replace(/[?.!]/g, '').replace(/\s+/g, ' ');
+
+/** * Exact FAQ answers. * * The user does not have to phrase these exactly, though. * The matcher below handles common variations. */
+const FAQ_RESPONSES = [
+    {
+        keywords: [['cancel'], ['subscription', 'plan', 'membership']],
+        answer: 'Yes, absolutely. You can cancel your Slotem subscription at any time from your account settings. Cancellation will take effect at the end of your current billing period. No cancellation fees apply.',
+    },
+
+    {
+        keywords: [
+            ['data'],
+            [
+                'delete',
+                'deleted',
+                'termination',
+                'terminate',
+                'close',
+                'account',
+            ],
+        ],
+        answer: 'Upon account termination, your data will be securely deleted from our active systems within 30 days, subject to any legal or regulatory retention requirements. You can request a data export before termination.',
+    },
+    {
+        keywords: [
+            ['hidden', 'extra', 'additional'],
+            ['fee', 'fees', 'charge', 'charges', 'cost', 'costs'],
+        ],
+        answer: 'No, Slotem is transparent about pricing. There are no hidden fees. You will only be charged the subscription fees shown on our pricing page. Any applicable taxes are clearly stated at checkout.',
+    },
+    {
+        keywords: [
+            ['commercial', 'business', 'company', 'businesses'],
+            ['use', 'usage', 'license', 'licensing'],
+        ],
+        answer: 'Yes, Slotem is designed for both personal and commercial use. Our commercial plans are available for teams and enterprises. Please review our pricing page for detailed commercial licensing options.',
+    },
+];
+
+const CONVERSATIONAL_RESPONSES = {
+    greetings: [
+        'hello',
+        'hi',
+        'hey',
+        'hello there',
+        'hi there',
+        'good morning',
+        'good afternoon',
+        'good evening',
+    ],
+    thanks: [
+        'thanks',
+        'thank you',
+        'thanks a lot',
+        'thank you so much',
+        'thanks so much',
+        'much appreciated',
+        'appreciate it',
+    ],
+    acknowledgements: [
+        'ok',
+        'okay',
+        'alright',
+        'all right',
+        'got it',
+        'understood',
+        'makes sense',
+        'that makes sense',
+    ],
+    farewells: ['bye', 'goodbye', 'see you', 'see ya', 'talk to you later'],
 };
 
 const DEFAULT_REPLY =
-    "I'm Slotem's Legal Assistant. For specific legal questions or to request a formal legal document, please contact our legal team directly at legal@slotem.io. I can help with general questions about our terms and conditions.";
+    "I'm Slotem's Legal Assistant. I can help with general questions about Slotem's terms, conditions, user obligations, and legal policies. For specific legal advice or to request a formal legal document, please contact our legal team directly at legal@slotem.io.";
+
+const containsAny = (text: string, words: string[]) =>
+    words.some((word) => text.includes(word));
+
+/** * Checks whether the query contains at least one word * from every required group. * * Example: * * [['cancel'], ['subscription', 'plan']] * * matches: * "Can I cancel my plan?" * "How do I cancel my subscription?" */
+const matchesKeywordGroups = (query: string, groups: string[][]): boolean => {
+    return groups.every((group) => containsAny(query, group));
+};
+
+const getFAQResponse = (query: string): string | null => {
+    const match = FAQ_RESPONSES.find(({ keywords }) =>
+        matchesKeywordGroups(query, keywords),
+    );
+    return match?.answer ?? null;
+};
+
+const getConversationalResponse = (query: string): string | null => {
+    if (CONVERSATIONAL_RESPONSES.greetings.some(word => query.includes(word))) {
+        return "Hello! How can I help you with Slotem's terms, policies, or legal questions?";
+    }
+    if (CONVERSATIONAL_RESPONSES.thanks.some(word => query.includes(word))) {
+        return "You're very welcome! If you have any other questions about Slotem's terms or policies, I'm happy to help.";
+    }
+    if (CONVERSATIONAL_RESPONSES.acknowledgements.some(word => query.includes(word))) {
+        return 'Got it! If you have another question, feel free to ask.';
+    }
+    if (CONVERSATIONAL_RESPONSES.farewells.some(word => query.includes(word))) {
+        return "Goodbye! If you have any questions about Slotem's terms or policies later, I'll be here.";
+    }
+    return null;
+};
+
+const getBotResponse = (text: string): string => {
+    const query = normalizeQuery(text);
+    // Empty input should never normally reach this function, // but keeping this guard makes the function safer.
+    if (!query) {
+        return "I'm here whenever you're ready. What would you like to know?";
+    }
+    // 1. Try to match a known FAQ first.
+    const faqResponse = getFAQResponse(query);
+    if (faqResponse) {
+        return faqResponse;
+    }
+    // 2. Handle natural conversation next.
+    const conversationalResponse = getConversationalResponse(query);
+    if (conversationalResponse) {
+        return conversationalResponse;
+    }
+    // 3. Unknown question.
+    return DEFAULT_REPLY;
+};;
 
 export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
     const [messages, setMessages] = useState<Message[]>([
@@ -56,12 +169,14 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
     }, [messages, isTyping]);
 
     const handleSendMessage = (textToSend: string) => {
-        if (!textToSend.trim()) return;
+        const trimmedText = textToSend.trim();
+
+        if (!trimmedText || isTyping) return;
 
         const userMessage: Message = {
-            id: Math.random().toString(),
+            id: crypto.randomUUID(),
             sender: 'user',
-            text: textToSend,
+            text: trimmedText,
             timestamp: new Date().toLocaleTimeString([], {
                 hour: '2-digit',
                 minute: '2-digit',
@@ -73,16 +188,10 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
         setIsTyping(true);
 
         setTimeout(() => {
-            const cleanQuery = textToSend
-                .trim()
-                .toLowerCase()
-                .replace(/[?.]/g, '');
-            const answer = BOT_ANSWERS[cleanQuery] || DEFAULT_REPLY;
-
             const botMessage: Message = {
-                id: Math.random().toString(),
+                id: crypto.randomUUID(),
                 sender: 'bot',
-                text: answer,
+                text: getBotResponse(trimmedText),
                 timestamp: new Date().toLocaleTimeString([], {
                     hour: '2-digit',
                     minute: '2-digit',
@@ -214,7 +323,8 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
                         </div>
 
                         {/* Quick Suggestions (FAQ) */}
-                        {messages.length === 1 && !isTyping && (
+                        {/* {messages.length === 1 && !isTyping && ( */}
+                        {!isTyping && (
                             <div className="border-t border-zinc-100 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
                                 <p className="mb-2 flex items-center gap-1 text-[10px] font-bold tracking-widest text-zinc-400 uppercase dark:text-zinc-500">
                                     <Sparkles className="h-3 w-3 text-violet-500" />{' '}
@@ -246,7 +356,7 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
                                 value={inputText}
                                 onChange={(e) => setInputText(e.target.value)}
                                 placeholder="Ask our legal assistant a question..."
-                                className="flex-1 rounded-xl border border-zinc-200 bg-zinc-50 px-3.5 py-2 text-xs placeholder-zinc-400 transition-all outline-none hover:border-zinc-300 focus:border-violet-500 focus:bg-white focus:ring-1 focus:ring-violet-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder-zinc-500"
+                                className="flex-1 rounded-xl border border-zinc-200 bg-zinc-50 px-3.5 py-2 text-xs placeholder-zinc-400 transition-all outline-none hover:border-zinc-300 focus:border-violet-500 focus:bg-white focus:ring-1 focus:ring-violet-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-900 dark:placeholder-zinc-500"
                             />
                             <button
                                 type="submit"

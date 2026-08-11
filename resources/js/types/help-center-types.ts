@@ -43,10 +43,3 @@ export interface SupportTicket {
     status: 'open' | 'pending' | 'resolved';
     createdAt: string;
 }
-
-export interface ChatMessages {
-    id: string;
-    sender: 'user' | 'assistant';
-    text: string;
-    timestamp: string;
-}

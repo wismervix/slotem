@@ -61,6 +61,15 @@ class ChatController extends Controller
                 "• **Multi-Host (Collective)**: Requires multiple team members (e.g., Sales Engineer and Account Executive) to be free before offering a slot.";
         }
 
+        // Goodbye / Thanks
+        if (str_contains($msg, 'thank') || str_contains($msg, 'thanks') || str_contains($msg, 'bye') || str_contains($msg, 'goodbye')) {
+            return "You're welcome! I'm glad I could help. 😊\n\n" .
+                "If you need further assistance:\n" .
+                "• Feel free to fill out the **Request a Demo** form on our homepage and a dedicated Solutions Specialist will show you a live demo matching your workflow!\n" .
+                "• Contact our support team directly\n\n" .
+                "Have a great day!";
+        }
+
         return "That's an excellent question! Slotem is designed exactly to solve complex enterprise scheduling hurdles. We offer high-availability bidirectional calendar syncing, custom-weighted routing, Salesforce mapping, and premium SLA support.\n\n" .
             "To explore this feature in detail, feel free to fill out the **Request a Demo** form on our homepage and a dedicated Solutions Specialist will show you a live demo matching your workflow!";
     }
