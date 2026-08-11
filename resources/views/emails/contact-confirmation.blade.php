@@ -54,7 +54,8 @@
             <h3>Your Message:</h3>
             <p><strong>Subject:</strong> {{ $subject }}</p>
             <p><strong>Message:</strong></p>
-            <p>{{ $message }}</p>
+            {{-- <p>{{ $contactMessage }}</p> --}}
+            <p>{!! nl2br(e($contactMessage)) !!}</p>
         </div>
         
         <p>In the meantime, you can:</p>

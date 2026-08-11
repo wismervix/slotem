@@ -10,7 +10,6 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChatMessage } from '@/types';
-import { usePage } from '@inertiajs/react';
 
 interface ChatWidgetProps {
     isOpen: boolean;
@@ -71,12 +70,12 @@ export default function ChatWidget({
     };
 
     const handleSendMessage = async (textToSend: string) => {
-        if (!textToSend.trim()) return;
+        if (!textToSend.trim() || isLoading) return;
 
         const userMsg: ChatMessage = {
-            id: `msg-${Date.now()}`,
+            id: `msg-${crypto.randomUUID()}`,
             sender: 'user',
-            text: textToSend,
+            text: textToSend.trim(),
             timestamp: new Date().toLocaleTimeString([], {
                 hour: '2-digit',
                 minute: '2-digit',
@@ -107,7 +106,7 @@ export default function ChatWidget({
             const data = await response.json();
 
             const assistantMsg: ChatMessage = {
-                id: `msg-${Date.now() + 1}`,
+                id: `msg-${crypto.randomUUID()}`,
                 sender: 'assistant',
                 text:
                     data.text ||
@@ -123,7 +122,8 @@ export default function ChatWidget({
             console.error('Chat API error:', err);
 
             const fallbackMsg: ChatMessage = {
-                id: `msg-${Date.now() + 1}`,
+                id: `msg-${crypto.randomUUID()}`,
+                // id: `msg-${Date.now() + 1}`,
                 sender: 'assistant',
                 text:
                     "I'm having trouble connecting to my AI brain right now. However, Slotem supports:\n\n" +
@@ -236,8 +236,6 @@ export default function ChatWidget({
                                                     {msg.text
                                                         .split('\n')
                                                         .map((line, idx) => {
-                                                            let formatted =
-                                                                line;
                                                             const boldRegex =
                                                                 /\*\*(.*?)\*\*/g;
                                                             const parts = [];
@@ -340,9 +338,10 @@ export default function ChatWidget({
 
                         {/* Quick Prompts Container */}
                         <div className="scrollbar-none flex shrink-0 gap-1.5 overflow-x-auto border-t border-slate-100 bg-white p-2 dark:border-slate-700 dark:bg-slate-900">
-                            {quickPrompts.map((p, i) => (
+                            {quickPrompts.map((p) => (
                                 <button
-                                    key={i}
+                                    key={p.label}
+                                    disabled={isLoading}
                                     onClick={() => handleSendMessage(p.query)}
                                     className="shrink-0 rounded-full border border-purple-100 bg-purple-50/50 px-3 py-1 text-xs text-[#630ed4] transition-colors hover:border-purple-200 hover:bg-purple-100/75 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-purple-400 dark:hover:border-slate-600 dark:hover:bg-slate-700"
                                 >

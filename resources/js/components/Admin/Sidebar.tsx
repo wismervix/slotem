@@ -113,8 +113,8 @@ export default function Sidebar({
                     route: 'admin.broadcasts',
                 },
                 {
-                    name: 'Show Broadcast',
-                    route: 'admin.broadcasts.show',
+                    name: 'Create Broadcast',
+                    route: 'admin.broadcasts.create',
                 },
             ],
         },

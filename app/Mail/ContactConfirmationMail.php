@@ -43,7 +43,7 @@ class ContactConfirmationMail extends Mailable
             with: [
                 'name' => $this->contact->name,
                 'subject' => $this->contact->subject,
-                'message' => $this->contact->message,
+                'contactMessage' => $this->contact->message,
             ],
         );
     }

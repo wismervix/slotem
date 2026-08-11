@@ -17,40 +17,47 @@ export default function ContactUs() {
         subject: '',
         message: '',
     });
-    
-        // Watch for flash messages
-        useEffect(() => {
-            if (flash?.success) {
-                setToastMessage(flash.success);
-                setToastType('success');
-                setShowToast(true);
-                const timer = setTimeout(() => setShowToast(false), 4000);
-                return () => clearTimeout(timer);
-            }
-            if (flash?.error) {
-                setToastMessage(flash.error);
-                setToastType('error');
-                setShowToast(true);
-                const timer = setTimeout(() => setShowToast(false), 4000);
-                return () => clearTimeout(timer);
-            }
-        }, [flash]);
 
-            // Handle form submission
-            const handleSave = (e: React.FormEvent) => {
-                e.preventDefault();
-        
-                post(route('contact-us.store'), {
-                    preserveScroll: true,
-                    onSuccess: () => {
-                        reset();
-                    },
-                    onError: (errors) => {
-                        console.error('Validation errors:', errors);
-                    },
-                });
-            };
-    
+    // Watch for flash messages
+    useEffect(() => {
+        if (flash?.success) {
+            setToastMessage(flash.success);
+            setToastType('success');
+            setShowToast(true);
+            const timer = setTimeout(() => setShowToast(false), 4000);
+            return () => clearTimeout(timer);
+        }
+        if (flash?.error) {
+            setToastMessage(flash.error);
+            setToastType('error');
+            setShowToast(true);
+            const timer = setTimeout(() => setShowToast(false), 4000);
+            return () => clearTimeout(timer);
+        }
+    }, [flash]);
+
+    // Toast auto-hide
+    useEffect(() => {
+        if (showToast) {
+            const timer = setTimeout(() => setShowToast(false), 4000);
+            return () => clearTimeout(timer);
+        }
+    }, [showToast]);
+
+    // Handle form submission
+    const handleSave = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        post(route('contact-us.store'), {
+            preserveScroll: true,
+            onSuccess: () => {
+                reset();
+            },
+            onError: (errors) => {
+                console.error('Validation errors:', errors);
+            },
+        });
+    };
 
     const containerVariants = {
         hidden: { opacity: 0 },

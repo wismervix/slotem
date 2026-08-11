@@ -215,12 +215,12 @@ export default function FeaturesPage() {
                         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                             {/* Left Larger Card */}
                             <div
-                                className="glass-card group flex cursor-pointer flex-col justify-between rounded-2xl p-8 transition-all duration-300 hover:shadow-md lg:col-span-2 dark:border dark:border-slate-700 dark:bg-slate-900/70 dark:hover:shadow-slate-950/40"
+                                className="glass-card group flex cursor-pointer flex-col justify-between rounded-2xl p-8 transition-all duration-300 hover:shadow-md lg:col-span-2 dark:border dark:border-slate-700 dark:bg-slate-900 dark:hover:shadow-slate-950/40"
                                 onClick={() => console.log("Go To Admin")}
                             >
                                 <div>
                                     <div className="mb-4 flex items-start justify-between">
-                                        <h3 className="text-2xl font-bold text-brand-primary group-hover:underline dark:text-purple-400">
+                                        <h3 className="text-2xl font-bold text-brand-primary group-hover:underline">
                                             Booking Management
                                         </h3>
                                         <span className="flex items-center gap-1 rounded-full bg-brand-primary px-2 py-0.5 text-xs font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-purple-600">
@@ -228,7 +228,7 @@ export default function FeaturesPage() {
                                             <ArrowRight className="h-2.5 w-2.5" />
                                         </span>
                                     </div>
-                                    <p className="mb-6 text-sm text-brand-gray md:text-base dark:text-slate-400">
+                                    <p className="mb-6 text-sm text-brand-gray md:text-base">
                                         View, edit, approve, or reschedule any
                                         booking with a unified interface. No
                                         more jumping between tools.
@@ -247,17 +247,17 @@ export default function FeaturesPage() {
                             <div className="glass-card flex flex-col items-center justify-center rounded-2xl p-8 text-center transition-all duration-300 hover:shadow-md dark:border dark:border-slate-700 dark:bg-slate-900/70 dark:hover:shadow-slate-950/40">
                                 <Repeat
                                     strokeWidth={1.5}
-                                    className="mb-4 h-16 w-16 text-brand-primary dark:text-purple-400"
+                                    className="mb-4 h-16 w-16 text-brand-primary"
                                 />
                                 <h4 className="mb-2 text-xl font-bold text-brand-dark dark:text-white">
                                     Rescheduling
                                 </h4>
-                                <p className="mb-6 text-sm text-brand-gray dark:text-slate-400">
+                                <p className="mb-6 text-sm text-brand-gray">
                                     Effortless drag-and-drop or click
                                     rescheduling for both admins and clients.
                                 </p>
                                 <button
-                                    className="flex cursor-pointer items-center gap-1 text-sm font-bold text-brand-primary hover:underline dark:text-purple-400"
+                                    className="flex cursor-pointer items-center gap-1 text-sm font-bold text-brand-primary hover:underline"
                                     onClick={() => console.log("Go To Admin")}
                                 >
                                     Launch Admin Board
