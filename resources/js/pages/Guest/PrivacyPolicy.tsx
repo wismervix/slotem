@@ -196,7 +196,7 @@ export default function PrivacyPolicyPage() {
                         <p className="text-xs font-medium text-zinc-600 dark:text-zinc-300">
                             You are viewing the current official privacy policy
                             framework. Last revised:{' '}
-                            <span className="font-bold">May 24, 2024</span>.
+                            <span className="font-bold">August 11, 2026</span>.
                         </p>
                     </div>
 
@@ -270,7 +270,7 @@ export default function PrivacyPolicyPage() {
                     <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
                         <div className="space-y-4">
                             <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-200/50 bg-violet-100 px-3 py-1 text-xs font-bold text-violet-800 dark:border-violet-800/40 dark:bg-violet-950/60 dark:text-violet-300">
-                                Effective Date: May 24, 2024
+                                Effective Date: August 11, 2026
                             </span>
                             <h1 className="text-4xl font-extrabold tracking-tight text-zinc-900 sm:text-5xl dark:text-zinc-100">
                                 Privacy Policy

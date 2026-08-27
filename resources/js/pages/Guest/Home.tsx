@@ -22,7 +22,7 @@ const Home = () => {
 
             <main>
                 {/* Hero */}
-                <section className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 px-6 py-20 lg:grid-cols-2 lg:py-24">
+                <section className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 px-6 py-24 lg:grid-cols-2">
                     <div className="flex flex-col gap-8">
                         <div className="inline-flex w-fit items-center gap-2 rounded-full bg-purple-100 px-4 py-2 text-purple-700 dark:bg-purple-500/10 dark:text-purple-300">
                             <ShieldCheck className="h-4 w-4" />

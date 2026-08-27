@@ -83,10 +83,10 @@ export default function TermsContent({
                     </p>
                     <div className="p-4 bg-zinc-50 dark:bg-zinc-950/50 rounded-xl border border-zinc-200 dark:border-zinc-800">
                         <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                            <strong>Effective Date:</strong> May 24, 2024
+                            <strong>Effective Date:</strong> August 11, 2026
                         </p>
                         <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-                            <strong>Last Updated:</strong> May 24, 2024
+                            <strong>Last Updated:</strong> August 11, 2026
                         </p>
                     </div>
                 </div>
@@ -477,10 +477,10 @@ export default function TermsContent({
                                     Physical HQ
                                 </p>
                                 <p className="font-bold text-sm text-zinc-900 dark:text-zinc-100">
-                                    123 Calendar Lane
+                                    15 Ogunbambi Street
                                 </p>
                                 <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                                    San Francisco, CA 94103, USA
+                                    Dopemu, LAG 100001, NG
                                 </p>
                             </div>
                         </div>

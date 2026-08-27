@@ -16,14 +16,14 @@ export default function Footer() {
 
             <div className="flex gap-8">
                 {[
-                    { label: 'Privacy Policy', href: '/privacy-policy' },
-                    { label: 'Terms of Service', href: '/terms-of-service' },
-                    { label: 'Help Center', href: '/help-center' },
-                    { label: 'Contact Sales', href: '/contact-sales' },
+                    { label: 'Privacy Policy', href: 'privacy-policy' },
+                    { label: 'Terms of Service', href: 'terms-of-service' },
+                    { label: 'Help Center', href: 'help-center' },
+                    { label: 'Contact Sales', href: 'contact-sales' },
                 ].map(({ label, href }) => (
                     <Link
                         key={label}
-                        href={href}
+                        href={route(href)}
                         className="text-[11px] font-semibold text-on-surface-variant transition-colors hover:text-primary dark:text-on-surface-variant-dark"
                     >
                         {label}

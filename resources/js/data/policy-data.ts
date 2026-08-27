@@ -3,7 +3,7 @@ import { VersionInfo } from '../types';
 export const POLICY_VERSIONS: VersionInfo[] = [
     {
         id: 'v3',
-        date: 'May 24, 2024',
+        date: 'August 11, 2026',
         description:
             'Current Version - Added advanced enterprise security safeguards and SendGrid email delivery services.',
         changes: [
@@ -15,7 +15,7 @@ export const POLICY_VERSIONS: VersionInfo[] = [
     },
     {
         id: 'v2',
-        date: 'January 12, 2023',
+        date: 'May 24, 2024',
         description:
             'Intermediate Release - Introduced support for Stripe payments and localized timezone matching.',
         changes: [
@@ -26,7 +26,7 @@ export const POLICY_VERSIONS: VersionInfo[] = [
     },
     {
         id: 'v1',
-        date: 'October 08, 2022',
+        date: 'January 12, 2023',
         description:
             'Initial Policy - First established Slotem privacy framework.',
         changes: [

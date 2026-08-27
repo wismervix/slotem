@@ -3,7 +3,7 @@ import { TermsVersionInfo } from '@/types';
 export const TERMS_VERSIONS: TermsVersionInfo[] = [
     {
         id: 'v3',
-        date: 'May 24, 2024',
+        date: 'August 11, 2026',
         description:
             'Current Version - Updated user obligations and clarified intellectual property rights.',
         changes: [
@@ -16,7 +16,7 @@ export const TERMS_VERSIONS: TermsVersionInfo[] = [
     },
     {
         id: 'v2',
-        date: 'January 12, 2023',
+        date: 'May 24, 2024',
         description:
             'Intermediate Release - Introduced payment processing and commercial usage terms.',
         changes: [
@@ -28,7 +28,7 @@ export const TERMS_VERSIONS: TermsVersionInfo[] = [
     },
     {
         id: 'v1',
-        date: 'October 08, 2022',
+        date: 'January 12, 2023',
         description:
             'Initial Terms - First established Slotem legal framework.',
         changes: [

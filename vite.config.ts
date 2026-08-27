@@ -6,6 +6,18 @@ import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+    // server: {
+    //     host: '127.0.0.1',
+    //     cors: {
+    //         origin: 'https://mic-roommate-leslie-moon.trycloudflare.com',
+    //     },
+    //     origin: 'https://adelaide-volunteer-opposed-man.trycloudflare.com',
+    //     hmr: {
+    //         protocol: 'wss',
+    //         host: 'adelaide-volunteer-opposed-man.trycloudflare.com',
+    //         clientPort: 443,
+    //     },
+    // },
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],

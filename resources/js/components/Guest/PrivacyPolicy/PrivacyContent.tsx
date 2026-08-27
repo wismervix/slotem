@@ -460,10 +460,10 @@ export default function PrivacyContent({
                   Physical HQ
                 </p>
                 <p className="font-bold text-sm text-zinc-900 dark:text-zinc-100">
-                  123 Calendar Lane
+                  15 Ogunbambi Street
                 </p>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  San Francisco, CA 94103, USA
+                  Dopemu, LAG 100001, NG
                 </p>
               </div>
             </div>

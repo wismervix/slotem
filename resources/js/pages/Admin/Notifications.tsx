@@ -175,7 +175,7 @@ export default function UserNotifications({
         );
     };
 
-    console.log('Mapped Notifications: ', mappedNotifications);
+    // console.log('Mapped Notifications: ', mappedNotifications);
 
     return (
         <AdminLayout>
