@@ -14,9 +14,10 @@ import {
     ChevronRight,
     SquareArrowOutUpRight,
 } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
 import { useState } from 'react';
 import { motion } from 'motion/react';
+import type { LucideIcon } from 'lucide-react';
+import logoImageDark from '@/images/logo_dark.png';
 
 interface SidebarProps {
     unreadCount: number;
@@ -153,6 +154,13 @@ export default function Sidebar({
             >
                 {/* Brand Header */}
                 <div className="group mb-8 px-2 py-1">
+                    {/* <div className="h-12 w-40">
+                        <img
+                            className="logo-img"
+                            src={logoImageDark}
+                            alt="Slotem Logo"
+                        />
+                    </div> */}
                     <div className="flex items-center gap-2">
                         <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-purple-700 text-xl font-bold text-white shadow-md transition-transform group-hover:rotate-12">
                             S

@@ -12,6 +12,7 @@ import {
     LogOut,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import logoImageDark from '@/images/logo_dark.png';
 
 type NavItem = {
     name: string;
@@ -77,15 +78,19 @@ export default function Sidebar({
             {/* Mobile top navigation header bar */}
             <div className="flex shrink-0 items-center justify-between border-b border-outline-variant bg-[#f9f1ff] p-4 md:hidden dark:border-neutral-800 dark:bg-neutral-900">
                 <div className="flex items-center gap-2">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-black text-white select-none">
+                    {/* <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-black text-white select-none">
                         S
-                    </span>
+                    </span> */}
                     <div>
-                        <h1 className="text-base leading-tight font-black text-primary dark:text-primary-fixed">
-                            Slotem
-                        </h1>
-                        <p className="text-[10px] leading-none text-gray-500">
-                            Management Suite
+                        <div className="h-12 w-40">
+                            <img
+                                className="logo-img"
+                                src={logoImageDark}
+                                alt="Slotem Logo"
+                            />
+                        </div>
+                        <p className="pt-2 text-[10px] leading-none text-gray-500">
+                            {user?.name}
                         </p>
                     </div>
                 </div>
@@ -139,9 +144,13 @@ export default function Sidebar({
                         )}
 
                         <div>
-                            <h1 className="text-2xl font-black tracking-tight text-primary dark:text-primary-fixed">
-                                Slotem
-                            </h1>
+                            <div className="h-12 w-28">
+                                <img
+                                    className="logo-img"
+                                    src={logoImageDark}
+                                    alt="Slotem Logo"
+                                />
+                            </div>
 
                             <p className="text-xs font-medium tracking-wide text-secondary opacity-80 dark:text-secondary-fixed">
                                 {user?.name}

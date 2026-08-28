@@ -1,12 +1,17 @@
 import { Link } from '@inertiajs/react';
+import logoImageDark from '@/images/logo_dark.png';
 
 export default function Footer() {
     return (
         <footer className="dark:border-zinc-850 mt-16 flex w-full shrink-0 flex-col items-center justify-between gap-4 border-t border-purple-100 pt-8 pb-4 md:flex-row">
             <Link href={route('home')} className="mb-6 md:mb-0">
-                <span className="text-xl font-extrabold tracking-tight text-purple-700 dark:text-purple-400">
-                    Slotem
-                </span>
+                <div className="h-12 w-40">
+                    <img
+                        className="logo-img"
+                        src={logoImageDark}
+                        alt="Slotem Logo"
+                    />
+                </div>
 
                 <p className="mt-1 text-[11px] font-medium tracking-tight text-zinc-400 dark:text-zinc-500">
                     © {new Date().getFullYear()} Slotem Booking Systems. All

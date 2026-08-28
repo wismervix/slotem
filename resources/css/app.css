@@ -224,6 +224,10 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
+.logo-img{
+    width: 100%;
+}
+
 /* Scrollbar utilities */
 .hide-scrollbar::-webkit-scrollbar {
     display: none;

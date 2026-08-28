@@ -1,6 +1,8 @@
 import { Link, usePage } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
 import { useState } from 'react';
+import logoImageDark from '@/images/logo_dark.png';
+
 // import { AppLogo } from '@/Components/AppLogo'; // Assume you have a logo component
 
 interface NavItem {
@@ -50,11 +52,8 @@ export default function GuestLayout({ children }: PropsWithChildren) {
             <header className="fixed top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80">
                 <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
                     {/* Logo */}
-                    <Link
-                        href={route('home')}
-                        className="text-2xl font-bold tracking-tight text-purple-600"
-                    >
-                        Slotem
+                    <Link href={route('home')} className="h-12 w-40">
+                        <img className="logo-img" src={logoImageDark} alt="Slotem Logo" />
                     </Link>
 
                     {/* Desktop Navigation */}
@@ -69,7 +68,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                                 href={route('admin.dashboard')}
                                 className={`font-medium transition hover:text-purple-600 ${
                                     route().current('admin.dashboard')
-                                        ? 'hover:underline text-purple-600 dark:text-purple-400'
+                                        ? 'text-purple-600 hover:underline dark:text-purple-400'
                                         : 'text-slate-600 dark:text-slate-300'
                                 }`}
                             >
@@ -80,7 +79,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                                 href={route('admin.login')}
                                 className={`font-medium transition hover:text-purple-600 ${
                                     route().current('admin.login')
-                                        ? 'hover:underline text-purple-600 dark:text-purple-400'
+                                        ? 'text-purple-600 hover:underline dark:text-purple-400'
                                         : 'text-slate-600 dark:text-slate-300'
                                 }`}
                             >
@@ -117,7 +116,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                         ) : (
                             <Link
                                 href={route('user.login')}
-                                className={`hover:underline hidden text-sm font-medium transition hover:text-purple-500 sm:block ${
+                                className={`hidden text-sm font-medium transition hover:text-purple-500 hover:underline sm:block ${
                                     route().current('user.login')
                                         ? 'text-purple-600'
                                         : 'text-purple-600'
@@ -180,7 +179,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                                     href={item.href}
                                     className={`font-medium transition hover:text-purple-600 ${
                                         route().current(item.route)
-                                            ? 'hover:underline text-purple-600 dark:text-purple-400'
+                                            ? 'text-purple-600 hover:underline dark:text-purple-400'
                                             : 'text-slate-600 dark:text-slate-300'
                                     }`}
                                     onClick={() => setIsMobileMenuOpen(false)}
@@ -197,7 +196,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                                     href={route('admin.dashboard')}
                                     className={`font-medium transition hover:text-purple-600 ${
                                         route().current('admin.dashboard')
-                                            ? 'hover:underline text-purple-600 dark:text-purple-400'
+                                            ? 'text-purple-600 hover:underline dark:text-purple-400'
                                             : 'text-slate-600 dark:text-slate-300'
                                     }`}
                                     onClick={() => setIsMobileMenuOpen(false)}
@@ -209,7 +208,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                                     href={route('admin.login')}
                                     className={`font-medium transition hover:text-purple-600 ${
                                         route().current('admin.login')
-                                            ? 'hover:underline text-purple-600 dark:text-purple-400'
+                                            ? 'text-purple-600 hover:underline dark:text-purple-400'
                                             : 'text-slate-600 dark:text-slate-300'
                                     }`}
                                     onClick={() => setIsMobileMenuOpen(false)}
@@ -253,7 +252,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                                 <Link
                                     href={route('user.login')}
                                     onClick={() => setIsMobileMenuOpen(false)}
-                                    className={`hover:underline hidden text-sm font-medium transition hover:text-purple-500 sm:block ${
+                                    className={`hidden text-sm font-medium transition hover:text-purple-500 hover:underline sm:block ${
                                         route().current('user.login')
                                             ? 'text-purple-600'
                                             : 'text-purple-600'
@@ -274,9 +273,12 @@ export default function GuestLayout({ children }: PropsWithChildren) {
             <footer className="border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
                 <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-8 px-6 py-10 md:flex-row">
                     <Link href={route('home')}>
-                        <h3 className="text-2xl font-bold text-purple-600">
+                        <div className="h-12 w-40">
+                            <img className="logo-img" src={logoImageDark} alt="Slotem Logo" />
+                        </div>
+                        {/* <h3 className="text-2xl font-bold text-purple-600">
                             Slotem
-                        </h3>
+                        </h3> */}
                         <p className="mt-2 text-sm text-slate-500">
                             © 2026 Slotem Booking Systems. All rights reserved.
                         </p>
