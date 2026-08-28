@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import logoImageDark from '@/images/logo_dark.png';
+import logoImageLight from '@/images/logo_light.png';
 
 type NavItem = {
     name: string;
@@ -84,7 +85,12 @@ export default function Sidebar({
                     <div>
                         <div className="h-12 w-40">
                             <img
-                                className="logo-img"
+                                className="block h-auto w-full dark:hidden"
+                                src={logoImageLight}
+                                alt="Slotem Logo"
+                            />
+                            <img
+                                className="hidden h-auto w-full dark:block"
                                 src={logoImageDark}
                                 alt="Slotem Logo"
                             />
@@ -146,7 +152,12 @@ export default function Sidebar({
                         <div>
                             <div className="h-12 w-28">
                                 <img
-                                    className="logo-img"
+                                    className="block h-auto w-full dark:hidden"
+                                    src={logoImageLight}
+                                    alt="Slotem Logo"
+                                />
+                                <img
+                                    className="hidden h-auto w-full dark:block"
                                     src={logoImageDark}
                                     alt="Slotem Logo"
                                 />

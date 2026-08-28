@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import logoImageDark from '@/images/logo_dark.png';
+import logoImageLight from '@/images/logo_light.png';
 
 export default function Footer() {
     return (
@@ -7,7 +8,12 @@ export default function Footer() {
             <Link href={route('home')} className="mb-6 md:mb-0">
                 <div className="h-12 w-40">
                     <img
-                        className="logo-img"
+                        className="block h-auto w-full dark:hidden"
+                        src={logoImageLight}
+                        alt="Slotem Logo"
+                    />
+                    <img
+                        className="hidden h-auto w-full dark:block"
                         src={logoImageDark}
                         alt="Slotem Logo"
                     />

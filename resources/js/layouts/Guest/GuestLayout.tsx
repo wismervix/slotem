@@ -2,6 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
 import { useState } from 'react';
 import logoImageDark from '@/images/logo_dark.png';
+import logoImageLight from '@/images/logo_light.png';
 
 // import { AppLogo } from '@/Components/AppLogo'; // Assume you have a logo component
 
@@ -53,7 +54,16 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                 <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
                     {/* Logo */}
                     <Link href={route('home')} className="h-12 w-40">
-                        <img className="logo-img" src={logoImageDark} alt="Slotem Logo" />
+                        <img
+                            className="block h-auto w-full dark:hidden"
+                            src={logoImageLight}
+                            alt="Slotem Logo"
+                        />
+                        <img
+                            className="hidden h-auto w-full dark:block"
+                            src={logoImageDark}
+                            alt="Slotem Logo"
+                        />
                     </Link>
 
                     {/* Desktop Navigation */}
@@ -274,7 +284,16 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                 <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-8 px-6 py-10 md:flex-row">
                     <Link href={route('home')}>
                         <div className="h-12 w-40">
-                            <img className="logo-img" src={logoImageDark} alt="Slotem Logo" />
+                            <img
+                                className="block h-auto w-full dark:hidden"
+                                src={logoImageLight}
+                                alt="Slotem Logo"
+                            />
+                            <img
+                                className="hidden h-auto w-full dark:block"
+                                src={logoImageDark}
+                                alt="Slotem Logo"
+                            />
                         </div>
                         {/* <h3 className="text-2xl font-bold text-purple-600">
                             Slotem
