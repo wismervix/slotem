@@ -91,9 +91,9 @@ export default function AdminLayout({
 
             <main className="motion-safe:animate-in motion-safe:fade-in flex min-h-screen w-full flex-1 flex-col overflow-hidden pb-24 duration-500">
                 {/* Top Header Bar */}
-                <header className="z-10 flex h-16 shrink-0 items-center justify-between border-b border-outline-variant bg-surface px-6 select-none dark:border-slate-700 dark:bg-zinc-950">
-                    {/* Logo toggle on mobile */}
-                    <div className="flex items-center gap-2">
+                <header className="z-10 flex min-h-16 py-2 sm:py-0 shrink-0 items-center justify-between border-b border-outline-variant bg-surface px-6 select-none dark:border-slate-700 dark:bg-zinc-950">
+                    <div className="flex flex-col flex-wrap items-start gap-2 sm:flex-row sm:flex-nowrap sm:items-center">
+                        {/* Logo toggle on mobile */}
                         <button
                             onClick={() =>
                                 setMobileSidebarOpen(!mobileSidebarOpen)
@@ -103,37 +103,37 @@ export default function AdminLayout({
                             <Menu size={20} />
                         </button>
 
-                        {/* Active search bar */}
-                        {shouldShowSearch && (
-                            <div className="flex w-44 items-center rounded-full border border-outline-variant bg-surface-container-low px-4 py-1.5 sm:w-80 md:w-96 dark:border-slate-700 dark:bg-zinc-950">
-                                <Search
-                                    className="shrink-0 animate-pulse text-outline dark:text-slate-600"
-                                    size={16}
-                                />
-                                <input
-                                    type="text"
-                                    value={searchQuery}
-                                    onChange={(e) =>
-                                        setSearchQuery(e.target.value)
-                                    }
-                                    className="ml-2 w-full border-none bg-transparent text-xs font-medium text-on-surface outline-none placeholder:text-outline focus:ring-0 dark:bg-transparent dark:text-white dark:placeholder:text-slate-500"
-                                    placeholder={getSearchPlaceholder()}
-                                />
-                                {searchQuery && (
-                                    <button
-                                        onClick={() => setSearchQuery('')}
-                                        className="text-outline hover:text-on-surface dark:text-slate-500 dark:hover:text-slate-300"
-                                    >
-                                        <X size={12} />
-                                    </button>
-                                )}
-                            </div>
-                        )}
-                    </div>
+                        <div className="flex items-center">
+                            {/* Active search bar */}
+                            {shouldShowSearch && (
+                                <div className="flex w-44 items-center rounded-full border border-outline-variant bg-surface-container-low px-4 py-1.5 sm:w-80 md:w-96 dark:border-slate-700 dark:bg-zinc-950">
+                                    <Search
+                                        className="shrink-0 animate-pulse text-outline dark:text-slate-600"
+                                        size={16}
+                                    />
+                                    <input
+                                        type="text"
+                                        value={searchQuery}
+                                        onChange={(e) =>
+                                            setSearchQuery(e.target.value)
+                                        }
+                                        className="ml-2 w-full border-none bg-transparent text-xs font-medium text-on-surface outline-none placeholder:text-outline focus:ring-0 dark:bg-transparent dark:text-white dark:placeholder:text-slate-500"
+                                        placeholder={getSearchPlaceholder()}
+                                    />
+                                    {searchQuery && (
+                                        <button
+                                            onClick={() => setSearchQuery('')}
+                                            className="text-outline hover:text-on-surface dark:text-slate-500 dark:hover:text-slate-300"
+                                        >
+                                            <X size={12} />
+                                        </button>
+                                    )}
+                                </div>
+                            )}
 
-                    {/* Right Header Navigation Panel tools */}
-                    <div className="flex items-center gap-4">
-                        {/* <button className="relative cursor-pointer rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-purple-400">
+                            {/* Right Header Navigation Panel tools */}
+                            <div className="flex items-center gap-4">
+                                {/* <button className="relative cursor-pointer rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-purple-400">
                             <Bell size={18} />
                             {notifications.unreadCount > 0 && (
                                 <span className="absolute -top-0.5 -right-0.5 flex min-h-3.5 min-w-3.5 scale-90 items-center justify-center rounded-full bg-red-600 text-[9px] font-extrabold text-white ring-2 ring-white">
@@ -142,44 +142,46 @@ export default function AdminLayout({
                             )}
                         </button> */}
 
-                        <button className="cursor-pointer rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-purple-400">
-                            <span className="relative block">
-                                <Bell size={18} />
+                                <button className="cursor-pointer rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-purple-400">
+                                    <span className="relative block">
+                                        <Bell size={18} />
 
-                                {notifications.unreadCount > 0 && (
-                                    <span className="absolute -top-2 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] leading-none font-bold text-white ring-2 ring-white dark:ring-zinc-950">
-                                        {notifications.unreadCount > 99
-                                            ? '99+'
-                                            : notifications.unreadCount}
+                                        {notifications.unreadCount > 0 && (
+                                            <span className="absolute -top-2 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] leading-none font-bold text-white ring-2 ring-white dark:ring-zinc-950">
+                                                {notifications.unreadCount > 99
+                                                    ? '99+'
+                                                    : notifications.unreadCount}
+                                            </span>
+                                        )}
                                     </span>
-                                )}
-                            </span>
-                        </button>
+                                </button>
 
-                        <Link
-                            href={route('help-center')}
-                            className="hidden cursor-pointer rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary sm:inline-block dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-purple-400"
-                        >
-                            <HelpCircle size={18} />
-                        </Link>
+                                <Link
+                                    href={route('help-center')}
+                                    className="hidden cursor-pointer rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary sm:inline-block dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-purple-400"
+                                >
+                                    <HelpCircle size={18} />
+                                </Link>
 
-                        {/* Avatar block */}
-                        <div className="flex items-center gap-3 border-l border-outline-variant pl-4 select-none dark:border-slate-700">
-                            <div className="hidden text-right sm:block">
-                                <p className="text-xs font-bold text-on-surface dark:text-white">
-                                    {auth.admin?.name}
-                                </p>
-                                <p className="mt-0.5 text-[9px] leading-none tracking-tighter text-outline dark:text-slate-500">
-                                    {auth.admin?.email}
-                                </p>
-                            </div>
-                            <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-outline-variant bg-surface-container-highest dark:border-slate-700 dark:bg-slate-800">
-                                <img
-                                    className="h-full w-full object-cover"
-                                    src={auth.admin?.avatar_url}
-                                    alt={auth.admin?.name}
-                                    referrerPolicy="no-referrer"
-                                />
+                                {/* Avatar block */}
+                                <div className="flex items-center gap-3 border-l border-outline-variant pl-4 select-none dark:border-slate-700">
+                                    <div className="hidden text-right sm:block">
+                                        <p className="text-xs font-bold text-on-surface dark:text-white">
+                                            {auth.admin?.name}
+                                        </p>
+                                        <p className="mt-0.5 text-[9px] leading-none tracking-tighter text-outline dark:text-slate-500">
+                                            {auth.admin?.email}
+                                        </p>
+                                    </div>
+                                    <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-outline-variant bg-surface-container-highest dark:border-slate-700 dark:bg-slate-800">
+                                        <img
+                                            className="h-full w-full object-cover"
+                                            src={auth.admin?.avatar_url}
+                                            alt={auth.admin?.name}
+                                            referrerPolicy="no-referrer"
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

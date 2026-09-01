@@ -47,7 +47,7 @@ export default function DateAndTime({ service }: DateAndTimeProps) {
 
     return (
         <GuestLayout>
-            <main className="mx-auto w-full max-w-7xl flex-grow px-4 py-24 sm:px-6 lg:px-8">
+            <main className="mx-auto w-full max-w-7xl flex-grow px-4 pt-44 sm:pt-24 pb-24 sm:px-6 lg:px-8">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}

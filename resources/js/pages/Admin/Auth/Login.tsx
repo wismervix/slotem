@@ -33,7 +33,7 @@ export default function AdminLogin() {
 
     return (
         <GuestLayout>
-            <main className="flex flex-1 items-center justify-center px-8 py-24">
+            <main className="flex flex-1 items-center justify-center px-8 py-44 sm:py-24">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -207,7 +207,7 @@ export default function AdminLogin() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 0.5 }}
                         transition={{ delay: 0.5 }}
-                        className="flex items-center justify-center gap-8 grayscale transition-all duration-500 hover:grayscale-0"
+                        className="flex flex-wrap sm:flex-nowrap items-center justify-center gap-8 grayscale transition-all duration-500 hover:grayscale-0"
                     >
                         <div className="flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-700 backdrop-blur-sm dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-300">
                             <ShieldCheck className="h-4 w-4" />

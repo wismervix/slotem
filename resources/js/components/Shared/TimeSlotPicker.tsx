@@ -86,7 +86,7 @@ export function TimeSlotPicker({
                                 key={slot.start_time}
                                 disabled={isBooked}
                                 onClick={() => onSelectSlot(slot)}
-                                className={`rounded-full border px-4 py-3 text-sm font-semibold transition-all duration-200 ${
+                                className={`rounded-full border px-2 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-all duration-200 ${
                                     isBooked
                                         ? 'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400 line-through opacity-60 dark:bg-gray-800'
                                         : selected
@@ -127,7 +127,7 @@ export function TimeSlotPicker({
                     </div>
                 )}
 
-                <div className="flex gap-4">
+                <div className="flex flex-col sm:flex-row gap-4">
                     <Link
                         href={route('services')}
                         className="flex-1 rounded-full border border-gray-200 px-6 py-4 text-center text-sm font-bold text-gray-500 transition-all transition-colors hover:bg-gray-50 active:scale-95 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"

@@ -22,7 +22,7 @@ const Home = () => {
 
             <main>
                 {/* Hero */}
-                <section className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 px-6 py-24 lg:grid-cols-2">
+                <section className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 px-6 pt-44 pb-24 sm:pt-24 lg:grid-cols-2">
                     <div className="flex flex-col gap-8">
                         <div className="inline-flex w-fit items-center gap-2 rounded-full bg-purple-100 px-4 py-2 text-purple-700 dark:bg-purple-500/10 dark:text-purple-300">
                             <ShieldCheck className="h-4 w-4" />
@@ -182,14 +182,14 @@ const Home = () => {
 
                 {/* Features */}
                 <section className="mx-auto max-w-7xl px-6 py-24">
-                    <div className="grid auto-rows-[220px] grid-cols-1 gap-6 md:grid-cols-12">
+                    <div className="sm:auto-rows-[220px] grid grid-cols-1 gap-6 md:grid-cols-12">
                         {/* Big Card */}
-                        <div className="relative overflow-hidden rounded-[2rem] bg-purple-600 p-10 text-white md:col-span-8">
+                        <div className="home-lightning-card relative overflow-hidden rounded-[2rem] bg-purple-600 p-10 text-white md:col-span-8">
                             <div className="absolute top-8 right-8 opacity-10">
                                 <Zap className="h-32 w-32" />
                             </div>
 
-                            <div className="relative z-10 flex h-full flex-col justify-end">
+                            <div className="relative z-10 flex flex-col justify-end">
                                 <h3 className="mb-4 text-4xl font-black">
                                     Lightning Fast Booking
                                 </h3>
@@ -251,11 +251,11 @@ const Home = () => {
 
                 {/* CTA */}
                 <section className="mx-auto max-w-7xl px-6 pb-24">
-                    <div className="relative overflow-hidden rounded-[3rem] bg-purple-600 px-8 py-20 text-center text-white md:px-20">
+                    <div className="relative overflow-hidden rounded-[3rem] bg-purple-600 px-6 sm:px-8 py-20 text-center text-white md:px-20">
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12)_0%,transparent_70%)]"></div>
 
                         <div className="relative z-10 mx-auto max-w-3xl">
-                            <h2 className="text-5xl font-black tracking-tight">
+                            <h2 className="text-4xl sm:text-5xl font-black tracking-tight">
                                 Ready to automate your appointment scheduling?
                             </h2>
 

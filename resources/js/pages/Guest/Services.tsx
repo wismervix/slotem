@@ -16,7 +16,7 @@ const Services = () => {
         <GuestLayout>
             <Head title="Services" />
 
-            <main className="mx-auto min-h-screen max-w-7xl px-6 py-10 pt-24">
+            <main className="mx-auto min-h-screen max-w-7xl px-6 py-10 pt-44 sm:pt-24">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -60,7 +60,7 @@ const Services = () => {
                     <section className="mt-20 border-t border-slate-200 pt-16 dark:border-slate-700">
                         <div className="grid gap-10 md:grid-cols-3">
                             {/* Item 1 */}
-                            <div className="flex items-start gap-4">
+                            <div className="flex flex-wrap sm:flex-nowrap items-start gap-4">
                                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-100 text-purple-600 dark:bg-purple-500/10">
                                     <CheckCircle2 className="h-7 w-7" />
                                 </div>
@@ -78,7 +78,7 @@ const Services = () => {
                             </div>
 
                             {/* Item 2 */}
-                            <div className="flex items-start gap-4">
+                            <div className="flex flex-wrap sm:flex-nowrap items-start gap-4">
                                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-100 text-purple-600 dark:bg-purple-500/10">
                                     <Calendar className="h-7 w-7" />
                                 </div>
@@ -96,7 +96,7 @@ const Services = () => {
                             </div>
 
                             {/* Item 3 */}
-                            <div className="flex items-start gap-4">
+                            <div className="flex flex-wrap sm:flex-nowrap items-start gap-4">
                                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-100 text-purple-600 dark:bg-purple-500/10">
                                     <Bell className="h-7 w-7" />
                                 </div>

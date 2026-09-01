@@ -330,3 +330,11 @@ a:active {
     @apply transition-all active:scale-95;
   }
 }
+
+.home-lightning-card{
+    min-height: fit-content;
+}
+/* 
+.home-lightning-card .lightning-content{
+    height: fit-content;
+} */

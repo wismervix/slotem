@@ -91,7 +91,7 @@ export function ServiceCard({ service, Icon }: any) {
                             </div>
                         </div>
 
-                        <div className="mt-auto flex items-center justify-between">
+                        <div className="mt-auto flex flex-wrap sm:flex-nowrap gap-4 items-center justify-between">
                             <div>
                                 <span className="text-4xl font-black text-purple-600">
                                     ${service.price}

@@ -289,7 +289,7 @@ export default function UserAuth() {
                                                             )
                                                         }
                                                         onPaste={handleOtpPaste}
-                                                        className={`h-14 w-14 rounded-xl border text-center text-xl font-semibold transition-all focus:outline-none ${
+                                                        className={`h-8 w-8 sm:h-14 sm:w-14 rounded-xl border text-center text-xs sm:text-xl font-semibold transition-all focus:outline-none ${
                                                             errors.otp
                                                                 ? 'border-red-500 focus:ring-red-500'
                                                                 : 'border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary'

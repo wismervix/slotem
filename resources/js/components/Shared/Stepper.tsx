@@ -10,7 +10,7 @@ export function Stepper({ currentStep = 2 }: { currentStep?: number }) {
 
     return (
         <div
-            className="scrollbar-hide flex items-center justify-center space-x-4 overflow-x-auto py-4"
+            className="scrollbar-hide flex items-center justify-start sm:justify-center sm:space-x-4 overflow-x-auto px-4 sm:px-0 py-4"
             id="stepper"
         >
             {steps.map((step, idx) => (

@@ -83,7 +83,7 @@ export default function Sidebar({
                         S
                     </span> */}
                     <div>
-                        <div className="h-12 w-40">
+                        <Link href={route('home')} className="block h-12 w-40">
                             <img
                                 className="block h-auto w-full dark:hidden"
                                 src={logoImageLight}
@@ -94,7 +94,7 @@ export default function Sidebar({
                                 src={logoImageDark}
                                 alt="Slotem Logo"
                             />
-                        </div>
+                        </Link>
                         <p className="pt-2 text-[10px] leading-none text-gray-500">
                             {user?.name}
                         </p>
@@ -150,7 +150,7 @@ export default function Sidebar({
                         )}
 
                         <div>
-                            <div className="h-12 w-28">
+                            <Link href={route('home')} className="block h-12 w-28">
                                 <img
                                     className="block h-auto w-full dark:hidden"
                                     src={logoImageLight}
@@ -161,7 +161,7 @@ export default function Sidebar({
                                     src={logoImageDark}
                                     alt="Slotem Logo"
                                 />
-                            </div>
+                            </Link>
 
                             <p className="text-xs font-medium tracking-wide text-secondary opacity-80 dark:text-secondary-fixed">
                                 {user?.name}

@@ -27,7 +27,7 @@ export default function FeaturesPage() {
         <GuestLayout>
             <main>
                 {/* Hero Section */}
-                <section className="relative overflow-hidden px-6 pt-26 pb-24 md:px-8">
+                <section className="relative overflow-hidden px-6 pt-44 sm:pt-26 pb-24 md:px-8">
                     <div className="relative z-10 mx-auto max-w-4xl text-center">
                         <span className="mb-6 inline-block rounded-full bg-brand-primary/10 px-3 py-1 text-xs font-semibold tracking-wider text-brand-primary uppercase dark:bg-purple-500/10 dark:text-purple-400">
                             New: v2.0 Release

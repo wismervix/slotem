@@ -89,9 +89,9 @@ const Create = ({ service, selectedDate, slot }: CreateProps) => {
 
     return (
         <GuestLayout>
-            <main className="py-24">
+            <main className="pt-44 sm:pt-24 pb-24">
                 {/* Stepper Section */}
-                <div className="pb-8" id="stepper-section">
+                <div className="pb-8 px-4" id="stepper-section">
                     <Stepper currentStep={3} />
                 </div>
 
@@ -229,7 +229,7 @@ const Create = ({ service, selectedDate, slot }: CreateProps) => {
                                 <div className="space-y-3">
                                     <Link
                                         href={route('services')}
-                                        className="group flex w-full items-start gap-4 rounded-xl p-3 text-left transition-all hover:bg-surface-accent/40 hover:shadow-sm active:scale-95 dark:hover:bg-surface-accent-dark/40"
+                                        className="group flex flex-col sm:flex-row w-full items-start gap-4 rounded-xl p-3 text-left transition-all hover:bg-surface-accent/40 hover:shadow-sm active:scale-95 dark:hover:bg-surface-accent-dark/40"
                                     >
                                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-accent transition-all group-hover:scale-105 group-hover:bg-primary/10 dark:bg-surface-accent-dark">
                                             <Scissors className="h-5 w-5 text-primary" />
@@ -250,7 +250,7 @@ const Create = ({ service, selectedDate, slot }: CreateProps) => {
                                         href={route('booking.date-time', {
                                             service: service.id,
                                         })}
-                                        className="group flex w-full items-start gap-4 rounded-xl p-3 text-left transition-all hover:bg-surface-accent/40 hover:shadow-sm active:scale-95 dark:hover:bg-surface-accent-dark/40"
+                                        className="group flex flex-col sm:flex-row w-full items-start gap-4 rounded-xl p-3 text-left transition-all hover:bg-surface-accent/40 hover:shadow-sm active:scale-95 dark:hover:bg-surface-accent-dark/40"
                                     >
                                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-accent transition-all group-hover:scale-105 group-hover:bg-primary/10 dark:bg-surface-accent-dark">
                                             <Calendar className="h-5 w-5 text-primary" />
@@ -282,7 +282,7 @@ const Create = ({ service, selectedDate, slot }: CreateProps) => {
                                         href={route('booking.date-time', {
                                             service: service.id,
                                         })}
-                                        className="group flex w-full items-start gap-4 rounded-xl p-3 text-left transition-all hover:bg-surface-accent/40 hover:shadow-sm active:scale-95 dark:hover:bg-surface-accent-dark/40"
+                                        className="group flex flex-col sm:flex-row w-full items-start gap-4 rounded-xl p-3 text-left transition-all hover:bg-surface-accent/40 hover:shadow-sm active:scale-95 dark:hover:bg-surface-accent-dark/40"
                                     >
                                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-accent transition-all group-hover:scale-105 group-hover:bg-primary/10 dark:bg-surface-accent-dark">
                                             <Clock className="h-5 w-5 text-primary" />

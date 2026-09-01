@@ -51,7 +51,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
         <div className="min-h-screen bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-white">
             {/* Header */}
             <header className="fixed top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80">
-                <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+                <nav className="mx-auto flex flex-wrap sm:flex-nowrap gap-8 sm:gap-0 max-w-7xl items-center justify-between px-6 py-4">
                     {/* Logo */}
                     <Link href={route('home')} className="h-12 w-40">
                         <img
@@ -232,7 +232,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                             {auth.user ? (
                                 <Link
                                     href={route('user.dashboard')}
-                                    className={`hidden sm:block ${
+                                    className={` ${
                                         route().current('user.dashboard')
                                             ? 'ring-2 ring-purple-500 ring-offset-2'
                                             : ''
@@ -262,7 +262,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                                 <Link
                                     href={route('user.login')}
                                     onClick={() => setIsMobileMenuOpen(false)}
-                                    className={`hidden text-sm font-medium transition hover:text-purple-500 hover:underline sm:block ${
+                                    className={`text-sm font-medium transition hover:text-purple-500 hover:underline ${
                                         route().current('user.login')
                                             ? 'text-purple-600'
                                             : 'text-purple-600'
@@ -298,7 +298,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                         {/* <h3 className="text-2xl font-bold text-purple-600">
                             Slotem
                         </h3> */}
-                        <p className="mt-2 text-sm text-slate-500">
+                        <p className="mt-8 sm:mt-2 text-sm text-slate-500">
                             © 2026 Slotem Booking Systems. All rights reserved.
                         </p>
                     </Link>

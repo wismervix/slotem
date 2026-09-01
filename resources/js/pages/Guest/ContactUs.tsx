@@ -200,7 +200,7 @@ export default function ContactUs() {
                     {/* Hero Section */}
                     <div className="mb-16 text-center">
                         <motion.h1
-                            className="mb-4 font-heading text-6xl tracking-widest text-white drop-shadow-2xl md:text-8xl"
+                            className="mb-4 font-heading text-5xl sm:text-6xl tracking-widest text-white drop-shadow-2xl md:text-8xl"
                             variants={itemVariants}
                         >
                             CONNECT WITH SLOTEM
@@ -298,7 +298,7 @@ export default function ContactUs() {
                                         </p>
                                     )}
 
-                                    <button className="w-full rounded-xl bg-primary-container py-4 font-heading text-3xl tracking-widest text-white shadow-xl shadow-primary/30 transition-all hover:bg-primary active:scale-95 active:scale-[0.98]">
+                                    <button className="w-full rounded-xl bg-primary-container py-4 font-heading text-xl sm:text-3xl tracking-widest text-white shadow-xl shadow-primary/30 transition-all hover:bg-primary active:scale-95 active:scale-[0.98]">
                                         {processing
                                             ? 'SENDING INQUIRY'
                                             : 'SEND INQUIRY'}
@@ -321,7 +321,7 @@ export default function ContactUs() {
                                     <div className="rounded-full bg-white/5 p-3 transition-all group-hover:bg-primary/20">
                                         <Mail className="h-5 w-5" />
                                     </div>
-                                    <span className="text-lg">
+                                    <span className="text-base sm:text-lg">
                                         support@slotem.com
                                     </span>
                                 </div>
