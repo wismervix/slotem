@@ -296,7 +296,7 @@ export default function ListView({
                             </div>
 
                             {/* Right Column: Time and cancellation actions */}
-                            <div className="flex shrink-0 flex-row items-end justify-between gap-3 border-t border-dashed border-outline-variant pt-3 md:flex-col md:border-0 md:pt-0">
+                            <div className="flex flex-wrap sm:flex-nowrap shrink-0 flex-row items-end justify-between gap-3 border-t border-dashed border-outline-variant pt-3 md:flex-col md:border-0 md:pt-0">
                                 <div className="space-y-0.5 text-right">
                                     <div className="flex items-center justify-end gap-1.5 text-xs font-bold text-gray-900 dark:text-white">
                                         <CalendarDays className="h-3.5 w-3.5 text-primary" />
@@ -315,7 +315,7 @@ export default function ListView({
                                     </div>
                                 </div>
 
-                                <div className="flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                                <div className="flex flex-wrap sm:flex-nowrap gap-2 opacity-0 transition-opacity group-hover:opacity-100">
                                     {/* {booking.status === 'completed' ? ( */}
                                     {booking.status === 'approved' ||
                                     booking.status === 'pending' ? (

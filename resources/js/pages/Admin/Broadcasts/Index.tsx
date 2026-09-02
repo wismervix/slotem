@@ -152,6 +152,7 @@ export default function BroadcastsIndex({ broadcasts }: BroadcastsIndexProps) {
                     <Link
                         href={route('admin.broadcasts.create')}
                         className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-on-primary shadow-sm shadow-primary/20 transition-all hover:bg-primary-container dark:bg-purple-600 dark:hover:bg-purple-700"
+                        style={{width: 'fit-content'}}
                     >
                         <Plus className="h-4 w-4" />
                         New Broadcast
@@ -298,7 +299,10 @@ export default function BroadcastsIndex({ broadcasts }: BroadcastsIndexProps) {
                                     {/* Actions */}
                                     <div className="mt-4 flex items-center justify-end gap-2 opacity-0 transition-opacity group-hover:opacity-100">
                                         <Link
-                                            href={route('admin.broadcasts.show', broadcast.id)}
+                                            href={route(
+                                                'admin.broadcasts.show',
+                                                broadcast.id,
+                                            )}
                                             className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-primary/10 hover:text-primary"
                                             title="View Details"
                                         >

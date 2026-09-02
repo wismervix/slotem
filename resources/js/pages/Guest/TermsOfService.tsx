@@ -93,10 +93,10 @@ export default function TermsAndConditionsPage() {
     return (
         <GuestLayout>
             {/* Main Container */}
-            <main className="mx-auto max-w-7xl py-10 pt-20 pb-4 sm:px-6 lg:px-8">
+            <main className="mx-auto max-w-7xl px-4 py-10 pt-44 pb-4 sm:px-6 sm:pt-26 lg:px-8">
                 {/* Banner Announcement */}
                 <div className="mb-10 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
                         <span className="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-violet-600 dark:bg-violet-400" />
                         <p className="text-xs font-medium text-zinc-600 dark:text-zinc-300">
                             You are viewing the current official terms and

@@ -341,7 +341,7 @@ export default function ServicesView() {
                     </button>
                 </div>
 
-                <div className="flex justify-between gap-3">
+                <div className="flex flex-wrap sm:flex-nowrap justify-between gap-3">
                     {/* Tabs / Filter Tabs */}
                     <div className="flex gap-2 overflow-x-auto pb-1">
                         {(

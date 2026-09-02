@@ -608,7 +608,7 @@ export default function AdminAvailability() {
                                                         {date.getDate()}
                                                     </span>
                                                     {closed && (
-                                                        <div className="text-[9px] font-bold text-red-500">
+                                                        <div title="CLOSED" className="text-[6px] sm:text-[9px] font-bold text-red-500">
                                                             CLOSED
                                                         </div>
                                                     )}
@@ -641,7 +641,7 @@ export default function AdminAvailability() {
                             {formatDateLabel(selectedDateStr)}
                         </h3>
 
-                        <div className="mb-4 flex flex-col items-center gap-2 sm:flex-row">
+                        <div className="mb-4 flex flex-wrap sm:flex-nowrap items-center gap-2 flex-row">
                             <button
                                 onClick={handleCloseDay}
                                 className="mt-2 cursor-pointer text-xs font-semibold text-red-500"

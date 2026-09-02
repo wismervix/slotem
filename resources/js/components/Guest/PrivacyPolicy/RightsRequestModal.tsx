@@ -300,7 +300,7 @@ export default function RightsRequestModal({
                             </p>
                           </div>
 
-                          <div className="flex flex-row md:flex-col items-center md:items-end justify-between border-t md:border-t-0 pt-2 md:pt-0 border-zinc-200/50 dark:border-zinc-800/50 gap-2">
+                          <div className="flex flex-col items-end justify-between border-t md:border-t-0 pt-2 md:pt-0 border-zinc-200/50 dark:border-zinc-800/50 gap-2">
                             {/* Status Indicator */}
                             <div className="flex items-center gap-1.5">
                               {req.status === 'completed' ? (

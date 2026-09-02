@@ -341,7 +341,7 @@ export default function AdminBookingIndex({ bookings }: BookingsProps) {
             )}
 
             {/* Header */}
-            <header className="mb-8 flex flex-col items-end justify-between gap-3 pb-2 sm:flex-row">
+            <header className="mb-8 flex flex-col items-start sm:items-end justify-between gap-3 pb-2 sm:flex-row">
                 <div>
                     <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 select-text dark:text-zinc-50">
                         Bookings Management
@@ -761,7 +761,7 @@ export default function AdminBookingIndex({ bookings }: BookingsProps) {
             {/* Action Grid */}
             <section className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
                 {/* Send Reminders Card */}
-                <div className="flex items-center gap-4 rounded-2xl border border-outline-variant bg-surface-container/40 p-6 dark:border-zinc-800 dark:bg-zinc-900">
+                <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 rounded-2xl border border-outline-variant bg-surface-container/40 p-6 dark:border-zinc-800 dark:bg-zinc-900">
                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-secondary-container text-primary shadow-sm shadow-primary/5 dark:bg-purple-950 dark:text-purple-400">
                         <Bell className="animate-swing h-6 w-6" />
                     </div>
@@ -783,7 +783,7 @@ export default function AdminBookingIndex({ bookings }: BookingsProps) {
                 </div>
 
                 {/* Export Data Card */}
-                <div className="flex items-center gap-4 rounded-2xl border border-outline-variant bg-surface-container/40 p-6 dark:border-zinc-800 dark:bg-zinc-900">
+                <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 rounded-2xl border border-outline-variant bg-surface-container/40 p-6 dark:border-zinc-800 dark:bg-zinc-900">
                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-container-high text-on-secondary-container shadow-sm shadow-black/5 dark:bg-zinc-800 dark:text-zinc-400">
                         <CloudDownload size={24} />
                     </div>

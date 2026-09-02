@@ -78,8 +78,8 @@ export default function ContactShow({ contact }: ContactShowProps) {
                 {/* Header */}
                 <div className="flex flex-col justify-between gap-4 rounded-xl border border-outline-variant bg-surface p-6 dark:bg-slate-900 md:flex-row md:items-center">
                     <div>
-                        <div className="flex items-center gap-3">
-                            <h1 className="text-2xl font-bold text-on-surface dark:text-white">
+                        <div className="flex items-start sm:items-center gap-3">
+                            <h1 className="text-xl sm:text-2xl font-bold text-on-surface dark:text-white">
                                 {contact.subject}
                             </h1>
                             {contact.status === 'new' && (
@@ -97,7 +97,7 @@ export default function ContactShow({ contact }: ContactShowProps) {
                             From {contact.name} • {contact.email}
                         </p>
                     </div>
-                    <div className="flex gap-3">
+                    <div className="flex flex-wrap gap-3">
                         {contact.status !== 'replied' && (
                             <button
                                 onClick={handleMarkReplied}

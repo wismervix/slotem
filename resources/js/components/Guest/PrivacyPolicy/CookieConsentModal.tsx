@@ -197,7 +197,7 @@ export default function CookieConsentModal({
               <span className="text-xs text-zinc-500 dark:text-zinc-400">
                 You can adjust these settings at any time in the future.
               </span>
-              <div className="flex gap-2 w-full sm:w-auto">
+              <div className="flex flex-wrap sm:flex-nowrap gap-2 w-full sm:w-auto">
                 <button
                   onClick={handleSavePreferences}
                   className="flex-1 sm:flex-none text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 font-semibold px-4 py-2 rounded-xl text-xs transition-all"

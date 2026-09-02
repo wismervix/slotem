@@ -188,10 +188,10 @@ export default function PrivacyPolicyPage() {
     return (
         <GuestLayout>
             {/* Main Container */}
-            <main className="mx-auto max-w-7xl pt-20 pb-4 py-10 sm:px-6 lg:px-8">
+            <main className="mx-auto max-w-7xl pt-44 sm:pt-26 pb-4 py-10 px-4 sm:px-6 lg:px-8">
                 {/* Banner Announcement / Version History Indicator */}
                 <div className="mb-10 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                         <span className="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-violet-600 dark:bg-violet-400" />
                         <p className="text-xs font-medium text-zinc-600 dark:text-zinc-300">
                             You are viewing the current official privacy policy

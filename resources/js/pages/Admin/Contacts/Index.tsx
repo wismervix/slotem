@@ -97,7 +97,7 @@ export default function ContactsIndex({ contacts, unreadCount }: ContactsIndexPr
                         <p className="mt-1 text-xs text-on-surface-variant dark:text-slate-400">
                             Manage and respond to customer inquiries.
                             {unreadCount > 0 && (
-                                <span className="ml-2 inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-800 dark:bg-red-950/30 dark:text-red-400">
+                                <span className="ml-2 mt-2 sm:mt-0 inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-800 dark:bg-red-950/30 dark:text-red-400">
                                     {unreadCount} unread
                                 </span>
                             )}

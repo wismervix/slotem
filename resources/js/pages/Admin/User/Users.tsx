@@ -1108,7 +1108,7 @@ export default function AdminUsers({ users, flash }: AdminUsersProps) {
                             </div>
 
                             {/* Footer */}
-                            <div className="flex justify-end gap-2.5 bg-surface-container p-4 dark:bg-slate-800">
+                            <div className="flex flex-wrap sm:flex-nowrap justify-start sm:justify-end gap-2.5 bg-surface-container p-4 dark:bg-slate-800">
                                 <button
                                     onClick={() => setViewingUser(null)}
                                     className="cursor-pointer rounded-lg px-4 py-2 text-xs font-bold text-on-surface-variant transition-all hover:bg-surface-container-low dark:text-slate-500 dark:hover:bg-slate-700"
@@ -1306,7 +1306,7 @@ export default function AdminUsers({ users, flash }: AdminUsersProps) {
                                 </div>
 
                                 {/* Footer */}
-                                <div className="flex justify-between bg-surface-container px-6 py-4 dark:bg-slate-800">
+                                <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-0 justify-between bg-surface-container px-6 py-4 dark:bg-slate-800">
                                     <button
                                         type="button"
                                         disabled={processing}

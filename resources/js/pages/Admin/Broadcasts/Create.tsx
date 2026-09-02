@@ -117,7 +117,7 @@ export default function CreateBroadcast({ users }: PageProps) {
         <AdminLayout>
             <div className="mx-auto max-w-4xl space-y-6 py-6">
                 {/* Header */}
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap sm:flex-nowrap gap-2 items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight text-on-surface dark:text-white">
                             Create Broadcast
@@ -539,7 +539,7 @@ export default function CreateBroadcast({ users }: PageProps) {
                     </div>
 
                     {/* Submit */}
-                    <div className="flex justify-end gap-3">
+                    <div className="flex flex-wrap sm:flex-nowrap justify-end gap-3">
                         <button
                             type="button"
                             onClick={() =>

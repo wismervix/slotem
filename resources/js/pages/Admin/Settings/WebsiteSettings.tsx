@@ -178,7 +178,7 @@ export default function AdminSettings() {
                 {/* Header */}
                 <header className="mb-8">
                     <div>
-                        <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 select-text dark:text-zinc-50">
+                        <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 select-text dark:text-zinc-50">
                             Admin Website Settings Management
                         </h1>
                         <p className="mt-1 text-sm font-medium text-zinc-500 dark:text-zinc-400">

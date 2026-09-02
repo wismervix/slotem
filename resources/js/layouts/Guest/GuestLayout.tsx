@@ -6,7 +6,7 @@ import logoImageLight from '@/images/logo_light.png';
 
 // import { AppLogo } from '@/Components/AppLogo'; // Assume you have a logo component
 
-interface NavItem {
+export interface NavItem {
     name: string;
     href: string;
     route: string;

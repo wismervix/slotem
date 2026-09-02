@@ -91,7 +91,7 @@ export default function App() {
         <GuestLayout>
             {/* Main container with optional Sidebar spacing */}
             <div
-                className="pt-18 relative flex flex-grow flex-col lg:flex-row"
+                className="pt-40 sm:pt-18 relative flex flex-grow flex-col lg:flex-row"
                 id="layout-main-container"
             >
                 {/* Left Sidebar */}

@@ -2,9 +2,40 @@ import { useState, useEffect } from 'react';
 import { Link, usePage, useForm } from '@inertiajs/react';
 import { Mail, Check, Share2, Globe, MessageSquare } from 'lucide-react';
 import { motion } from 'motion/react';
+import { NavItem } from '@/layouts/Guest/GuestLayout';
+import logoImageDark from '@/images/logo_dark.png';
+import logoImageLight from '@/images/logo_light.png';
+
 
 export default function ContactUs() {
     const { auth, flash } = usePage().props as any;
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    // Center navigation items
+    const centerNavItems: NavItem[] = [
+        { name: 'Features', href: route('features'), route: 'features' },
+        { name: 'Services', href: route('services'), route: 'services' },
+        { name: 'Contact Us', href: route('contact-us'), route: 'contact-us' },
+    ];
+
+    // Navigation link component
+    const NavLink = ({ item }: { item: NavItem }) => (
+        <Link
+            href={item.href}
+            className={`text-sm font-medium transition hover:text-white ${
+                route().current(item.route)
+                    ? 'text-white hover:underline'
+                    : 'text-white/70'
+            }`}
+        >
+            {item.name}
+        </Link>
+    );
+
+    // Mobile menu toggle
+    const toggleMobileMenu = () => {
+        setIsMobileMenuOpen(!isMobileMenuOpen);
+    };
 
     // Toast state
     const [showToast, setShowToast] = useState(false);
@@ -88,35 +119,29 @@ export default function ContactUs() {
 
             {/* Header */}
             <header className="sticky top-0 z-50 border-b border-white/10 bg-transparent backdrop-blur-md">
-                <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
-                    <Link
-                        href={route('home')}
-                        className="cursor-pointer text-2xl font-bold tracking-tight text-white transition-opacity hover:opacity-80"
-                    >
-                        Slotem
+                <nav className="mx-auto flex gap-2 sm:gap-0 py-2 sm:py-0 flex-wrap sm:flex-nowrap min-h-20 max-w-7xl items-center justify-between px-6">
+                    <Link href={route('home')} className="h-12 w-40">
+                        {/* <img
+                            className="block h-auto w-full dark:hidden"
+                            src={logoImageLight}
+                            alt="Slotem Logo"
+                        />
+                        <img
+                            className="hidden h-auto w-full dark:block"
+                            src={logoImageDark}
+                            alt="Slotem Logo"
+                        /> */}
+                        <img
+                            className="h-auto w-full dark:block"
+                            src={logoImageDark}
+                            alt="Slotem Logo"
+                        />
                     </Link>
 
                     <div className="hidden items-center space-x-8 md:flex">
-                        <Link
-                            href={route('features')}
-                            className="text-sm font-medium text-white/70 transition-colors hover:text-white"
-                        >
-                            Features
-                        </Link>
-
-                        <Link
-                            href={route('services')}
-                            className="text-sm font-medium text-white/70 transition-colors hover:text-white"
-                        >
-                            Services
-                        </Link>
-
-                        <Link
-                            href={route('contact-us')}
-                            className="text-sm font-medium text-white/70 transition-colors hover:text-white"
-                        >
-                            Contact Us
-                        </Link>
+                        {centerNavItems.map((item) => (
+                            <NavLink key={item.name} item={item} />
+                        ))}
 
                         {auth?.admin ? (
                             <Link
@@ -136,10 +161,11 @@ export default function ContactUs() {
                     </div>
 
                     <div className="flex items-center space-x-4">
+                        {/* User Avatar / Login */}
                         {auth.user ? (
                             <>
                                 <Link href={route('user.dashboard')}>
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-full border border-primary/20 bg-primary-fixed text-2xl font-extrabold text-primary">
+                                    <div className="hidden h-10 w-10 items-center justify-center rounded-full border border-primary/20 bg-primary-fixed text-2xl font-extrabold text-primary sm:flex">
                                         {auth.user.name ? (
                                             <img
                                                 alt="Profile Avatar"
@@ -159,20 +185,138 @@ export default function ContactUs() {
                         ) : (
                             <Link
                                 href={route('user.login')}
-                                className="px-4 py-2 text-sm font-medium text-white/70 transition-colors hover:text-white"
+                                className="hidden px-4 py-2 text-sm font-medium text-white/70 transition-colors hover:text-white sm:block"
                             >
                                 Login
                             </Link>
                         )}
 
+                        {/* Book Now Button */}
                         <Link
                             href={route('services')}
                             className="rounded-xl bg-purple-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-purple-500/20 transition transition-all hover:scale-[1.02] hover:bg-purple-500 active:scale-95"
                         >
                             Book Now
                         </Link>
+
+                        {/* Mobile Menu Button */}
+                        <button
+                            onClick={toggleMobileMenu}
+                            className="flex flex-col gap-1.5 rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 md:hidden dark:text-slate-300 dark:hover:bg-slate-400"
+                            aria-label="Toggle menu"
+                        >
+                            <span
+                                className={`block h-0.5 w-6 bg-current transition-all ${
+                                    isMobileMenuOpen
+                                        ? 'translate-y-2 rotate-45'
+                                        : ''
+                                }`}
+                            />
+                            <span
+                                className={`block h-0.5 w-6 bg-current transition-all ${
+                                    isMobileMenuOpen ? 'opacity-0' : ''
+                                }`}
+                            />
+                            <span
+                                className={`block h-0.5 w-6 bg-current transition-all ${
+                                    isMobileMenuOpen
+                                        ? '-translate-y-2 -rotate-45'
+                                        : ''
+                                }`}
+                            />
+                        </button>
                     </div>
                 </nav>
+
+                {/* Mobile Navigation Menu */}
+                <div
+                    className={`overflow-hidden transition-all duration-300 ease-in-out md:hidden ${
+                        isMobileMenuOpen
+                            ? 'max-h-96 opacity-100'
+                            : 'max-h-0 opacity-0'
+                    }`}
+                >
+                    <div className="border-t border-slate-200 bg-transparent backdrop-blur">
+                        <div className="flex flex-col space-y-3 px-6 py-4">
+                            {centerNavItems.map((item) => (
+                                <Link
+                                    key={item.name}
+                                    href={item.href}
+                                    className={`text-sm font-medium transition hover:text-white ${
+                                        route().current(item.route)
+                                            ? 'text-white hover:underline'
+                                            : 'text-white/70'
+                                    }`}
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                >
+                                    {item.name}
+                                </Link>
+                            ))}
+
+                            <div className="my-2 h-px bg-slate-200" />
+
+                            {/* Mobile Admin */}
+                            {auth?.admin ? (
+                                <Link
+                                    href={route('admin.dashboard')}
+                                    className="text-sm font-medium text-white/70 transition-colors hover:text-white"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                >
+                                    View Admin Dashboard
+                                </Link>
+                            ) : (
+                                <Link
+                                    href={route('admin.login')}
+                                    className="text-sm font-medium text-white/70 transition-colors hover:text-white"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                >
+                                    Admin
+                                </Link>
+                            )}
+
+                            {/* Mobile User Actions */}
+                            {/* User Avatar / Login */}
+                            {auth.user ? (
+                                <Link
+                                    href={route('user.dashboard')}
+                                    className={` ${
+                                        route().current('user.dashboard')
+                                            ? 'ring-2 ring-purple-500 ring-offset-2'
+                                            : ''
+                                    }`}
+                                >
+                                    <div
+                                        onClick={() =>
+                                            setIsMobileMenuOpen(false)
+                                        }
+                                        className="flex h-10 w-10 items-center justify-center rounded-full border border-primary/20 bg-primary-fixed text-2xl font-extrabold text-primary"
+                                    >
+                                        {auth.user.avatar_url ? (
+                                            <img
+                                                alt="Profile Avatar"
+                                                src={auth.user.avatar_url}
+                                                title={`Hi, ${auth.user.name}`}
+                                                className="h-full w-full rounded-full object-cover"
+                                            />
+                                        ) : (
+                                            auth.user.name
+                                                .charAt(0)
+                                                .toUpperCase()
+                                        )}
+                                    </div>
+                                </Link>
+                            ) : (
+                                <Link
+                                    href={route('user.login')}
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className={`text-sm font-medium text-white/70 transition hover:text-white`}
+                                >
+                                    Login
+                                </Link>
+                            )}
+                        </div>
+                    </div>
+                </div>
             </header>
 
             {/* Main Content */}
@@ -200,7 +344,7 @@ export default function ContactUs() {
                     {/* Hero Section */}
                     <div className="mb-16 text-center">
                         <motion.h1
-                            className="mb-4 font-heading text-5xl sm:text-6xl tracking-widest text-white drop-shadow-2xl md:text-8xl"
+                            className="mb-4 font-heading text-5xl tracking-widest text-white drop-shadow-2xl sm:text-6xl md:text-8xl"
                             variants={itemVariants}
                         >
                             CONNECT WITH SLOTEM
@@ -298,7 +442,7 @@ export default function ContactUs() {
                                         </p>
                                     )}
 
-                                    <button className="w-full rounded-xl bg-primary-container py-4 font-heading text-xl sm:text-3xl tracking-widest text-white shadow-xl shadow-primary/30 transition-all hover:bg-primary active:scale-95 active:scale-[0.98]">
+                                    <button className="w-full rounded-xl bg-primary-container py-4 font-heading text-xl tracking-widest text-white shadow-xl shadow-primary/30 transition-all hover:bg-primary active:scale-95 active:scale-[0.98] sm:text-3xl">
                                         {processing
                                             ? 'SENDING INQUIRY'
                                             : 'SEND INQUIRY'}

@@ -291,7 +291,7 @@ export default function UserDashboard({
                 {/* Banner Card */}
                 <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary to-primary-container p-6 text-white shadow-md md:p-8">
                     <div className="relative z-10 max-w-xl space-y-2">
-                        <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold tracking-wider text-white uppercase backdrop-blur-md">
+                        <span className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold tracking-wider text-white uppercase backdrop-blur-md sm:text-xs">
                             Welcome to Slotem Management
                         </span>
                         <h2 className="text-2xl font-extrabold tracking-tight md:text-3xl">
@@ -309,7 +309,7 @@ export default function UserDashboard({
                             active consultations and wellness appointments
                             scheduled for this cycle. Keep healthy!
                         </p>
-                        <div className="flex gap-3 pt-2">
+                        <div className="flex flex-wrap gap-3 pt-2 sm:flex-nowrap">
                             <Link
                                 href={route('user.bookings')}
                                 className="rounded-lg bg-white px-4 py-2.5 text-xs font-bold text-primary shadow-sm transition-all hover:shadow-md active:scale-95"
@@ -334,7 +334,7 @@ export default function UserDashboard({
                 </div>
 
                 {/* Grid statistics highlights */}
-                <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <div className="flex items-center gap-4 rounded-xl border border-outline-variant bg-white p-4 transition-colors hover:border-primary dark:bg-neutral-900">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                             <Calendar className="h-5 w-5" />
@@ -407,7 +407,7 @@ export default function UserDashboard({
                                 </h3>
                             </div>
 
-                            <div className="flex flex-wrap rounded-lg bg-neutral-100 p-1 text-xs font-semibold dark:bg-neutral-800">
+                            <div className="flex flex-wrap gap-1.5 rounded-lg bg-neutral-100 p-1 text-xs font-semibold dark:bg-neutral-800">
                                 <button
                                     onClick={() => setChartSource('all')}
                                     className={`rounded-md px-2.5 py-1 transition-all ${
@@ -623,7 +623,7 @@ export default function UserDashboard({
 
                 {/* Recommended Doctors/Slots Near Thee */}
                 <div className="space-y-3">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between gap-2 sm:flex-nowrap sm:gap-0">
                         <h3 className="flex items-center gap-1.5 text-base font-extrabold text-gray-900 dark:text-white">
                             <Sparkles className="h-4 w-4 fill-amber-500 text-amber-500" />
                             1-Click Available Hot-Slots Today
@@ -704,7 +704,7 @@ export default function UserDashboard({
                 <div className="grid grid-cols-12 gap-6">
                     {/* Upcoming */}
                     <section className="col-span-12 flex flex-col gap-5 lg:col-span-7">
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-wrap items-center justify-between gap-2 sm:flex-nowrap sm:gap-0">
                             <h2 className="text-2xl font-bold tracking-tight text-on-surface dark:text-zinc-100">
                                 Upcoming Appointments
                             </h2>
@@ -891,95 +891,103 @@ export default function UserDashboard({
                         </div>
 
                         <div className="overflow-hidden rounded-2xl border border-outline-variant/40 bg-white/80 shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-zinc-900/70 dark:shadow-black/30">
-                            <table className="w-full border-collapse text-left">
-                                <thead>
-                                    <tr className="border-b border-outline-variant/40 bg-surface-container-low/80 dark:border-white/10 dark:bg-white/[0.03]">
-                                        <th className="px-4 py-4 text-[11px] font-semibold tracking-widest text-on-surface-variant uppercase dark:text-zinc-400">
-                                            Service
-                                        </th>
+                            <div className="overflow-x-auto">
+                                <table className="w-full min-w-max border-collapse text-left">
+                                    <thead>
+                                        <tr className="border-b border-outline-variant/40 bg-surface-container-low/80 dark:border-white/10 dark:bg-white/[0.03]">
+                                            <th className="px-4 py-4 text-[11px] font-semibold tracking-widest text-on-surface-variant uppercase dark:text-zinc-400">
+                                                Service
+                                            </th>
 
-                                        <th className="px-4 py-4 text-[11px] font-semibold tracking-widest text-on-surface-variant uppercase dark:text-zinc-400">
-                                            Date
-                                        </th>
+                                            <th className="px-4 py-4 text-[11px] font-semibold tracking-widest text-on-surface-variant uppercase dark:text-zinc-400">
+                                                Date
+                                            </th>
 
-                                        <th className="px-4 py-4 text-[11px] font-semibold tracking-widest text-on-surface-variant uppercase dark:text-zinc-400">
-                                            Status
-                                        </th>
-                                    </tr>
-                                </thead>
-
-                                <tbody className="divide-y divide-outline-variant/20 dark:divide-white/5">
-                                    {bookingHistory.length === 0 ? (
-                                        <tr>
-                                            <td className="px-4 py-4 text-center text-sm text-on-surface-variant dark:text-zinc-400">
-                                                No booking history available.
-                                            </td>
+                                            <th className="px-4 py-4 text-[11px] font-semibold tracking-widest text-on-surface-variant uppercase dark:text-zinc-400">
+                                                Status
+                                            </th>
                                         </tr>
-                                    ) : (
-                                        bookingHistory.map((row, idx) => (
-                                            <tr
-                                                key={idx}
-                                                className="group transition-all duration-200 hover:bg-surface-container-low dark:hover:bg-white/[0.03]"
-                                            >
-                                                <td className="max-w-[220px] px-4 py-4">
-                                                    <div className="min-w-0">
-                                                        <span
-                                                            title={
-                                                                row.service
-                                                                    ?.name
-                                                            }
-                                                            className="block truncate text-sm font-semibold text-on-surface dark:text-zinc-100"
-                                                        >
-                                                            {row.service?.name}
-                                                        </span>
+                                    </thead>
 
-                                                        <span
-                                                            title={
-                                                                row.service
-                                                                    ?.description ??
-                                                                'No description'
-                                                            }
-                                                            className="mt-1 line-clamp-2 text-xs leading-relaxed text-on-surface-variant dark:text-zinc-400"
-                                                        >
-                                                            {
-                                                                row.service
-                                                                    ?.description
-                                                            }
-                                                        </span>
-                                                    </div>
-                                                </td>
-
-                                                <td className="px-4 py-4">
-                                                    <span className="text-sm text-on-surface dark:text-zinc-300">
-                                                        {new Intl.DateTimeFormat(
-                                                            'en-US',
-                                                            {
-                                                                weekday:
-                                                                    'short',
-                                                                month: 'short',
-                                                                day: 'numeric',
-                                                                year: 'numeric',
-                                                            },
-                                                        ).format(
-                                                            new Date(row.date),
-                                                        )}
-                                                    </span>
-                                                </td>
-
-                                                <td className="px-4 py-4">
-                                                    <span
-                                                        className={`inline-flex items-center ${getStatusColor(
-                                                            row.status,
-                                                        )}`}
-                                                    >
-                                                        {row.status}
-                                                    </span>
+                                    <tbody className="divide-y divide-outline-variant/20 dark:divide-white/5">
+                                        {bookingHistory.length === 0 ? (
+                                            <tr>
+                                                <td className="px-4 py-4 text-center text-sm text-on-surface-variant dark:text-zinc-400">
+                                                    No booking history
+                                                    available.
                                                 </td>
                                             </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
+                                        ) : (
+                                            bookingHistory.map((row, idx) => (
+                                                <tr
+                                                    key={idx}
+                                                    className="group transition-all duration-200 hover:bg-surface-container-low dark:hover:bg-white/[0.03]"
+                                                >
+                                                    <td className="max-w-[220px] px-4 py-4">
+                                                        <div className="min-w-0">
+                                                            <span
+                                                                title={
+                                                                    row.service
+                                                                        ?.name
+                                                                }
+                                                                className="block truncate text-sm font-semibold text-on-surface dark:text-zinc-100"
+                                                            >
+                                                                {
+                                                                    row.service
+                                                                        ?.name
+                                                                }
+                                                            </span>
+
+                                                            <span
+                                                                title={
+                                                                    row.service
+                                                                        ?.description ??
+                                                                    'No description'
+                                                                }
+                                                                className="mt-1 line-clamp-2 text-xs leading-relaxed text-on-surface-variant dark:text-zinc-400"
+                                                            >
+                                                                {
+                                                                    row.service
+                                                                        ?.description
+                                                                }
+                                                            </span>
+                                                        </div>
+                                                    </td>
+
+                                                    <td className="px-4 py-4">
+                                                        <span className="text-sm text-on-surface dark:text-zinc-300">
+                                                            {new Intl.DateTimeFormat(
+                                                                'en-US',
+                                                                {
+                                                                    weekday:
+                                                                        'short',
+                                                                    month: 'short',
+                                                                    day: 'numeric',
+                                                                    year: 'numeric',
+                                                                },
+                                                            ).format(
+                                                                new Date(
+                                                                    row.date,
+                                                                ),
+                                                            )}
+                                                        </span>
+                                                    </td>
+
+                                                    <td className="px-4 py-4">
+                                                        <span
+                                                            className={`inline-flex items-center ${getStatusColor(
+                                                                row.status,
+                                                            )}`}
+                                                        >
+                                                            {row.status}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
 
                             <div className="border-t border-outline-variant/30 bg-surface-container-low/60 p-4 text-center dark:border-white/10 dark:bg-white/[0.02]">
                                 <button

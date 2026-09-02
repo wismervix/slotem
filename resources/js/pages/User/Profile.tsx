@@ -586,7 +586,7 @@ export default function Profile({
 
                 {/* Subscription Status Card */}
                 <div className="flex flex-col items-center justify-between gap-8 rounded-2xl border border-outline-variant bg-surface-container-highest p-8 transition-colors md:flex-row lg:col-span-3 dark:border-outline-variant-dark dark:bg-neutral-900">
-                    <div className="flex items-center gap-6">
+                    <div className="flex flex-wrap sm:flex-nowrap items-center gap-6">
                         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 dark:bg-primary/15">
                             <BadgeCheck className="text-primary" size={40} />
                         </div>

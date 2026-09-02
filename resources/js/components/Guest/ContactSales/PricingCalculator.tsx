@@ -53,7 +53,7 @@ export default function PricingCalculator() {
             id="pricing-interactive-calculator"
         >
             <div className="mx-auto max-w-xl space-y-2 text-center">
-                <span className="rounded-full bg-purple-50 px-2.5 py-1 text-xs font-semibold tracking-wider text-[#630ed4] uppercase dark:bg-purple-950/30 dark:text-purple-400">
+                <span className="rounded-full bg-purple-50 px-2.5 py-2 text-xs font-semibold tracking-wider text-[#630ed4] uppercase sm:py-1 dark:bg-purple-950/30 dark:text-purple-400">
                     Transparent & Scalable Plans
                 </span>
                 <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
@@ -108,7 +108,7 @@ export default function PricingCalculator() {
                 </div>
 
                 <div className="space-y-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between gap-2 sm:flex-nowrap sm:gap-0">
                         <span className="text-xs font-semibold text-slate-400 uppercase dark:text-slate-500">
                             Operator Seats
                         </span>
@@ -127,7 +127,7 @@ export default function PricingCalculator() {
                         className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-[#630ed4] focus:outline-none dark:bg-slate-700"
                     />
 
-                    <div className="flex justify-between px-1 font-mono text-[10px] text-slate-400 dark:text-slate-500">
+                    <div className="flex justify-between gap-2.5 px-1 font-mono text-[10px] text-slate-400 sm:gap-0 dark:text-slate-500">
                         <span>5 SEATS</span>
                         <span>100 SEATS (Volume Discount)</span>
                         <span>500+ SEATS (Custom SLA)</span>
@@ -170,13 +170,15 @@ export default function PricingCalculator() {
                         </p>
                     </div>
 
-                    <div className="flex items-baseline gap-1 border-y border-slate-100 py-4 dark:border-slate-800">
-                        <span className="text-2xl font-black text-slate-800 dark:text-white">
-                            ${totalMonthlyPrice}
-                        </span>
-                        <span className="text-xs font-medium text-slate-400 dark:text-slate-500">
-                            / month billed {billingCycle}
-                        </span>
+                    <div className="flex flex-wrap sm:flex-nowrap items-baseline gap-1 border-y border-slate-100 py-4 dark:border-slate-800">
+                        <div className="flex items-baseline gap-1">
+                            <span className="text-2xl font-black text-slate-800 dark:text-white">
+                                ${totalMonthlyPrice}
+                            </span>
+                            <span className="text-xs font-medium text-slate-400 dark:text-slate-500">
+                                / month billed {billingCycle}
+                            </span>
+                        </div>
                         <span className="ml-auto text-xs font-semibold text-slate-400 dark:text-slate-500">
                             (${finalPricePerSeat}/seat)
                         </span>

@@ -490,7 +490,7 @@ export default function BookModal() {
                             {step === 3 && (
                                 <div className="space-y-4">
                                     <div className="overflow-hidden rounded-xl border border-outline-variant shadow-xs">
-                                        <div className="flex items-center justify-between border-b border-outline-variant bg-gray-50 p-4 text-xs dark:bg-neutral-800">
+                                        <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-0 items-center justify-between border-b border-outline-variant bg-gray-50 p-4 text-xs dark:bg-neutral-800">
                                             <span className="font-bold text-gray-500 uppercase">
                                                 Appointment Summary
                                             </span>
@@ -517,11 +517,11 @@ export default function BookModal() {
 
                                             <div className="h-px bg-outline-variant" />
 
-                                            <div className="grid grid-cols-2 gap-y-2 text-xs leading-relaxed font-semibold">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 text-xs leading-relaxed font-semibold">
                                                 <span className="text-gray-400">
                                                     Scheduled Date:
                                                 </span>
-                                                <span className="text-right text-gray-900 dark:text-white">
+                                                <span className="sm:text-right text-gray-900 dark:text-white">
                                                     {selectedSlot && (
                                                         <span className="font-semibold text-gray-900 dark:text-white">
                                                             {formatSelectedDate(
@@ -534,7 +534,7 @@ export default function BookModal() {
                                                 <span className="text-gray-400">
                                                     Scheduled Time:
                                                 </span>
-                                                <span className="text-right text-gray-900 dark:text-white">
+                                                <span className="sm:text-right text-gray-900 dark:text-white">
                                                     {selectedSlot && (
                                                         <span className="text-gray-900 dark:text-white">
                                                             {formatTime(
@@ -551,7 +551,7 @@ export default function BookModal() {
                                                 <span className="text-gray-400">
                                                     Duration Limit:
                                                 </span>
-                                                <span className="text-right text-gray-900 dark:text-white">
+                                                <span className="sm:text-right text-gray-900 dark:text-white">
                                                     {currentPreset.duration}{' '}
                                                     mins
                                                 </span>
@@ -559,7 +559,7 @@ export default function BookModal() {
                                                 <span className="text-gray-400">
                                                     Estimated Charge:
                                                 </span>
-                                                <span className="text-right font-bold text-primary">
+                                                <span className="sm:text-right font-bold text-primary">
                                                     ${currentPreset.price} USD
                                                 </span>
                                             </div>
@@ -595,7 +595,7 @@ export default function BookModal() {
                             )}
 
                             {/* NAV BUTTONS */}
-                            <div className="mt-6 flex items-center justify-between border-t border-outline-variant pt-4">
+                            <div className="mt-6 flex flex-wrap sm:flex-nowrap gap-2 sm:gap-0 items-center justify-between border-t border-outline-variant pt-4">
                                 {step > 1 ? (
                                     <button
                                         type="button"

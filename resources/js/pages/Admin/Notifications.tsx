@@ -329,7 +329,7 @@ export default function UserNotifications({
                                 </div>
 
                                 <div className="grow space-y-1">
-                                    <div className="flex items-start justify-between gap-4">
+                                    <div className="mb-2 flex flex-wrap items-start justify-between gap-4 sm:mb-0 sm:flex-nowrap">
                                         <h4
                                             className={`text-xs font-bold text-gray-900 dark:text-white ${!item.read ? 'font-extrabold' : ''}`}
                                         >

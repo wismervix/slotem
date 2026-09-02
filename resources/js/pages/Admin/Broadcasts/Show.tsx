@@ -147,14 +147,14 @@ export default function BroadcastShow({ broadcast }: BroadcastShowProps) {
 
                 {/* Header */}
                 <div className="flex flex-col justify-between gap-4 rounded-xl border border-outline-variant bg-surface p-6 md:flex-row md:items-center dark:bg-slate-900">
-                    <div className="flex items-start gap-4">
+                    <div className="flex flex-wrap items-start gap-4">
                         <div
                             className={`rounded-lg p-2.5 ${getTypeColor(broadcast.type)}`}
                         >
                             <TypeIcon className="h-6 w-6" />
                         </div>
                         <div>
-                            <div className="flex items-center gap-3">
+                            <div className="flex flex-wrap items-center gap-3">
                                 <h1 className="text-2xl font-bold text-on-surface dark:text-white">
                                     {broadcast.title}
                                 </h1>
@@ -237,7 +237,7 @@ export default function BroadcastShow({ broadcast }: BroadcastShowProps) {
                         onClick={() => setShowUsers(!showUsers)}
                         className="flex w-full items-center justify-between p-6"
                     >
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-col sm:flex-row items-center gap-3">
                             <Users className="h-5 w-5 text-primary" />
                             <h3 className="text-sm font-bold text-on-surface dark:text-white">
                                 Recipients ({totalUsers})

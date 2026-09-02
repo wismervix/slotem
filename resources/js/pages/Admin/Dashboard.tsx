@@ -585,7 +585,7 @@ export default function AdminDashboard({ bookings }: AdminDashboardProps) {
                 <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                     {/* Weekly load Line tracking */}
                     <div className="rounded-2xl border border-zinc-100 bg-white p-5 lg:col-span-2 dark:border-zinc-800 dark:bg-zinc-900">
-                        <div className="mb-4 flex items-center justify-between">
+                        <div className="mb-4 flex flex-wrap sm:flex-nowrap gap-1.5 sm:gap-0 items-center justify-between">
                             <div>
                                 <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
                                     Weekly Appointment Ingestion
@@ -791,7 +791,7 @@ export default function AdminDashboard({ bookings }: AdminDashboardProps) {
 
                 {/* Recent Activity / Active Bookings Stream */}
                 <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
-                    <div className="flex items-center justify-between border-b border-slate-100 p-6 dark:border-zinc-800">
+                    <div className="flex flex-wrap sm:flex-nowrap gap-4 sm:gap-0 items-center justify-between border-b border-slate-100 p-6 dark:border-zinc-800">
                         <div>
                             <h3 className="text-md font-bold text-slate-800 dark:text-zinc-100">
                                 Upcoming Schedule Agenda

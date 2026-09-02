@@ -196,9 +196,9 @@ export default function HelpCenter() {
                 </div>
                 <a
                     href="mailto:sales@slotem.com"
-                    className="flex items-center gap-1.5 rounded-lg border border-purple-200 bg-white px-4 py-2 text-xs font-bold text-[#630ed4] shadow-sm transition-all hover:bg-slate-50 dark:border-purple-800/30 dark:bg-slate-900 dark:text-purple-400 dark:hover:bg-slate-800"
+                    className="flex flex-wrap sm:flex-nowrap items-center gap-1.5 rounded-lg border border-purple-200 bg-white px-4 py-2 text-xs font-bold text-[#630ed4] shadow-sm transition-all hover:bg-slate-50 dark:border-purple-800/30 dark:bg-slate-900 dark:text-purple-400 dark:hover:bg-slate-800"
                 >
-                    <Mail className="h-3.5 w-3.5" /> Email support@slotem.com
+                    <Mail className="h-3.5 w-3.5" /> <span>Email: support@slotem.com</span>
                 </a>
             </div>
         </div>
