@@ -10,12 +10,12 @@ export default defineConfig({
     server: {
         host: '127.0.0.1',
         cors: {
-            origin: 'https://sierra-shorts-carlo-albums.trycloudflare.com', //docker
+            origin: 'https://routing-footage-acquire-expanded.trycloudflare.com', //docker
         },
-        origin: 'https://processing-proper-dans-veterans.trycloudflare.com', //npm
+        origin: 'https://continued-games-yields-proposition.trycloudflare.com', //npm
         hmr: {
             protocol: 'wss',
-            host: 'processing-proper-dans-veterans.trycloudflare.com',
+            host: 'continued-games-yields-proposition.trycloudflare.com',
             clientPort: 443,
         },
     },
@@ -82,10 +82,17 @@ export default defineConfig({
                 screenshots: [
                     {
                         src: '/screenshots/slotem_screenshot_mobile.png',
-                        sizes: '1117x1791',
+                        sizes: '853x1844',
                         type: 'image/png',
                         form_factor: 'narrow',
                         label: 'Slotem mobile screenshot',
+                    },
+                    {
+                        src: '/screenshots/slotem_screenshot_desktop.png',
+                        sizes: '1536x1024',
+                        type: 'image/png',
+                        form_factor: 'wide',
+                        label: 'Slotem desktop screenshot',
                     },
                 ],
             },
