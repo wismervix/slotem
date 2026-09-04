@@ -214,7 +214,7 @@ export default function CalendarView({
                                                 e.stopPropagation();
                                                 openModal(formattedDate);
                                             }}
-                                            className="shrink-0 cursor-pointer text-[10px] font-extrabold text-primary uppercase opacity-0 transition-opacity group-hover:opacity-100"
+                                            className="shrink-0 cursor-pointer text-[10px] font-extrabold text-primary uppercase opacity-100 md:opacity-0 transition-opacity md:group-hover:opacity-100"
                                         >
                                             + Book
                                         </button>

@@ -315,7 +315,7 @@ export default function ListView({
                                     </div>
                                 </div>
 
-                                <div className="flex flex-wrap sm:flex-nowrap gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                                <div className="flex flex-wrap sm:flex-nowrap gap-2 opacity-100 md:opacity-0 transition-opacity md:group-hover:opacity-100">
                                     {/* {booking.status === 'completed' ? ( */}
                                     {booking.status === 'approved' ||
                                     booking.status === 'pending' ? (

@@ -716,7 +716,7 @@ export default function AdminUsers({ users, flash }: AdminUsersProps) {
 
                                                 {/* Actions */}
                                                 <td className="px-6 py-4 text-right">
-                                                    <div className="flex items-center justify-end gap-1.5 transition-opacity group-hover:opacity-100 md:opacity-0">
+                                                    <div className="flex items-center justify-end gap-1.5 transition-opacity opacity-100 md:group-hover:opacity-100 md:opacity-0">
                                                         {/* View */}
                                                         <button
                                                             onClick={() =>

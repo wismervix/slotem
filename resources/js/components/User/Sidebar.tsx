@@ -194,7 +194,7 @@ export default function Sidebar({
                                 className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-colors ${
                                     active
                                         ? 'bg-secondary-container text-primary'
-                                        : 'text-on-surface-variant hover:bg-surface-container-highest'
+                                        : 'bg-surface-container-highest text-on-surface-variant md:bg-transparent md:hover:bg-surface-container-highest'
                                 }`}
                             >
                                 <div className="flex items-center gap-3">

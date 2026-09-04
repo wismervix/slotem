@@ -335,7 +335,7 @@ export default function UserNotifications({
                                             NEW alert
                                         </span>
                                     )}
-                                    <div className="mt-4 flex gap-4 opacity-0 transition-opacity group-hover:opacity-100">
+                                    <div className="mt-4 flex gap-4 opacity-100 md:opacity-0 transition-opacity md:group-hover:opacity-100">
                                         {!item.read && (
                                             <button
                                                 onClick={(e) => {

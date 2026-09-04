@@ -146,7 +146,7 @@ export default function ContactsIndex({ contacts, unreadCount }: ContactsIndexPr
                             setFilterType('all');
                             setFilterStatus('all');
                         }}
-                        className="flex items-center gap-2 rounded-lg border border-outline-variant px-4 py-2 text-sm hover:bg-surface-container"
+                        className="flex items-center gap-2 rounded-lg border border-outline-variant px-4 py-2 text-sm hover:bg-surface-container-dark/90"
                     >
                         <Filter className="h-4 w-4" />
                         Reset

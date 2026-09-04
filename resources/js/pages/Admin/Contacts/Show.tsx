@@ -111,7 +111,7 @@ export default function ContactShow({ contact }: ContactShowProps) {
                         {contact.status !== 'archived' && (
                             <button
                                 onClick={handleArchive}
-                                className="flex items-center gap-2 rounded-lg border border-outline px-4 py-2 text-sm font-semibold hover:bg-surface-container"
+                                className="flex items-center gap-2 rounded-lg border border-outline px-4 py-2 text-sm font-semibold hover:bg-surface-container-dark/90"
                             >
                                 <Archive className="h-4 w-4" />
                                 Archive

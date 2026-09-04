@@ -32,7 +32,7 @@ export default function FeaturesPage() {
                         <span className="mb-6 inline-block rounded-full bg-brand-primary/10 px-3 py-1 text-xs font-semibold tracking-wider text-brand-primary uppercase dark:bg-purple-500/10 dark:text-purple-400">
                             New: v2.0 Release
                         </span>
-                        <h1 className="mb-6 font-sans text-5xl leading-none font-extrabold tracking-tight text-brand-dark md:text-7xl dark:text-white">
+                        <h1 className="mb-6 font-sans text-4xl sm:text-5xl leading-none font-extrabold tracking-tight text-brand-dark md:text-7xl dark:text-white">
                             Everything you need to{' '}
                             <span className="text-brand-primary dark:text-purple-400">
                                 manage appointments

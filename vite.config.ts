@@ -9,12 +9,12 @@ export default defineConfig({
     // server: {
     //     host: '127.0.0.1',
     //     cors: {
-    //         origin: 'https://emission-plans-studying-demonstrated.trycloudflare.com', //docker
+    //         origin: 'https://mysql-recipe-sport-suffered.trycloudflare.com', //docker
     //     },
-    //     origin: 'https://practical-terrorist-scientific-elimination.trycloudflare.com', //npm
+    //     origin: 'https://administrators-wings-excerpt-success.trycloudflare.com', //npm
     //     hmr: {
     //         protocol: 'wss',
-    //         host: 'practical-terrorist-scientific-elimination.trycloudflare.com',
+    //         host: 'administrators-wings-excerpt-success.trycloudflare.com',
     //         clientPort: 443,
     //     },
     // },

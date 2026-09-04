@@ -203,7 +203,7 @@ export default function BroadcastsIndex({ broadcasts }: BroadcastsIndexProps) {
                             setFilterType('all');
                             setFilterPriority('all');
                         }}
-                        className="flex items-center gap-2 rounded-lg border border-outline-variant px-4 py-2 text-sm hover:bg-surface-container"
+                        className="flex items-center gap-2 rounded-lg border border-outline-variant px-4 py-2 text-sm hover:bg-surface-container-dark/90"
                     >
                         <RefreshCw className="h-4 w-4" />
                         Reset
@@ -297,7 +297,7 @@ export default function BroadcastsIndex({ broadcasts }: BroadcastsIndexProps) {
                                     </div>
 
                                     {/* Actions */}
-                                    <div className="mt-4 flex items-center justify-end gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                                    <div className="mt-4 flex items-center justify-end gap-2 opacity-100 md:opacity-0 transition-opacity md:group-hover:opacity-100">
                                         <Link
                                             href={route(
                                                 'admin.broadcasts.show',

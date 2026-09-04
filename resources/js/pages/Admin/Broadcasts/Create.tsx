@@ -129,7 +129,7 @@ export default function CreateBroadcast({ users }: PageProps) {
                     </div>
                     <button
                         onClick={() => router.visit(route('admin.broadcasts'))}
-                        className="flex items-center gap-2 rounded-lg border border-outline px-4 py-2 text-xs font-semibold hover:bg-surface-container"
+                        className="flex items-center gap-2 rounded-lg border border-outline px-4 py-2 text-xs font-semibold hover:bg-surface-container-dark/90"
                     >
                         <X className="h-4 w-4" />
                         Cancel
@@ -545,7 +545,7 @@ export default function CreateBroadcast({ users }: PageProps) {
                             onClick={() =>
                                 router.visit(route('admin.broadcasts'))
                             }
-                            className="rounded-lg border border-outline px-6 py-2.5 text-sm font-semibold hover:bg-surface-container"
+                            className="rounded-lg border border-outline px-6 py-2.5 text-sm font-semibold hover:bg-surface-container-dark/90"
                         >
                             Cancel
                         </button>

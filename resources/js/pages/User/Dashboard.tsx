@@ -335,7 +335,7 @@ export default function UserDashboard({
 
                 {/* Grid statistics highlights */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <div className="flex items-center gap-4 rounded-xl border border-outline-variant bg-white p-4 transition-colors hover:border-primary dark:bg-neutral-900">
+                    <div className="flex items-center gap-4 rounded-xl border border-primary md:border-outline-variant bg-white p-4 transition-colors md:hover:border-primary dark:bg-neutral-900">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                             <Calendar className="h-5 w-5" />
                         </div>
@@ -349,7 +349,7 @@ export default function UserDashboard({
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4 rounded-xl border border-outline-variant bg-white p-4 transition-colors hover:border-emerald-500 dark:bg-neutral-900">
+                    <div className="flex items-center gap-4 rounded-xl border border-emerald-500 md:border-outline-variant bg-white p-4 transition-colors md:hover:border-emerald-500 dark:bg-neutral-900">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20">
                             <Clock className="h-5 w-5" />
                         </div>
@@ -363,7 +363,7 @@ export default function UserDashboard({
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4 rounded-xl border border-outline-variant bg-white p-4 transition-colors hover:border-amber-500 dark:bg-neutral-900">
+                    <div className="flex items-center gap-4 rounded-xl border border-amber-500 md:border-outline-variant bg-white p-4 transition-colors md:hover:border-amber-500 dark:bg-neutral-900">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-600 dark:bg-amber-950/20">
                             <ShieldCheck className="h-5 w-5" />
                         </div>
@@ -377,7 +377,7 @@ export default function UserDashboard({
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4 rounded-xl border border-outline-variant bg-white p-4 transition-colors hover:border-blue-500 dark:bg-neutral-900">
+                    <div className="flex items-center gap-4 rounded-xl border border-blue-500 md:border-outline-variant bg-white p-4 transition-colors md:hover:border-blue-500 dark:bg-neutral-900">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-950/20">
                             <Flame className="h-5 w-5 animate-pulse" />
                         </div>

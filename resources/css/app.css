@@ -222,6 +222,7 @@ body {
     background-color: #fef7ff;
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
 }
 
 /* Scrollbar utilities */
