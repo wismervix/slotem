@@ -7,18 +7,18 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-    // server: {
-    //     host: '127.0.0.1',
-    //     cors: {
-    //         origin: 'https://mysql-recipe-sport-suffered.trycloudflare.com', //docker
-    //     },
-    //     origin: 'https://administrators-wings-excerpt-success.trycloudflare.com', //npm
-    //     hmr: {
-    //         protocol: 'wss',
-    //         host: 'administrators-wings-excerpt-success.trycloudflare.com',
-    //         clientPort: 443,
-    //     },
-    // },
+    server: {
+        host: '127.0.0.1',
+        cors: {
+            origin: 'https://bare-updated-pulling-enhancing.trycloudflare.com', //docker
+        },
+        origin: 'https://participated-egg-tourist-controlling.trycloudflare.com', //npm
+        hmr: {
+            protocol: 'wss',
+            host: 'participated-egg-tourist-controlling.trycloudflare.com',
+            clientPort: 443,
+        },
+    },
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
@@ -34,6 +34,25 @@ export default defineConfig({
         wayfinder({
             formVariants: true,
         }),
-        VitePWA(),
+        VitePWA({
+            registerType: 'autoUpdate',
+            injectRegister: 'script',
+            manifest: {
+                name: 'Slotem',
+                short_name: 'Slotem',
+                description: 'A booking platform for service-based businesses.',
+                theme_color: '#7C3AED',
+                background_color: '#111318',
+                display: 'standalone',
+                start_url: '/',
+                icons: [
+                    {
+                        src: '/app_icon_dark.png',
+                        sizes: '339x327',
+                        type: 'image/png',
+                    },
+                ],
+            },
+        }),
     ],
 });
