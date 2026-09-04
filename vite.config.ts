@@ -10,12 +10,12 @@ export default defineConfig({
     server: {
         host: '127.0.0.1',
         cors: {
-            origin: 'https://bare-updated-pulling-enhancing.trycloudflare.com', //docker
+            origin: 'https://sierra-shorts-carlo-albums.trycloudflare.com', //docker
         },
-        origin: 'https://participated-egg-tourist-controlling.trycloudflare.com', //npm
+        origin: 'https://processing-proper-dans-veterans.trycloudflare.com', //npm
         hmr: {
             protocol: 'wss',
-            host: 'participated-egg-tourist-controlling.trycloudflare.com',
+            host: 'processing-proper-dans-veterans.trycloudflare.com',
             clientPort: 443,
         },
     },
@@ -38,18 +38,54 @@ export default defineConfig({
             registerType: 'autoUpdate',
             injectRegister: 'script',
             manifest: {
+                id: '/',
+
                 name: 'Slotem',
                 short_name: 'Slotem',
+
                 description: 'A booking platform for service-based businesses.',
+
                 theme_color: '#7C3AED',
                 background_color: '#111318',
+
                 display: 'standalone',
+
                 start_url: '/',
+                scope: '/',
+
                 icons: [
                     {
-                        src: '/app_icon_dark.png',
-                        sizes: '339x327',
+                        src: '/icons/icon-192-light.png',
+                        sizes: '192x192',
                         type: 'image/png',
+                        purpose: 'any',
+                    },
+                    {
+                        src: '/icons/icon-512-light.png',
+                        sizes: '512x512',
+                        type: 'image/png',
+                        purpose: 'any',
+                    },
+                    {
+                        src: '/icons/icon-192-dark.png',
+                        sizes: '192x192',
+                        type: 'image/png',
+                        purpose: 'any',
+                    },
+                    {
+                        src: '/icons/icon-512-dark.png',
+                        sizes: '512x512',
+                        type: 'image/png',
+                        purpose: 'any',
+                    },
+                ],
+                screenshots: [
+                    {
+                        src: '/screenshots/slotem_screenshot_mobile.png',
+                        sizes: '1117x1791',
+                        type: 'image/png',
+                        form_factor: 'narrow',
+                        label: 'Slotem mobile screenshot',
                     },
                 ],
             },
