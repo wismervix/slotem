@@ -1,5 +1,6 @@
 import { router, createInertiaApp } from '@inertiajs/react';
 import { createRoot } from 'react-dom/client';
+import { registerSW } from 'virtual:pwa-register';
 import { route as ziggyRoute } from 'ziggy-js';
 import type { route as ZiggyRouteType } from 'ziggy-js';
 import { BookingModalProvider } from './contexts/BookingModalContext';
@@ -19,6 +20,10 @@ const pages = import.meta.glob<{ default: ComponentType<any> }>(
     './pages/**/*.tsx',
     { eager: false },
 );
+
+registerSW({
+    immediate: true,
+});
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
