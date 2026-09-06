@@ -10,12 +10,12 @@ export default defineConfig({
     server: {
         host: '127.0.0.1',
         cors: {
-            origin: 'https://routing-footage-acquire-expanded.trycloudflare.com', //docker
+            origin: 'https://fighting-sensitivity-dated-nokia.trycloudflare.com', //docker
         },
-        origin: 'https://continued-games-yields-proposition.trycloudflare.com', //npm
+        origin: 'https://identifier-friendly-maybe-album.trycloudflare.com', //npm
         hmr: {
             protocol: 'wss',
-            host: 'continued-games-yields-proposition.trycloudflare.com',
+            host: 'identifier-friendly-maybe-album.trycloudflare.com',
             clientPort: 443,
         },
     },
