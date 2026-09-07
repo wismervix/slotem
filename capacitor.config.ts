@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
     // webDir: 'public/build',
 
     server: {
-        url: 'https://fighting-sensitivity-dated-nokia.trycloudflare.com',
+        url: 'https://stops-proceed-hartford-readings.trycloudflare.com',
         cleartext: false,
     },
 };

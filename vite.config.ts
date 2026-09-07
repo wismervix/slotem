@@ -10,7 +10,7 @@ export default defineConfig({
     server: {
         host: '127.0.0.1',
         cors: {
-            origin: 'https://fighting-sensitivity-dated-nokia.trycloudflare.com', //docker
+            origin: 'https://stops-proceed-hartford-readings.trycloudflare.com', //docker
         },
         origin: 'https://identifier-friendly-maybe-album.trycloudflare.com', //npm
         hmr: {
