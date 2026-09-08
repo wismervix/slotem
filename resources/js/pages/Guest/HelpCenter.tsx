@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import GuestLayout from '@/layouts/Guest/GuestLayout';
+import { Head } from '@inertiajs/react';
 
 export default function App() {
     const [activeSection, setActiveSection] = useState<string>('overview');
@@ -89,6 +90,7 @@ export default function App() {
 
     return (
         <GuestLayout>
+                    <Head title="Help Center" />
             {/* Main container with optional Sidebar spacing */}
             <div
                 className="pt-40 sm:pt-18 relative flex flex-grow flex-col lg:flex-row"

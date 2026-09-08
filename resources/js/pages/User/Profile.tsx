@@ -1,4 +1,4 @@
-import { Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import UserLayout from '@/layouts/User/UserLayout';
 import { UserProfile } from '@/types';
 import { useEffect, useState } from 'react';
@@ -115,6 +115,7 @@ export default function Profile({
 
     return (
         <UserLayout unreadNotificationsCount={unreadNotificationsCount}>
+                    <Head title="User Profile" />
             <div className="max-w-4xl space-y-6 pb-10">
                 {/* Toast Feedback */}
                 {props.flash?.success && showToast && (

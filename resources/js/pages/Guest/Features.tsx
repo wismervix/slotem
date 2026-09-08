@@ -1,4 +1,5 @@
 
+import { Head, Link } from '@inertiajs/react';
 import GuestLayout from '@/layouts/Guest/GuestLayout';
 
 import React from 'react';
@@ -25,14 +26,16 @@ export default function FeaturesPage() {
 
     return (
         <GuestLayout>
+            <Head title="Features" />
+
             <main>
                 {/* Hero Section */}
-                <section className="relative overflow-hidden px-6 pt-44 sm:pt-26 pb-24 md:px-8">
+                <section className="relative overflow-hidden px-6 pt-44 pb-24 sm:pt-26 md:px-8">
                     <div className="relative z-10 mx-auto max-w-4xl text-center">
                         <span className="mb-6 inline-block rounded-full bg-brand-primary/10 px-3 py-1 text-xs font-semibold tracking-wider text-brand-primary uppercase dark:bg-purple-500/10 dark:text-purple-400">
                             New: v2.0 Release
                         </span>
-                        <h1 className="mb-6 font-sans text-4xl sm:text-5xl leading-none font-extrabold tracking-tight text-brand-dark md:text-7xl dark:text-white">
+                        <h1 className="mb-6 font-sans text-4xl leading-none font-extrabold tracking-tight text-brand-dark sm:text-5xl md:text-7xl dark:text-white">
                             Everything you need to{' '}
                             <span className="text-brand-primary dark:text-purple-400">
                                 manage appointments
@@ -45,20 +48,20 @@ export default function FeaturesPage() {
                             efficiency and calm customer experiences.
                         </p>
                         <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-                            <button
+                            <Link
+                                href={route('services')}
                                 className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-brand-primary px-8 py-4 text-base font-semibold text-white transition-all hover:shadow-lg hover:shadow-brand-primary/20 active:scale-95 sm:w-auto dark:bg-purple-600 dark:hover:shadow-purple-950/30"
-                                onClick={() => console.log("Go To Client")}
                             >
                                 Start Free Booking
                                 <ArrowRight className="h-5 w-5" />
-                            </button>
-                            <button
+                            </Link>
+                            <Link
+                                href={route('admin.login')}
                                 className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-brand-outline px-8 py-4 text-base font-semibold text-brand-dark transition-all hover:bg-brand-container-low active:scale-95 sm:w-auto dark:border-slate-700 dark:text-white dark:hover:bg-slate-800"
-                                onClick={() => console.log("Go To Admin")}
                             >
                                 Book a Demo (Admin)
                                 <LayoutDashboard className="h-5 w-5" />
-                            </button>
+                            </Link>
                         </div>
                     </div>
                 </section>
@@ -108,7 +111,7 @@ export default function FeaturesPage() {
 
                         <div
                             className="group relative order-1 cursor-pointer lg:order-2"
-                            onClick={() => console.log("Go To Admin")}
+                            onClick={() => console.log('Go To Admin')}
                         >
                             <div className="absolute -inset-1.5 rounded-2xl bg-gradient-to-r from-brand-primary to-blue-500 opacity-15 blur transition duration-300 group-hover:opacity-25 dark:from-purple-600 dark:to-blue-600 dark:opacity-20 dark:group-hover:opacity-30"></div>
                             <div className="glass-card relative rounded-2xl p-4 transition-all duration-300 group-hover:translate-y-[-4px] dark:border dark:border-slate-700 dark:bg-slate-900/70">
@@ -133,9 +136,9 @@ export default function FeaturesPage() {
                     <div className="mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-16 px-6 md:px-8 lg:grid-cols-2">
                         <div
                             className="group relative cursor-pointer"
-                            onClick={() => console.log("Go To Client")}
+                            onClick={() => console.log('Go To Client')}
                         >
-                            <div className="absolute -inset-1.5 rounded-2xl bg-gradient-to-r from-blue-500 to-brand-primary opacity-15 blur transition duration-300 group-hover:opacity-25  dark:from-purple-600 dark:to-blue-600 dark:opacity-20 dark:group-hover:opacity-30"></div>
+                            <div className="absolute -inset-1.5 rounded-2xl bg-gradient-to-r from-blue-500 to-brand-primary opacity-15 blur transition duration-300 group-hover:opacity-25 dark:from-purple-600 dark:to-blue-600 dark:opacity-20 dark:group-hover:opacity-30"></div>
                             <div className="glass-card relative rounded-2xl p-4 transition-all duration-300 group-hover:translate-y-[-4px] dark:border dark:border-slate-700 dark:bg-slate-900/70">
                                 <div className="absolute top-6 left-6 z-10 flex animate-pulse items-center gap-1 rounded-full bg-brand-primary px-3 py-1 text-xs font-semibold text-white shadow-md dark:bg-purple-600">
                                     <span>Interactive Booking Portal</span>
@@ -171,7 +174,7 @@ export default function FeaturesPage() {
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                 <div
                                     className="cursor-pointer rounded-xl border border-brand-outline/40 p-4 transition-all hover:border-brand-primary hover:bg-white dark:border-slate-700 dark:hover:border-purple-500 dark:hover:bg-slate-800"
-                                    onClick={() => console.log("Go To Client")}
+                                    onClick={() => console.log('Go To Client')}
                                 >
                                     <Zap className="mb-2 h-8 w-8 text-brand-primary dark:text-purple-400" />
                                     <h4 className="mb-1 text-base font-bold text-brand-dark dark:text-white">
@@ -184,7 +187,7 @@ export default function FeaturesPage() {
                                 </div>
                                 <div
                                     className="cursor-pointer rounded-xl border border-brand-outline/40 p-4 transition-all hover:border-brand-primary hover:bg-white dark:border-slate-700 dark:hover:border-purple-500 dark:hover:bg-slate-800"
-                                    onClick={() => console.log("Go To Client")}
+                                    onClick={() => console.log('Go To Client')}
                                 >
                                     <Smartphone className="mb-2 h-8 w-8 text-brand-primary dark:text-purple-400" />
                                     <h4 className="mb-1 text-base font-bold text-brand-dark dark:text-white">
@@ -214,9 +217,9 @@ export default function FeaturesPage() {
 
                         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                             {/* Left Larger Card */}
-                            <div
+                            <Link
                                 className="glass-card group flex cursor-pointer flex-col justify-between rounded-2xl p-8 transition-all duration-300 hover:shadow-md lg:col-span-2 dark:border dark:border-slate-700 dark:bg-slate-900 dark:hover:shadow-slate-950/40"
-                                onClick={() => console.log("Go To Admin")}
+                                href={route('contact-sales')}
                             >
                                 <div>
                                     <div className="mb-4 flex items-start justify-between">
@@ -241,7 +244,7 @@ export default function FeaturesPage() {
                                             "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCLznul-r8FEgRnwd-3Pj5MQF1HjtpALsaPDfiTvfel5i5s--ntl0Atcjb6lUmhgwWGNS-DL6vWcj__Dj8RYwYFqpeO64_MnD7-8VB1cZ2_3zoP0yIdPe56lqFNo8gZ3agKlftZx9N8F4VH_kUZwRy3zJod_-JVegpFc4y9HI7lC7pjvRvE8qvPQNbxKv00-QgE14ra4JGDzRxszLCIHkyVw9H8-9HPpo8gZYBfJPJIlrd41VWn0kbLQBkKRozdyxIbGrd5ieuGI3Y')",
                                     }}
                                 ></div>
-                            </div>
+                            </Link>
 
                             {/* Right Small Card */}
                             <div className="glass-card flex flex-col items-center justify-center rounded-2xl p-8 text-center transition-all duration-300 hover:shadow-md dark:border dark:border-slate-700 dark:bg-slate-900/70 dark:hover:shadow-slate-950/40">
@@ -256,13 +259,13 @@ export default function FeaturesPage() {
                                     Effortless drag-and-drop or click
                                     rescheduling for both admins and clients.
                                 </p>
-                                <button
+                                <Link
                                     className="flex cursor-pointer items-center gap-1 text-sm font-bold text-brand-primary hover:underline"
-                                    onClick={() => console.log("Go To Admin")}
+                                    href={route('contact-sales')}
                                 >
                                     Launch Admin Board
                                     <ArrowRight className="h-4 w-4" />
-                                </button>
+                                </Link>
                             </div>
                         </div>
                     </div>
@@ -304,9 +307,9 @@ export default function FeaturesPage() {
                                         </p>
                                     </div>
                                 </div>
-                                <div
+                                <Link
                                     className="group flex cursor-pointer items-start gap-4"
-                                    onClick={() => console.log("Go To Admin")}
+                                    href={route('admin.login')}
                                 >
                                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-sec-bg/50 transition-colors group-hover:bg-brand-primary/10 dark:bg-purple-950/40 dark:group-hover:bg-purple-900/50">
                                         <BarChart3 className="h-5 w-5 text-brand-primary dark:text-purple-400" />
@@ -320,13 +323,13 @@ export default function FeaturesPage() {
                                             coming from in real time.
                                         </p>
                                     </div>
-                                </div>
+                                </Link>
                             </div>
                         </div>
 
                         <div
                             className="group relative order-1 cursor-pointer lg:order-2"
-                            onClick={() => console.log("Go To Admin")}
+                            onClick={() => console.log('Go To Admin')}
                         >
                             <div className="absolute -top-10 -right-10 h-64 w-64 rounded-full bg-brand-primary/10 opacity-20 blur-3xl dark:bg-purple-600/20"></div>
                             <div className="glass-card relative rounded-2xl p-4 shadow-xl transition-all duration-300 group-hover:translate-y-[-4px] dark:border dark:border-slate-700 dark:bg-slate-900/70 dark:shadow-slate-950/40">
@@ -351,7 +354,7 @@ export default function FeaturesPage() {
                     <div className="mx-auto max-w-[1200px] px-6 md:px-8">
                         <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                             {/* Team Management */}
-                            <div className="rounded-2xl border border-brand-outline/40 bg-white p-8 shadow-sm transition-shadow hover:shadow-md md:p-10 dark:border-slate-700 dark:bg-slate-900 dark:hover:shadow-slaate-950/40">
+                            <div className="dark:hover:shadow-slaate-950/40 rounded-2xl border border-brand-outline/40 bg-white p-8 shadow-sm transition-shadow hover:shadow-md md:p-10 dark:border-slate-700 dark:bg-slate-900">
                                 <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-primary/10 dark:bg-purple-500/10">
                                     <Users className="h-7 w-7 text-brand-primary dark:text-purple-400" />
                                 </div>
@@ -425,24 +428,20 @@ export default function FeaturesPage() {
                             Slotem. No credit card required to start.
                         </p>
                         <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-                            <button
-                                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-white px-8 py-4 text-base font-bold text-brand-primary shadow-lg transition-all hover:bg-brand-bg active:scale-95 sm:w-auto dark:bg-slate-100 dark-text-purple-700 dark:hover:bg-white"
-                                onClick={() =>
-                                    console.log('Get Started Clicked!')
-                                }
+                            <Link
+                                className="dark-text-purple-700 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-white px-8 py-4 text-base font-bold text-brand-primary shadow-lg transition-all hover:bg-brand-bg active:scale-95 sm:w-auto dark:bg-slate-100 dark:hover:bg-white"
+                                href={route('services')}
                             >
                                 Get Started Now
                                 <Rocket className="h-4 w-4" />
-                            </button>
-                            <button
+                            </Link>
+                            <Link
                                 className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/60 px-8 py-4 text-base font-bold text-white transition-all hover:bg-white/10 active:scale-95 sm:w-auto"
-                                onClick={() =>
-                                    console.log('View Enterprise Plans!')
-                                }
+                                href={route('contact-sales')}
                             >
                                 View Enterprise Plans
                                 <Briefcase className="h-4 w-4" />
-                            </button>
+                            </Link>
                         </div>
                     </div>
                 </section>

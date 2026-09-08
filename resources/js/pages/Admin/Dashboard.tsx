@@ -31,7 +31,7 @@ import {
 } from 'recharts';
 import { motion, AnimatePresence } from 'motion/react';
 import { Service, Booking, BookingStatus } from '@/types';
-import { Link, usePage } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { formatTime } from '@/lib/calendar-utils';
 
 interface AdminDashboardProps {
@@ -461,6 +461,8 @@ export default function AdminDashboard({ bookings }: AdminDashboardProps) {
 
     return (
         <AdminLayout searchQuery={searchQuery} setSearchQuery={setSearchQuery}>
+            <Head title="Admin Dashboard" />
+
             <div className="space-y-6">
                 {/* Header Info */}
                 <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">

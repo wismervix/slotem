@@ -1,4 +1,4 @@
-import { router, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import CalendarView from '@/components/User/CalendarView';
 import ListView from '@/components/User/ListView';
 import UserLayout from '@/layouts/User/UserLayout';
@@ -90,6 +90,7 @@ const ViewBookings = ({ bookings, unreadNotificationsCount }: ViewBookingsProps)
                 </div>
             }
         >
+                    <Head title="User Bookings" />
             {subView === 'calendar' ? (
                 <CalendarView
                     bookings={bookings}

@@ -15,7 +15,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import AdminLayout from '@/layouts/Admin/AdminLayout';
 import { serviceIcons } from '@/lib/service-icons';
-import { useForm, usePage } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import { formatDateAndTime } from '@/lib/calendar-utils';
 
 export default function ServicesView() {
@@ -312,6 +312,8 @@ export default function ServicesView() {
 
     return (
         <AdminLayout searchQuery={searchQuery} setSearchQuery={setSearchQuery}>
+            <Head title="Admin Services" />
+
             <div className="space-y-6">
                 {/* Toast Notification */}
                 {showToast && toastMessage && (
@@ -341,7 +343,7 @@ export default function ServicesView() {
                     </button>
                 </div>
 
-                <div className="flex flex-wrap sm:flex-nowrap justify-between gap-3">
+                <div className="flex flex-wrap justify-between gap-3 sm:flex-nowrap">
                     {/* Tabs / Filter Tabs */}
                     <div className="flex gap-2 overflow-x-auto pb-1">
                         {(

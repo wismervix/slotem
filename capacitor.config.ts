@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
     // webDir: 'public/build',
 
     server: {
-        url: 'https://stops-proceed-hartford-readings.trycloudflare.com',
+        url: 'https://feelings-wrote-tee-stable.trycloudflare.com',
         cleartext: false,
     },
 };

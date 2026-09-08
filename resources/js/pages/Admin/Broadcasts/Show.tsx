@@ -1,6 +1,6 @@
 // resources/js/Pages/Admin/Broadcasts/Show.tsx
 import AdminLayout from '@/layouts/Admin/AdminLayout';
-import { router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import {
     ArrowLeft,
@@ -135,6 +135,7 @@ export default function BroadcastShow({ broadcast }: BroadcastShowProps) {
 
     return (
         <AdminLayout>
+                    <Head title="Admin Broadcast Details" />
             <div className="space-y-6 py-6">
                 {/* Navigation */}
                 <button

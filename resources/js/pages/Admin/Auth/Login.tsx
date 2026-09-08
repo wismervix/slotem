@@ -1,4 +1,4 @@
-import { Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import {
     Mail,
     Lock,
@@ -33,6 +33,8 @@ export default function AdminLogin() {
 
     return (
         <GuestLayout>
+                    <Head title="Admin Login" />
+                    
             <main className="flex flex-1 items-center justify-center px-8 py-44 sm:py-24">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}

@@ -1,4 +1,4 @@
-import { Link, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import UserLayout from '@/layouts/User/UserLayout';
 import { Notification } from '@/types';
 import React, { useState } from 'react';
@@ -170,6 +170,7 @@ export default function UserNotifications({
 
     return (
         <UserLayout unreadNotificationsCount={unreadNotificationsCount}>
+                    <Head title="User Notifications" />
             <div className="max-w-4xl space-y-6 pb-10">
                 {/* Top action header for filters */}
                 <div className="flex flex-col flex-wrap items-start justify-between gap-4 rounded-2xl border border-outline-variant bg-white p-4 shadow-xs sm:flex-row sm:items-center dark:bg-neutral-900">

@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import {
     CalendarClock,
     CheckCircle2,
@@ -46,13 +46,13 @@ const Home = () => {
                         </div>
 
                         <div className="flex flex-wrap gap-4">
-                            <button className="cursor-pointer rounded-2xl bg-purple-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-purple-500/20 transition transition-all hover:bg-purple-500 active:scale-95">
+                            <Link href={route('services')} className="cursor-pointer rounded-2xl bg-purple-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-purple-500/20 transition transition-all hover:bg-purple-500 active:scale-95">
                                 Book Now
-                            </button>
+                            </Link>
 
-                            <button className="cursor-pointer rounded-2xl border border-slate-300 px-8 py-4 text-lg font-semibold text-slate-700 transition transition-all hover:bg-slate-100 active:scale-95 dark:border-slate-700 dark:text-white dark:hover:bg-slate-800">
-                                View Pricing
-                            </button>
+                            <Link href={route('contact-us')} className="cursor-pointer rounded-2xl border border-slate-300 px-8 py-4 text-lg font-semibold text-slate-700 transition transition-all hover:bg-slate-100 active:scale-95 dark:border-slate-700 dark:text-white dark:hover:bg-slate-800">
+                                Contact Us
+                            </Link>
                         </div>
 
                         <div className="flex items-center gap-4">
@@ -265,13 +265,14 @@ const Home = () => {
                             </p>
 
                             <div className="mt-10 flex flex-wrap justify-center gap-4">
-                                <button className="cursor-pointer rounded-2xl bg-white px-10 py-4 text-lg font-semibold text-purple-600 transition transition-all hover:bg-slate-100 active:scale-95">
-                                    Get Started for Free
-                                </button>
+                                <Link href={route('features')} className="cursor-pointer rounded-2xl bg-white px-10 py-4 text-lg font-semibold text-purple-600 transition transition-all hover:bg-slate-100 active:scale-95">
+                                    See Slotem's Features
+                                </Link>
+                                    {/* Get Started for Free */}
 
-                                <button className="cursor-pointer rounded-2xl border border-white/30 px-10 py-4 text-lg font-semibold text-white transition transition-all hover:bg-white/10 active:scale-95">
+                                <Link href={route('contact-sales')} className="cursor-pointer rounded-2xl border border-white/30 px-10 py-4 text-lg font-semibold text-white transition transition-all hover:bg-white/10 active:scale-95">
                                     Talk to Sales
-                                </button>
+                                </Link>
                             </div>
                         </div>
                     </div>

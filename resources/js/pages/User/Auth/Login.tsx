@@ -1,4 +1,4 @@
-import { Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { Mail, ArrowRight, CalendarCheck, Gauge } from 'lucide-react'; //Lock (password input icon) removed for OTP flow
 import { motion } from 'motion/react';
 import React, { useEffect, useState } from 'react';
@@ -144,6 +144,8 @@ export default function UserAuth() {
 
     return (
         <div className="relative flex min-h-screen flex-col overflow-hidden">
+            <Head title="User Login" />
+            
             {/* Background Decorative Elements */}
             <div className="pointer-events-none fixed top-0 left-0 -z-10 h-full w-full">
                 <div className="absolute top-[-10%] left-[-5%] h-[40%] w-[40%] rounded-full bg-primary/5 blur-[120px]"></div>

@@ -1,3 +1,4 @@
+import { Head } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Guest/PrivacyPolicy/Sidebar';
 import PrivacyContent from '@/components/Guest/PrivacyPolicy/PrivacyContent';
@@ -187,6 +188,8 @@ export default function PrivacyPolicyPage() {
 
     return (
         <GuestLayout>
+                    <Head title="Privacy Policy" />
+
             {/* Main Container */}
             <main className="mx-auto max-w-7xl pt-44 sm:pt-26 pb-4 py-10 px-4 sm:px-6 lg:px-8">
                 {/* Banner Announcement / Version History Indicator */}

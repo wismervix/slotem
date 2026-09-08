@@ -19,7 +19,7 @@ import {
     TrendingUp,
     Camera,
 } from 'lucide-react';
-import { Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 
 // ─── Layouts & Components ───────────────────────────────────────────────
 import AdminLayout from '@/layouts/Admin/AdminLayout';
@@ -462,6 +462,8 @@ export default function AdminUsers({ users, flash }: AdminUsersProps) {
 
     return (
         <AdminLayout searchQuery={searchQuery} setSearchQuery={setSearchQuery}>
+                    <Head title="Admin Users" />
+
             <div className="space-y-6">
                 {/* ─── Toast Notification ────────────────────────── */}
                 {showToast && toastMessage && (

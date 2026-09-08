@@ -9,7 +9,7 @@ import {
     Check,
 } from 'lucide-react';
 import AdminLayout from '@/layouts/Admin/AdminLayout';
-import { usePage, useForm } from '@inertiajs/react';
+import { usePage, useForm, Head } from '@inertiajs/react';
 import { AdminProfile, SharedPageProps } from '@/types';
 
 interface AdminPageProps extends SharedPageProps {
@@ -120,6 +120,7 @@ export default function AdminSettings() {
 
     return (
         <AdminLayout>
+                    <Head title="Admin Settings" />
             <div className="space-y-8 pb-12">
                 {/* Toast Notification */}
                 {showToast && toastMessage && (

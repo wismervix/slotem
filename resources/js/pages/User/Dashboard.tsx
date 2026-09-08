@@ -1,4 +1,4 @@
-import { router, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import UserLayout from '@/layouts/User/UserLayout';
 import { Availability, Booking, Service, ServiceBadge } from '@/types';
 import { useState } from 'react';
@@ -287,6 +287,7 @@ export default function UserDashboard({
             onSelectDate={setSelectedDate}
             handleCancelAppointment={handleCancelAppointment}
         >
+                    <Head title="User Dashboard" />
             <div className="space-y-6 pr-1 pb-10">
                 {/* Banner Card */}
                 <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary to-primary-container p-6 text-white shadow-md md:p-8">

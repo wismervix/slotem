@@ -33,7 +33,7 @@ import { Booking, User, Notification, BookingStatus } from '@/types';
 import AdminLayout from '@/layouts/Admin/AdminLayout';
 import { formatDateAndTime, formatTime } from '@/lib/calendar-utils';
 import { serviceIcons } from '@/lib/service-icons';
-import { Link } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 
 interface UserDetailsProps {
     user: User;
@@ -417,6 +417,8 @@ export default function DashboardView({
 
     return (
         <AdminLayout>
+                    <Head title="Admin User Details" />
+                    
             <div
                 id="dashboard_view"
                 className="animate-in fade-in space-y-6 duration-300"

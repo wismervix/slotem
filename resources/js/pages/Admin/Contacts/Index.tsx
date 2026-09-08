@@ -1,6 +1,6 @@
 // resources/js/Pages/Admin/Contacts/Index.tsx
 import AdminLayout from '@/layouts/Admin/AdminLayout';
-import { router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import {
     Mail,
@@ -87,6 +87,7 @@ export default function ContactsIndex({ contacts, unreadCount }: ContactsIndexPr
 
     return (
         <AdminLayout>
+            <Head title="Admin Contacts" />
             <div className="space-y-6 py-6">
                 {/* Header */}
                 <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">

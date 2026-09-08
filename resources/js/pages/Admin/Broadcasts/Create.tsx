@@ -1,6 +1,6 @@
 // resources/js/Pages/Admin/Broadcasts/Create.tsx
 import AdminLayout from '@/layouts/Admin/AdminLayout';
-import { useForm, router } from '@inertiajs/react';
+import { Head, useForm, router } from '@inertiajs/react';
 import { useState } from 'react';
 import {
     Megaphone,
@@ -115,6 +115,7 @@ export default function CreateBroadcast({ users }: PageProps) {
 
     return (
         <AdminLayout>
+                    <Head title="Admin Broadcast Create" />
             <div className="mx-auto max-w-4xl space-y-6 py-6">
                 {/* Header */}
                 <div className="flex flex-wrap sm:flex-nowrap gap-2 items-center justify-between">

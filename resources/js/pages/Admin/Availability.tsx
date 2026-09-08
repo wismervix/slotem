@@ -15,7 +15,7 @@ import { useConfirmation } from '@/hooks/useConfirmation';
 import ConfirmationModal from '@/components/Shared/ConfirmationModal';
 
 import type { Availability, TimeSlot } from '@/types';
-import { usePage } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import {
     formatDate,
     generateCalendarDays,
@@ -445,6 +445,8 @@ export default function AdminAvailability() {
     // ============================================
     return (
         <AdminLayout>
+            <Head title="Admin Availability" />
+
             {/* Header */}
             <div className="flex flex-col justify-between gap-4 border-b border-outline-variant/15 pb-5 sm:flex-row sm:items-end dark:border-slate-700/50">
                 <div>

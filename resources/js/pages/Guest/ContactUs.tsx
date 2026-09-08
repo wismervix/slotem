@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, usePage, useForm } from '@inertiajs/react';
+import { Head, Link, usePage, useForm } from '@inertiajs/react';
 import { Mail, Check, Share2, Globe, MessageSquare } from 'lucide-react';
 import { motion } from 'motion/react';
 import { NavItem } from '@/layouts/Guest/GuestLayout';
@@ -107,6 +107,8 @@ export default function ContactUs() {
 
     return (
         <div className="flex min-h-screen flex-col selection:bg-primary/30">
+                    <Head title="Contact Us" />
+
             {/* Background with Overlay */}
             <div
                 className="fixed inset-0 z-[-1] bg-cover bg-center bg-no-repeat"

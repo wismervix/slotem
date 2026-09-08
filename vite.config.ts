@@ -7,18 +7,18 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-    server: {
-        host: '127.0.0.1',
-        cors: {
-            origin: 'https://stops-proceed-hartford-readings.trycloudflare.com', //docker
-        },
-        origin: 'https://identifier-friendly-maybe-album.trycloudflare.com', //npm
-        hmr: {
-            protocol: 'wss',
-            host: 'identifier-friendly-maybe-album.trycloudflare.com',
-            clientPort: 443,
-        },
-    },
+    // server: {
+    //     host: '127.0.0.1',
+    //     cors: {
+    //         origin: 'https://feelings-wrote-tee-stable.trycloudflare.com', //docker
+    //     },
+    //     origin: 'https://identifier-friendly-maybe-album.trycloudflare.com', //npm
+    //     hmr: {
+    //         protocol: 'wss',
+    //         host: 'identifier-friendly-maybe-album.trycloudflare.com',
+    //         clientPort: 443,
+    //     },
+    // },
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],

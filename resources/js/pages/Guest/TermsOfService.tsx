@@ -6,6 +6,7 @@ import SupportModal from '@/components/Guest/TermsAndConditions/SupportModal';
 import { TermsSectionId } from '@/types';
 import { FileText, Printer, Search, Scale, Shield } from 'lucide-react';
 import GuestLayout from '@/layouts/Guest/GuestLayout';
+import { Head } from '@inertiajs/react';
 
 const SECTION_IDS: TermsSectionId[] = [
     'acceptance-of-terms',
@@ -92,6 +93,7 @@ export default function TermsAndConditionsPage() {
 
     return (
         <GuestLayout>
+            <Head title="Terms Of Services" />
             {/* Main Container */}
             <main className="mx-auto max-w-7xl px-4 py-10 pt-44 pb-4 sm:px-6 sm:pt-26 lg:px-8">
                 {/* Banner Announcement */}

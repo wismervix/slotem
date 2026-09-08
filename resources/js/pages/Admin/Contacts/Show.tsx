@@ -1,6 +1,6 @@
 // resources/js/Pages/Admin/Contacts/Show.tsx
 import AdminLayout from '@/layouts/Admin/AdminLayout';
-import { router, useForm } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import {
     ArrowLeft,
     Mail,
@@ -65,6 +65,7 @@ export default function ContactShow({ contact }: ContactShowProps) {
 
     return (
         <AdminLayout>
+            <Head title="Admin Contact Details" />
             <div className="space-y-6 py-6">
                 {/* Navigation */}
                 <button

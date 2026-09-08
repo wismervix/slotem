@@ -1,5 +1,5 @@
 import AdminLayout from '@/layouts/Admin/AdminLayout';
-import { Link, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import {
     Megaphone,
@@ -138,6 +138,8 @@ export default function BroadcastsIndex({ broadcasts }: BroadcastsIndexProps) {
 
     return (
         <AdminLayout searchQuery={searchQuery} setSearchQuery={setSearchQuery}>
+            <Head title="Admin Broadcasts" />
+            
             <div className="space-y-6 py-6">
                 {/* Header */}
                 <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">

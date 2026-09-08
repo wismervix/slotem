@@ -27,7 +27,7 @@ import FeaturesShowcase from '@/components/Guest/ContactSales/FeaturesShowcase';
 import PricingCalculator from '@/components/Guest/ContactSales/PricingCalculator';
 import HelpCenter from '@/components/Guest/ContactSales/HelpCenter';
 import GuestLayout from '@/layouts/Guest/GuestLayout';
-import { usePage, useForm, Link } from '@inertiajs/react';
+import { Head, usePage, useForm, Link } from '@inertiajs/react';
 
 export default function ContactSalesPage() {
     const { flash } = usePage().props as any;
@@ -118,6 +118,8 @@ export default function ContactSalesPage() {
 
     return (
         <GuestLayout>
+                    <Head title="Contact Sales" />
+                    
             {/* Toast Notification */}
             {showToast && toastMessage && (
                 <div
